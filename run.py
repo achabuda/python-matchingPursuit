@@ -22,4 +22,17 @@ e-mail: tomasz@spustek.pl
 University of Warsaw, July 06, 2015
 '''
 
-print 'Hello World!'
+from src.dictionary import gaussEnvelope
+
+import matplotlib.pyplot as plt
+import numpy             as np
+
+
+if __name__ == '__main__':
+	time  = np.arange(1 , 1000)
+	sigma = 10
+
+	(envelope , p , k , sr) = gaussEnvelope(sigma , time)
+
+	plt.plot(time , envelope)
+	plt.show()

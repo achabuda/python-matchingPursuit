@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
+from __future__ import division
+import numpy as np
+
 '''
 #    This file is part of Matching Pursuit Python program (python-MP).
 #
@@ -21,3 +24,17 @@ author: Tomasz Spustek
 e-mail: tomasz@spustek.pl
 University of Warsaw, July 06, 2015
 '''
+
+def gaussEnvelope(sigma , time):
+    eps = 1e-4
+    mi  = time[-1]/2
+    x   = (mi - time) / sigma
+    y   = np.exp(-1 * x**2 /2)
+    ind = np.where(y>eps)[0]
+
+    poczatek   = ind[0]
+    koniec     = ind[-1]
+    srodek     = (poczatek + koniec)/2 - poczatek + 1
+    envelope   = y / np.linalg.norm(y)
+
+    return (envelope , poczatek , koniec , srodek)
