@@ -25,16 +25,25 @@ e-mail: tomasz@spustek.pl
 University of Warsaw, July 06, 2015
 '''
 
-def gaussEnvelope(sigma , time):
-    eps = 1e-4
-    mi  = time[-1]/2
-    x   = (mi - time) / sigma
-    y   = np.exp(-1 * x**2 /2)
-    ind = np.where(y>eps)[0]
+def gaussEnvelope(sigma , time , shapeType=1):
+	'''
+	shapeTypes:
+	1 - standard gaussian shape
+	2 - flatten on top
+	'''
+	eps = 1e-4
+	mi  = time[-1]/2
+	x   = (mi - time) / sigma
 
-    poczatek   = ind[0]
-    koniec     = ind[-1]
-    srodek     = (poczatek + koniec)/2 - poczatek + 1
-    envelope   = y / np.linalg.norm(y)
-
-    return (envelope , poczatek , koniec , srodek)
+	if shapeType == 1:
+		y = np.exp(-1 * x**2 /2)
+	elif shapeType == 2:
+		y = np.exp(-7 * x**8 /8)
+	
+	ind      = np.where(y>eps)[0]
+	poczatek = ind[0]
+	koniec   = ind[-1]
+	srodek   = (poczatek + koniec)/2 - poczatek + 1
+	envelope = y / np.linalg.norm(y)
+	
+	return (envelope , poczatek , koniec , srodek)

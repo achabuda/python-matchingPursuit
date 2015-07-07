@@ -30,9 +30,15 @@ import numpy             as np
 
 if __name__ == '__main__':
 	time  = np.arange(1 , 1000)
+	
 	sigma = 10
-
-	(envelope , p , k , sr) = gaussEnvelope(sigma , time)
-
+	(envelope , p , k , sr) = gaussEnvelope(sigma , time , 1)
+	plt.subplot(2,1,1)
 	plt.plot(time , envelope)
+
+	sigma = 100
+	(envelope , p , k , sr) = gaussEnvelope(sigma , time , 2)
+	plt.subplot(2,1,2)
+	plt.plot(time , envelope)
+
 	plt.show()
