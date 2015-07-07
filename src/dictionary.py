@@ -25,9 +25,33 @@ e-mail: tomasz@spustek.pl
 University of Warsaw, July 06, 2015
 '''
 
+from scipy.optimize import fmin
+
+def generateDictionary(time , params):
+	'''
+	params:dictionary - parameters
+	minS - minimal sigma
+	maxS - maximal sigma
+	density - dictionary density
+	
+	time:list - original time vector
+	'''
+
+	time    = np.arange(1,3*len(time))
+
+	minS    = params['minS']#    = 10
+	maxS    = params['maxS']#    = 30
+	density = params['density']# = 0.01
+
+	sigma_start = (minS + maxS)/2
+	(gc , p , k , sr) = gaussEnvelope(sigma_start , time)
+	sigma_stop        = fmin(func=minSigEnerg , x0=sigma_start, args=(gc,density,time))
+
+	print 'Start={}, stop={}'.format(sigma_start,sigma_stop)
+
 def gaussEnvelope(sigma , time , shapeType=1):
 	'''
-	shapeTypes:
+	shapeTypes:int
 	1 - standard gaussian shape
 	2 - flatten on top
 	'''
@@ -47,3 +71,8 @@ def gaussEnvelope(sigma , time , shapeType=1):
 	envelope = y / np.linalg.norm(y)
 	
 	return (envelope , poczatek , koniec , srodek)
+
+def minSigEnerg(testSigma , testEnvelope , density , time):
+	(gx , p , k , sr) = gaussEnvelope(testSigma , time)
+	return np.abs(1 - density - np.dot(gx , testEnvelope))
+

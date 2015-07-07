@@ -22,23 +22,30 @@ e-mail: tomasz@spustek.pl
 University of Warsaw, July 06, 2015
 '''
 
-from src.dictionary import gaussEnvelope
+from src.dictionary import gaussEnvelope, generateDictionary
 
 import matplotlib.pyplot as plt
 import numpy             as np
 
 
 if __name__ == '__main__':
+
 	time  = np.arange(1 , 1000)
-	
-	sigma = 10
-	(envelope , p , k , sr) = gaussEnvelope(sigma , time , 1)
-	plt.subplot(2,1,1)
-	plt.plot(time , envelope)
+	params = {}
+	params['minS']    = 10
+	params['maxS']    = 30
+	params['density'] = 0.01
 
-	sigma = 100
-	(envelope , p , k , sr) = gaussEnvelope(sigma , time , 2)
-	plt.subplot(2,1,2)
-	plt.plot(time , envelope)
+	generateDictionary(time , params)
 
-	plt.show()
+	# sigma = 10
+	# (envelope , p , k , sr) = gaussEnvelope(sigma , time , 1)
+	# plt.subplot(2,1,1)
+	# plt.plot(time , envelope)
+
+	# sigma = 100
+	# (envelope , p , k , sr) = gaussEnvelope(sigma , time , 2)
+	# plt.subplot(2,1,2)
+	# plt.plot(time , envelope)
+
+	# plt.show()
