@@ -78,8 +78,8 @@ def generateBasicStructures(time , config):
 
 		if flags['useAsymA']:
 			dictionaryElement = {}
-			increase    = 0.5 * (sigmaActual**2)
-			decay       = 1.5 * sigmaActual
+			increase    = 0.5 / (sigmaActual**2)
+			decay       = 1.5 / sigmaActual
 			expectation = srodek
 			(envelope , poczatek , koniec , srodek) = asymetricEnvelope(increase , decay , expectation , time , 1)
 
@@ -124,15 +124,15 @@ def asymetricEnvelope(increase , decay , expectation , time , shapeType=1):
 	1 - envelope of type asymA
 	'''
 	eps = 1e-4
-	tmp = time - expectation;
-    y   = exp((-increase*(tmp)**2 ) / (1+ decay*(tmp) .* (np.atan(1e16*(tmp))+np.pi/2)/np.pi))
-    ind      = np.where(y>eps)[0]
+	if shapeType == 1:
+		tmp = time - expectation
+		y = np.exp(-increase*(tmp**2) / (1 + decay * tmp * (np.arctan(1e16*tmp)+np.pi/2)/np.pi))
+	ind      = np.where(y>eps)[0]
 	poczatek = ind[0]
 	koniec   = ind[-1]
-    sr       = expectation + 1 - p
-    envelope = y / np.linalg.norm(y)
-
-    return (envelope , poczatek , koniec , srodek)
+	srodek   = expectation + 1 - poczatek
+	envelope = y / np.linalg.norm(y)
+	return (envelope , poczatek , koniec , srodek)
 
 def minSigEnerg(testSigma , testEnvelope , density , time):
 	(gx , p , k , sr) = gaussEnvelope(testSigma , time)

@@ -22,7 +22,7 @@ e-mail: tomasz@spustek.pl
 University of Warsaw, July 06, 2015
 '''
 
-from src.dictionary import gaussEnvelope, generateDictionary
+from src.dictionary import generateDictionary
 
 import matplotlib.pyplot as plt
 import numpy             as np
@@ -37,27 +37,15 @@ if __name__ == '__main__':
 	config['density'] = 0.01
 
 	flags = {}
-	flags['useAsymA'] = 0
+	flags['useAsymA'] = 1
 	flags['useRectA'] = 0
 
 	config['flags']   = flags
 
 	dictionary = generateDictionary(time , config)
 
-	# print len(dictionary)
+	print len(dictionary)
 
-	# print dictionary[0]
-	# print '----------------'
-	# print dictionary[-1]
-
-	# sigma = 10
-	# (envelope , p , k , sr) = gaussEnvelope(sigma , time , 1)
-	# plt.subplot(2,1,1)
-	# plt.plot(time , envelope)
-
-	# sigma = 100
-	# (envelope , p , k , sr) = gaussEnvelope(sigma , time , 2)
-	# plt.subplot(2,1,2)
-	# plt.plot(time , envelope)
-
-	# plt.show()
+	envelope = dictionary[-1]['timeCourse']
+	plt.plot(envelope)
+	plt.show()
