@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
 	flags = {}
 	flags['useAsymA'] = 1
-	flags['useRectA'] = 0
+	flags['useRectA'] = 1
 
 	config['flags']   = flags
 

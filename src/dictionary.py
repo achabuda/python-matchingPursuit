@@ -39,9 +39,45 @@ def generateDictionary(time , config):
 	time       = np.arange(1,3*len(time))
 
 	dictionary = generateBasicStructures(time , config)
+	if config['flags']['useRectA'] == 1:
+		dictionary = generateRectangularEnvelopes(dictionary , time , config)
 
 	return dictionary
 
+
+def generateRectangularEnvelopes(dictionary , time , config):
+	minS       = config['minS']
+	maxS       = config['maxS']
+	density    = config['density']
+	flags      = config['flags']
+
+	sigmaStart = (minS + maxS)/2
+	gc          = gaussEnvelope(sigmaStart , time , 2)[0]
+	sigmaStop  = fmin(func=minSigEnerg , x0=sigmaStart, args=(gc,density,time,2))[0]
+
+	sigmaActual = minS
+	sigmaParity = sigmaStop / sigmaStart
+	if sigmaParity < 1:
+		sigmaParity = 1 / sigmaParity
+
+	threshold = maxS * np.sqrt(sigmaParity)
+
+	while sigmaActual < threshold:
+		dictionaryElement = {}
+		(envelope , poczatek , koniec , srodek) = gaussEnvelope(sigmaActual , time , 2)
+
+		dictionaryElement['timeCourse'] = envelope[poczatek:koniec]
+		dictionaryElement['energy']     = minPosEnerg(dictionaryElement['timeCourse'] , density)
+		# book(iter).skok=max([1 book(iter).skok]);
+		dictionaryElement['sigma']      = sigmaActual
+		dictionaryElement['srodek']     = int(srodek)
+		dictionaryElement['shapeType']  = 2
+		dictionaryElement['decay']      = 0
+		dictionary.append(dictionaryElement)
+
+		sigmaActual = sigmaActual * sigmaParity
+
+	return dictionary
 
 def generateBasicStructures(time , config):
 	dictionary = []
@@ -52,7 +88,7 @@ def generateBasicStructures(time , config):
 
 	sigmaStart = (minS + maxS)/2
 	gc          = gaussEnvelope(sigmaStart , time)[0]
-	sigmaStop  = fmin(func=minSigEnerg , x0=sigmaStart, args=(gc,density,time))[0]
+	sigmaStop  = fmin(func=minSigEnerg , x0=sigmaStart, args=(gc,density,time,1))[0]
 
 	# print 'Start={}, stop={}'.format(sigmaStart,sigmaStop)
 
@@ -87,7 +123,7 @@ def generateBasicStructures(time , config):
 			dictionaryElement['energy']     = dictionary[-1]['energy']
 			dictionaryElement['sigma']      = sigmaActual
 			dictionaryElement['srodek']     = int(srodek)
-			dictionaryElement['shapeType']  = 2
+			dictionaryElement['shapeType']  = 3
 			dictionaryElement['decay']      = decay
 			dictionary.append(dictionaryElement)
 
@@ -134,8 +170,8 @@ def asymetricEnvelope(increase , decay , expectation , time , shapeType=1):
 	envelope = y / np.linalg.norm(y)
 	return (envelope , poczatek , koniec , srodek)
 
-def minSigEnerg(testSigma , testEnvelope , density , time):
-	(gx , p , k , sr) = gaussEnvelope(testSigma , time)
+def minSigEnerg(testSigma , testEnvelope , density , time , shapeType):
+	(gx , p , k , sr) = gaussEnvelope(testSigma , time , shapeType)
 	return np.abs(1 - density - np.dot(gx , testEnvelope))
 
 def minPosEnerg(testEnvelope , density):
