@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 #-*- coding: utf-8 -*-
 
-from __future__ import division
-import numpy as np
-
 '''
 #    This file is part of Matching Pursuit Python program (python-MP).
 #
@@ -24,34 +21,83 @@ author: Tomasz Spustek
 e-mail: tomasz@spustek.pl
 University of Warsaw, July 06, 2015
 '''
-
+from __future__ import division
 from scipy.optimize import fmin
+import numpy as np
 
-def generateDictionary(time , params):
+def generateDictionary(time , config):
 	'''
-	params:dictionary - parameters
-	minS - minimal sigma
-	maxS - maximal sigma
+	config:dictionary - parameters
+	minS    - minimal sigma
+	maxS    - maximal sigma
 	density - dictionary density
+	flags   - which structures to use
 	
 	time:list - original time vector
 	'''
 
-	time    = np.arange(1,3*len(time))
+	time       = np.arange(1,3*len(time))
 
-	minS    = params['minS']#    = 10
-	maxS    = params['maxS']#    = 30
-	density = params['density']# = 0.01
+	dictionary = generateBasicStructures(time , config)
 
-	sigma_start = (minS + maxS)/2
-	(gc , p , k , sr) = gaussEnvelope(sigma_start , time)
-	sigma_stop        = fmin(func=minSigEnerg , x0=sigma_start, args=(gc,density,time))
+	return dictionary
 
-	print 'Start={}, stop={}'.format(sigma_start,sigma_stop)
+
+def generateBasicStructures(time , config):
+	dictionary = []
+	minS       = config['minS']
+	maxS       = config['maxS']
+	density    = config['density']
+	flags      = config['flags']
+
+	sigmaStart = (minS + maxS)/2
+	gc          = gaussEnvelope(sigmaStart , time)[0]
+	sigmaStop  = fmin(func=minSigEnerg , x0=sigmaStart, args=(gc,density,time))[0]
+
+	# print 'Start={}, stop={}'.format(sigmaStart,sigmaStop)
+
+	sigmaActual = minS
+	sigmaParity = sigmaStop / sigmaStart
+	if sigmaParity < 1:
+		sigmaParity = 1 / sigmaParity
+
+	threshold = maxS * np.sqrt(sigmaParity)
+
+	while sigmaActual < threshold:
+		dictionaryElement = {}
+		(envelope , poczatek , koniec , srodek) = gaussEnvelope(sigmaActual , time , 1)
+
+		dictionaryElement['timeCourse'] = envelope[poczatek:koniec]
+		dictionaryElement['energy']     = minPosEnerg(dictionaryElement['timeCourse'] , density)
+		# book(iter).skok=max([1 book(iter).skok]);
+		dictionaryElement['sigma']      = sigmaActual
+		dictionaryElement['srodek']     = int(srodek)
+		dictionaryElement['shapeType']  = 1
+		dictionaryElement['decay']      = 0
+		dictionary.append(dictionaryElement)
+
+		if flags['useAsymA']:
+			dictionaryElement = {}
+			increase    = 0.5 * (sigmaActual**2)
+			decay       = 1.5 * sigmaActual
+			expectation = srodek
+			(envelope , poczatek , koniec , srodek) = asymetricEnvelope(increase , decay , expectation , time , 1)
+
+			dictionaryElement['timeCourse'] = envelope[poczatek:koniec]
+			dictionaryElement['energy']     = dictionary[-1]['energy']
+			dictionaryElement['sigma']      = sigmaActual
+			dictionaryElement['srodek']     = int(srodek)
+			dictionaryElement['shapeType']  = 2
+			dictionaryElement['decay']      = decay
+			dictionary.append(dictionaryElement)
+
+		sigmaActual = sigmaActual * sigmaParity
+	return dictionary
+
 
 def gaussEnvelope(sigma , time , shapeType=1):
 	'''
-	shapeTypes:int
+	shapeType:int
 	1 - standard gaussian shape
 	2 - flatten on top
 	'''
@@ -72,7 +118,27 @@ def gaussEnvelope(sigma , time , shapeType=1):
 	
 	return (envelope , poczatek , koniec , srodek)
 
+def asymetricEnvelope(increase , decay , expectation , time , shapeType=1):
+	'''
+	shapeType:int
+	1 - envelope of type asymA
+	'''
+	eps = 1e-4
+	tmp = time - expectation;
+    y   = exp((-increase*(tmp)**2 ) / (1+ decay*(tmp) .* (np.atan(1e16*(tmp))+np.pi/2)/np.pi))
+    ind      = np.where(y>eps)[0]
+	poczatek = ind[0]
+	koniec   = ind[-1]
+    sr       = expectation + 1 - p
+    envelope = y / np.linalg.norm(y)
+
+    return (envelope , poczatek , koniec , srodek)
+
 def minSigEnerg(testSigma , testEnvelope , density , time):
 	(gx , p , k , sr) = gaussEnvelope(testSigma , time)
 	return np.abs(1 - density - np.dot(gx , testEnvelope))
 
+def minPosEnerg(testEnvelope , density):
+	xcorr  = np.abs(1 - density - np.correlate(testEnvelope , testEnvelope , 'full'))
+	where  = xcorr.argmin()
+	return np.abs(testEnvelope.size - where)

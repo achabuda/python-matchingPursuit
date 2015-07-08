@@ -31,12 +31,24 @@ import numpy             as np
 if __name__ == '__main__':
 
 	time  = np.arange(1 , 1000)
-	params = {}
-	params['minS']    = 10
-	params['maxS']    = 30
-	params['density'] = 0.01
+	config = {}
+	config['minS']    = 10
+	config['maxS']    = 30
+	config['density'] = 0.01
 
-	generateDictionary(time , params)
+	flags = {}
+	flags['useAsymA'] = 0
+	flags['useRectA'] = 0
+
+	config['flags']   = flags
+
+	dictionary = generateDictionary(time , config)
+
+	# print len(dictionary)
+
+	# print dictionary[0]
+	# print '----------------'
+	# print dictionary[-1]
 
 	# sigma = 10
 	# (envelope , p , k , sr) = gaussEnvelope(sigma , time , 1)
