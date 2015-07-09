@@ -45,21 +45,28 @@ def generateDictionary(time , config):
 
 	return dictionary
 
-	### classes ###
-	# - dictionaryElement
-	# - dictionary
+def appendToDictionary(dictionary , density , envelope , srodek , sigma , shapeType):
+	dictionaryElement = {}
+	dictionaryElement['timeCourse'] = envelope
+	dictionaryElement['energy']     = minPosEnerg(envelope , density)
+	# book(iter).skok=max([1 book(iter).skok]);
+	dictionaryElement['sigma']      = sigma
+	dictionaryElement['srodek']     = int(srodek)
+	dictionaryElement['shapeType']  = shapeType
 
-	### decay - unnecessary
+	dictionary.append(pd.Series(dictionaryElement))
+	return dictionary
 
 
 def generateRectangularEnvelopes(dictionary , time , config):
+	shapeType  = 2
 	minS       = config['minS']
 	maxS       = config['maxS']
 	density    = config['density']
 	flags      = config['flags']
 
 	sigmaStart = (minS + maxS)/2
-	gc          = gaussEnvelope(sigmaStart , time , 2)[0]
+	gc          = gaussEnvelope(sigmaStart , time , 2 , 0)[0]
 	sigmaStop  = fmin(func=minSigEnerg , x0=sigmaStart, args=(gc,density,time,2))[0]
 
 	sigmaActual = minS
@@ -70,25 +77,10 @@ def generateRectangularEnvelopes(dictionary , time , config):
 	threshold = maxS * np.sqrt(sigmaParity)
 
 	while sigmaActual < threshold:
-		dictionaryElement = {}
-		(envelope , poczatek , koniec , srodek) = gaussEnvelope(sigmaActual , time , 2)
-
-		dictionaryElement['timeCourse'] = envelope[poczatek:koniec]
-		dictionaryElement['energy']     = minPosEnerg(dictionaryElement['timeCourse'] , density)
-		# book(iter).skok=max([1 book(iter).skok]);
-		dictionaryElement['sigma']      = sigmaActual
-		dictionaryElement['srodek']     = int(srodek)
-		dictionaryElement['shapeType']  = 2
-		dictionaryElement['decay']      = 0
-
-		dictionary.append(pd.Series(dictionaryElement))
-
+		(envelope , srodek) = gaussEnvelope(sigmaActual , time , shapeType)
+		dictionary = appendToDictionary(dictionary , density , envelope , srodek , sigmaActual , shapeType)
 		sigmaActual = sigmaActual * sigmaParity
 
-	#print pd.DataFrame(dictionaryElement)
-	#tmp = pd.Series(dictionaryElement)
-	#print tmp['energy']
-	#print tmp
 	return dictionary
 
 def generateBasicStructures(time , config):
@@ -99,10 +91,8 @@ def generateBasicStructures(time , config):
 	flags      = config['flags']
 
 	sigmaStart = (minS + maxS)/2
-	gc         = gaussEnvelope(sigmaStart , time)[0]
+	gc         = gaussEnvelope(sigmaStart , time , 1 , 0)[0]
 	sigmaStop  = fmin(func=minSigEnerg , x0=sigmaStart, args=(gc,density,time,1))[0]
-
-	# print 'Start={}, stop={}'.format(sigmaStart,sigmaStop)
 
 	sigmaActual = minS
 	sigmaParity = sigmaStop / sigmaStart
@@ -112,39 +102,23 @@ def generateBasicStructures(time , config):
 	threshold = maxS * np.sqrt(sigmaParity)
 
 	while sigmaActual < threshold:
-		dictionaryElement = {}
-		(envelope , poczatek , koniec , srodek) = gaussEnvelope(sigmaActual , time , 1)
-
-		dictionaryElement['timeCourse'] = envelope[poczatek:koniec]
-		dictionaryElement['energy']     = minPosEnerg(dictionaryElement['timeCourse'] , density)
-		# book(iter).skok=max([1 book(iter).skok]);
-		dictionaryElement['sigma']      = sigmaActual
-		dictionaryElement['srodek']     = int(srodek)
-		dictionaryElement['shapeType']  = 1
-		dictionaryElement['decay']      = 0
-		dictionary.append(dictionaryElement)
+		shapeType = 1
+		(envelope , srodek) = gaussEnvelope(sigmaActual , time , shapeType)
+		dictionary = appendToDictionary(dictionary , density , envelope , srodek , sigmaActual , shapeType)
 
 		if flags['useAsymA']:
-			dictionaryElement = {}
+			shapeType   = 3
 			increase    = 0.5 / (sigmaActual**2)
 			decay       = 1.5 / sigmaActual
 			expectation = srodek
-			(envelope , poczatek , koniec , srodek) = asymetricEnvelope(increase , decay , expectation , time , 1)
-
-			dictionaryElement['timeCourse'] = envelope[poczatek:koniec]
-			dictionaryElement['energy']     = dictionary[-1]['energy']
-			# same as for symmetric shape (in this particular case)
-			dictionaryElement['sigma']      = sigmaActual
-			dictionaryElement['srodek']     = int(srodek)
-			dictionaryElement['shapeType']  = 3
-			dictionaryElement['decay']      = decay
-			dictionary.append(dictionaryElement)
+			(envelope , srodek) = asymetricEnvelope(increase , decay , expectation , time)
+			dictionary = appendToDictionary(dictionary , density , envelope , srodek , sigmaActual , shapeType)
 
 		sigmaActual = sigmaActual * sigmaParity
 	return dictionary
 
 
-def gaussEnvelope(sigma , time , shapeType=1):
+def gaussEnvelope(sigma , time , shapeType=1 , cutOutput=1):
 	'''
 	shapeType:int
 	1 - standard gaussian shape
@@ -158,16 +132,19 @@ def gaussEnvelope(sigma , time , shapeType=1):
 		y = np.exp(-1 * x**2 /2)
 	elif shapeType == 2:
 		y = np.exp(-7 * x**8 /8)
-	
-	ind      = np.where(y>eps)[0]
-	poczatek = ind[0]
-	koniec   = ind[-1]
-	srodek   = (poczatek + koniec)/2 - poczatek + 1
-	envelope = y / np.linalg.norm(y)
-	
-	return (envelope , poczatek , koniec , srodek)
+	ind        = np.where(y>eps)[0]
 
-def asymetricEnvelope(increase , decay , expectation , time , shapeType=1):
+	whereFrom  = ind[0]
+	whereTo    = ind[-1]
+	expected   = (whereFrom + whereTo)/2 - whereFrom + 1
+	envelope   = y / np.linalg.norm(y)
+
+	if cutOutput == 1:
+		envelope = envelope[whereFrom:whereTo]
+
+	return (envelope , expected)
+
+def asymetricEnvelope(increase , decay , expectation , time , shapeType=1 , cutOutput=1):
 	'''
 	shapeType:int
 	1 - envelope of type asymA
@@ -176,15 +153,18 @@ def asymetricEnvelope(increase , decay , expectation , time , shapeType=1):
 	if shapeType == 1:
 		tmp = time - expectation
 		y = np.exp(-increase*(tmp**2) / (1 + decay * tmp * (np.arctan(1e16*tmp)+np.pi/2)/np.pi))
-	ind      = np.where(y>eps)[0]
-	poczatek = ind[0]
-	koniec   = ind[-1]
-	srodek   = expectation + 1 - poczatek
-	envelope = y / np.linalg.norm(y)
-	return (envelope , poczatek , koniec , srodek)
+	ind        = np.where(y>eps)[0]
+	whereFrom  = ind[0]
+	whereTo    = ind[-1]
+	expected   = expectation + 1 - whereFrom
+	envelope   = y / np.linalg.norm(y)
+
+	if cutOutput == 1:
+		envelope = envelope[whereFrom:whereTo]
+	return (envelope , expected)
 
 def minSigEnerg(testSigma , testEnvelope , density , time , shapeType):
-	(gx , p , k , sr) = gaussEnvelope(testSigma , time , shapeType)
+	gx = gaussEnvelope(testSigma , time , shapeType , 0)[0]
 	return np.abs(1 - density - np.dot(gx , testEnvelope))
 
 def minPosEnerg(testEnvelope , density):
