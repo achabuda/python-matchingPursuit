@@ -21,38 +21,3 @@ author: Tomasz Spustek
 e-mail: tomasz@spustek.pl
 University of Warsaw, July 06, 2015
 '''
-
-from src.dictionary import generateDictionary, minSigEnerg, minPosEnerg, gaussEnvelope
-
-import matplotlib.pyplot as plt
-import numpy             as np
-
-
-if __name__ == '__main__':
-
-	time  = np.arange(0 , 1000)
-	config = {}
-	config['minS']    = 10
-	config['maxS']    = 30
-	config['density'] = 0.01
-
-	flags = {}
-	flags['useAsymA'] = 1
-	flags['useRectA'] = 1
-
-	config['flags']   = flags
-
-	dictionary = generateDictionary(time , config)
-
-	# envelope = dictionary[7]['timeCourse']
-	# plt.plot(envelope)
-	# plt.show()
-
-	sigma    = 100
-	# increase = 0.5 / (sigma**2)
-	# decay    = 1.5 / sigma
-	testEnvelope = gaussEnvelope(sigma , time , 1 , 0)[0]
-	# envelope    = asymetricEnvelope(increase , decay , expectation , time , 1 , 1)[0]
-	# print envelope.shape
-
-	print minPosEnerg(testEnvelope , 0.01)
