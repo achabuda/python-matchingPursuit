@@ -43,6 +43,7 @@ def generateDictionary(time , config):
 	if config['flags']['useRectA'] == 1:
 		dictionary = generateRectangularEnvelopes(dictionary , time , config)
 
+	dictionary = pd.DataFrame(dictionary)
 	return dictionary
 
 def appendToDictionary(dictionary , density , envelope , srodek , sigma , shapeType):
@@ -56,7 +57,6 @@ def appendToDictionary(dictionary , density , envelope , srodek , sigma , shapeT
 
 	dictionary.append(pd.Series(dictionaryElement))
 	return dictionary
-
 
 def generateRectangularEnvelopes(dictionary , time , config):
 	shapeType  = 2
