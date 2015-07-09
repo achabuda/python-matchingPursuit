@@ -30,7 +30,7 @@ import numpy             as np
 
 if __name__ == '__main__':
 
-	time  = np.arange(1 , 1000)
+	time  = np.arange(0 , 1000)
 	config = {}
 	config['minS']    = 10
 	config['maxS']    = 30
@@ -44,8 +44,6 @@ if __name__ == '__main__':
 
 	dictionary = generateDictionary(time , config)
 
-	print len(dictionary)
-
-	envelope = dictionary[-1]['timeCourse']
+	envelope = dictionary[7]['timeCourse']
 	plt.plot(envelope)
 	plt.show()

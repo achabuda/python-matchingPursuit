@@ -23,7 +23,8 @@ University of Warsaw, July 06, 2015
 '''
 from __future__ import division
 from scipy.optimize import fmin
-import numpy as np
+import numpy  as np
+import pandas as pd
 
 def generateDictionary(time , config):
 	'''
@@ -36,13 +37,19 @@ def generateDictionary(time , config):
 	time:list - original time vector
 	'''
 
-	time       = np.arange(1,3*len(time))
+	time       = np.arange(0,3*len(time))
 
 	dictionary = generateBasicStructures(time , config)
 	if config['flags']['useRectA'] == 1:
 		dictionary = generateRectangularEnvelopes(dictionary , time , config)
 
 	return dictionary
+
+	### classes ###
+	# - dictionaryElement
+	# - dictionary
+
+	### decay - unnecessary
 
 
 def generateRectangularEnvelopes(dictionary , time , config):
@@ -73,10 +80,15 @@ def generateRectangularEnvelopes(dictionary , time , config):
 		dictionaryElement['srodek']     = int(srodek)
 		dictionaryElement['shapeType']  = 2
 		dictionaryElement['decay']      = 0
-		dictionary.append(dictionaryElement)
+
+		dictionary.append(pd.Series(dictionaryElement))
 
 		sigmaActual = sigmaActual * sigmaParity
 
+	#print pd.DataFrame(dictionaryElement)
+	#tmp = pd.Series(dictionaryElement)
+	#print tmp['energy']
+	#print tmp
 	return dictionary
 
 def generateBasicStructures(time , config):
@@ -87,7 +99,7 @@ def generateBasicStructures(time , config):
 	flags      = config['flags']
 
 	sigmaStart = (minS + maxS)/2
-	gc          = gaussEnvelope(sigmaStart , time)[0]
+	gc         = gaussEnvelope(sigmaStart , time)[0]
 	sigmaStop  = fmin(func=minSigEnerg , x0=sigmaStart, args=(gc,density,time,1))[0]
 
 	# print 'Start={}, stop={}'.format(sigmaStart,sigmaStop)
@@ -121,6 +133,7 @@ def generateBasicStructures(time , config):
 
 			dictionaryElement['timeCourse'] = envelope[poczatek:koniec]
 			dictionaryElement['energy']     = dictionary[-1]['energy']
+			# same as for symmetric shape (in this particular case)
 			dictionaryElement['sigma']      = sigmaActual
 			dictionaryElement['srodek']     = int(srodek)
 			dictionaryElement['shapeType']  = 3
