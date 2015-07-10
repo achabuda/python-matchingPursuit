@@ -22,8 +22,9 @@ e-mail: tomasz@spustek.pl
 University of Warsaw, July 06, 2015
 '''
 
-from src.dictionary import generateDictionary
+from src.dictionary       import generateDictionary
 from data.signalGenerator import generateTestSignal , defaultValues
+from src.processing       import calculateMP
 
 import matplotlib.pyplot as plt
 import numpy             as np
@@ -31,24 +32,30 @@ import numpy             as np
 
 if __name__ == '__main__':
 	# create a syntetic signal
-	(gaborParams , sinusParams , noiseRatio) = defaultValues()
+	(gaborParams , sinusParams , noiseRatio, samplingFrequency) = defaultValues()
 	(signal,time) = generateTestSignal(gaborParams,sinusParams,noiseRatio)
 
 	# generate dictionary
+	flags = {}
+	flags['useAsymA'] = 1
+	flags['useRectA'] = 1
 	config = {}
+	config['flags']   = flags
 	config['minS']    = 10
 	config['maxS']    = 30
 	config['density'] = 0.01
 
-	flags = {}
-	flags['useAsymA'] = 1
-	flags['useRectA'] = 1
-
-	config['flags']   = flags
-
 	dictionary = generateDictionary(time , config)
 
 
+	# calculate Matching Pursuit
+	config['maxNumberOfIterations']            = 15
+	config['minEnergyExplained']               = 0.99
+	config['samplingFrequency']                = samplingFrequency
+	config['minNFFT']                          = 2*samplingFrequency
+	config['flags']['useGradientOptimization'] = 1
+
+	wynik = calculateMP(dictionary , signal , config) 
 
 
 

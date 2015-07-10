@@ -21,3 +21,36 @@ author: Tomasz Spustek
 e-mail: tomasz@spustek.pl
 University of Warsaw, July 06, 2015
 '''
+
+import numpy as np
+from scipy.signal import hilbert
+
+
+def calculateMP(dictionary , signal , config):
+	'''
+	dictionary - pandas.DataFrame containing redundant base set of functions
+	signal     - numpy.array containing signal to decompose
+	config     - dict
+	- 
+	'''
+	
+	signal = initializeMP(signal)
+
+	return signal
+
+def initializeMP(signal):
+	signal = hilbert(signal)
+	signalRest   = signal
+	signalEnergy = Energy(signal)
+	out_book     = []
+	siglen       = length(signal)
+	env_part     = []
+	subMaxDot    = []
+	subMaxFreq   = []
+	iteration    = 0
+	print 'MP initialization - done'
+	return signal
+
+
+def calculateSignalEnergy(signal):
+	return sum( signal * signal.conjugate() )

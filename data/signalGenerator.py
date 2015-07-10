@@ -89,4 +89,4 @@ def defaultValues():
 	gaborParams = np.array([[numberOfSamples,samplingFreq,amplitude,position1,width,frequency1,phase],[numberOfSamples,samplingFreq,amplitude,position2,width,frequency2,phase]])
 	sinusParams = np.array([[5.0,5.0,0.0]])
 	noiseRatio  = 0.05
-	return (gaborParams , sinusParams , noiseRatio)
+	return (gaborParams , sinusParams , noiseRatio , samplingFreq)
