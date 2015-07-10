@@ -22,15 +22,19 @@ e-mail: tomasz@spustek.pl
 University of Warsaw, July 06, 2015
 '''
 
-from src.dictionary import generateDictionary, minSigEnerg, minPosEnerg, gaussEnvelope
+from src.dictionary import generateDictionary
+from data.signalGenerator import generateTestSignal , defaultValues
 
 import matplotlib.pyplot as plt
 import numpy             as np
 
 
 if __name__ == '__main__':
+	# create a syntetic signal
+	(gaborParams , sinusParams , noiseRatio) = defaultValues()
+	(signal,time) = generateTestSignal(gaborParams,sinusParams,noiseRatio)
 
-	time  = np.arange(0 , 1000)
+	# generate dictionary
 	config = {}
 	config['minS']    = 10
 	config['maxS']    = 30
@@ -44,15 +48,11 @@ if __name__ == '__main__':
 
 	dictionary = generateDictionary(time , config)
 
+
+
+
+
 	# envelope = dictionary[7]['timeCourse']
 	# plt.plot(envelope)
 	# plt.show()
 
-	sigma    = 100
-	# increase = 0.5 / (sigma**2)
-	# decay    = 1.5 / sigma
-	testEnvelope = gaussEnvelope(sigma , time , 1 , 0)[0]
-	# envelope    = asymetricEnvelope(increase , decay , expectation , time , 1 , 1)[0]
-	# print envelope.shape
-
-	print minPosEnerg(testEnvelope , 0.01)
