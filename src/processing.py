@@ -47,10 +47,6 @@ def calculateMP(dictionary , signal , config):
 	subMaxFreq     = []
 	book           = []
 
-	# print 'MP initialization - done'
-
-	flag = 'dupa'
-
 	for index, atom in dictionary.iterrows():
 		tmpEnergyStep = atom['step']
 		tmpTimeCourse = atom['timeCourse']
@@ -69,12 +65,7 @@ def calculateMP(dictionary , signal , config):
 				tmpWhereStop = tmpSrodek + signalLength - ind1
 			##########################
 			envelopeRange2go = np.arange(tmpWhereStart , tmpWhereStop)
-
-			#if flag == 'dupa':
-			#	print tmpWhereStart
-			#	print tmpWhereStop
-				
-
+			
 			# This could be optimised:
 			tmp1 = ind1 - tmpSrodek
 			if tmp1 < 0:
@@ -82,11 +73,6 @@ def calculateMP(dictionary , signal , config):
 			##########################
 			tmp2 = tmp1 + (tmpWhereStop - tmpWhereStart)
 			tmp_ind = np.arange(tmp1,tmp2)
-
-
-			#if flag == 'dupa':
-			#	print tmp1
-			#	print tmp2
 
 			if envelopeRange2go.shape[0] < 3:
 				break
@@ -98,22 +84,11 @@ def calculateMP(dictionary , signal , config):
 			partialResultsElement['shapeType']  = atom['shapeType']
 			# partialResultsElement['decay']      = atom['decay']
 
-			# partialSignal = signal(tmp_ind)
-
 			signal2fft = signal[tmp_ind] * partialResultsElement['timeCourse']
 			nfft       = int(np.array([signal2fft.shape[0] , config['minNFFT']]).max())
 			freqencies = np.arange(0 , nfft/2.)/nfft
 			DOT        = np.fft.fft(signal2fft , nfft)
 			ind        = np.abs(DOT[0:freqencies.shape[0]]).argmax()
-
-			#if flag == 'dupa':
-				# print signal2fft
-				# print 'nfft={}'.format(nfft)
-				# print 'DOT={}'.format(DOT)
-				# print ind
-				# plt.scatter(signal2fft.real,signal2fft.imag, color='red')
-				# plt.show()
-				# flag = ''
 
 			subMaxDOT.append(DOT[ind])
 			subMaxFreq.append(2*np.pi*freqencies[ind])
@@ -123,19 +98,8 @@ def calculateMP(dictionary , signal , config):
 	subMaxFreq     = np.array(subMaxFreq)
 	subMaxDOT      = np.array(subMaxDOT)
 
-	#if flag == 'dupa':
-	#	print subMaxFreq[0]
-	#	print subMaxDOT[0]
-	#	flag = ''
 	iteration = 1
 	whereMax  = np.abs(subMaxDOT).argmax()
-
-	#if flag == 'dupa':
-		# print whereMax
-		# print subMaxDOT[whereMax]
-		# plt.plot(np.abs(subMaxDOT))
-		# plt.show()
-		# flag = ''
 
 	time = np.arange(0,partialResults['time'][whereMax].shape[0])
 	
