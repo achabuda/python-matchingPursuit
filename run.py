@@ -33,7 +33,7 @@ from scipy.io import savemat
 
 
 if __name__ == '__main__':
-	# create a syntetic signal
+	# create a synthetic signal
 	(gaborParams , sinusParams , noiseRatio, samplingFrequency) = defaultValues()
 	(signal,time) = generateTestSignal(gaborParams,sinusParams,noiseRatio)
 
@@ -55,13 +55,12 @@ if __name__ == '__main__':
 
 	dictionary = generateDictionary(time , config)
 
-
 	# calculate Matching Pursuit
-	config['maxNumberOfIterations']            = 15
+	config['maxNumberOfIterations']            = 3
 	config['minEnergyExplained']               = 0.99
 	config['samplingFrequency']                = samplingFrequency
-	config['minNFFT']                          = 256#2*samplingFrequency
-	config['flags']['useGradientOptimization'] = 1
+	config['minNFFT']                          = 256 # 2*samplingFrequency
+	config['flags']['useGradientOptimization'] = 0
 
 	book = calculateMP(dictionary , signal , config) 
 

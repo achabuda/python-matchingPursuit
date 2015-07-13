@@ -52,8 +52,6 @@ def calculateMP(dictionary , signal , config):
 		tmpTimeCourse = atom['timeCourse']
 		tmpSrodek     = atom['srodek']
 		tmpSigma      = atom['sigma']
-
-		print tmpEnergyStep
 		
 		for ind1 in np.arange(0, signalLength+tmpEnergyStep , tmpEnergyStep):
 			# This could be optimised:
@@ -98,7 +96,6 @@ def calculateMP(dictionary , signal , config):
 	subMaxFreq     = np.array(subMaxFreq)
 	subMaxDOT      = np.array(subMaxDOT)
 
-	iteration = 1
 	whereMax  = np.abs(subMaxDOT).argmax()
 
 	time = np.arange(0,partialResults['time'][whereMax].shape[0])
@@ -116,29 +113,47 @@ def calculateMP(dictionary , signal , config):
 	tmp = bookElement['amplitude']*partialResults['timeCourse'][whereMax]*np.exp(1j*bookElement['freq']*time)
 	bookElement['reconstruction'][0][bookElement['time']]   = tmp.real
 
+	# not needed:
+	# PrzedM(1+length(PrzedM))=abs(mmax);
+	# PoM(1+length(PoM))=abs(mmax);
+
+	if config['flags']['useGradientOptimization'] == 1:
+		where_mi = partialResults['timeCourse'][whereMax].argmax()
+		mi_0     = partialResults['time'][whereMax][where_mi]
+		sigma_0  = partialResults['sigma'][whereMax]
+
+		(freq,amplitude,envelope,reconstruction,mi,sigma) = gradientSearch(subMaxDOT[whereMax],mi_0,sigma_0,signalRest,partialResults['time'][0],partialResults['shapeType'][whereMax],subMaxFreq[whereMax],config['flags']['useAsymA'])
+
+		if np.abs(amplitude) > np.abs(bookElement['amplitude']):
+			bookElement['amplitude']      = amplitude
+			bookElement['freq']           = freq
+			bookElement['envelope']       = envelope
+			bookElement['reconstruction'] = reconstruction
+			bookElement['sigma']          = sigma
+			# not needed:
+			# bookElement['mi']             = mi
+			# PoM(length(PoM))=abs(out_book(ii).amplitude);
+
 	book.append(pd.Series(bookElement))
 
+	minEnergyExplained = config['minEnergyExplained'] - config['density'] * (np.dot(bookElement['reconstruction'][0] , bookElement['reconstruction'][0]) / np.dot(signalRest , signalRest))
+	signalRest         = signalRest - bookElement['reconstruction'][0]
+	energyExplained    = np.abs(1 - calculateSignalEnergy(signalRest) / signalEnergy)
 
+	print 'Iteration {} done, energy explained: {}.'.format(1 , energyExplained)
 
-#PrzedM(1+length(PrzedM))=abs(mmax);
-#PoM(1+length(PoM))=abs(mmax);%abs(out_book(ii).amplitude);
+	if energyExplained > minEnergyExplained:
+		return pd.DataFrame(book) 
 
+	# next iterations here
 
 	return pd.DataFrame(book) 
 
-def initializeMP(signal):
-	signal = hilbert(signal)
-	signalRest   = signal
-	signalEnergy = calculateSignalEnergy(signal)
-	out_book     = []
-	signalLength       = signal.shape[0]
-	env_part     = []
-	subMaxDot    = []
-	subMaxFreq   = []
-	iteration    = 0
-	print 'MP initialization - done'
-	return (signal, signalLength)
 
+
+def gradientSearch(amplitude_0 , mi_0 , sigma_0 , signalRest , whereStart , shapeType , freq , asym):
+	# gradient optimization here
+	return (1,1,1,1,1,1)
 
 def calculateSignalEnergy(signal):
 	return sum( signal * signal.conjugate() )
