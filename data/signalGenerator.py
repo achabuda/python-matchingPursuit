@@ -77,7 +77,7 @@ def gaborFunction(params):
 
 def defaultValues():
 	numberOfSamples = 1000
-	samplingFreq    = 250
+	samplingFreq    = 250.0
 	amplitude       = 12.0
 	position1       = 3.0
 	position2       = 1.0

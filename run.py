@@ -37,8 +37,8 @@ if __name__ == '__main__':
 
 	# generate dictionary
 	flags = {}
-	flags['useAsymA'] = 1
-	flags['useRectA'] = 1
+	flags['useAsymA'] = 0
+	flags['useRectA'] = 0
 	config = {}
 	config['flags']   = flags
 	config['minS']    = 10
@@ -55,11 +55,11 @@ if __name__ == '__main__':
 	config['minNFFT']                          = 2*samplingFrequency
 	config['flags']['useGradientOptimization'] = 1
 
-	wynik = calculateMP(dictionary , signal , config) 
+	book = calculateMP(dictionary , signal , config) 
 
-
+	
 
 	# envelope = dictionary[7]['timeCourse']
-	# plt.plot(envelope)
+	# plt.plot(book['reconstruction'][0])
 	# plt.show()
 

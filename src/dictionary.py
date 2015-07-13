@@ -49,8 +49,7 @@ def generateDictionary(time , config):
 def appendToDictionary(dictionary , density , envelope , srodek , sigma , shapeType):
 	dictionaryElement = {}
 	dictionaryElement['timeCourse'] = envelope
-	dictionaryElement['energy']     = minPosEnerg(envelope , density)
-	# book(iter).skok=max([1 book(iter).skok]);
+	dictionaryElement['step']       = np.array([minPosEnerg(envelope , density) , 1]).max()
 	dictionaryElement['sigma']      = sigma
 	dictionaryElement['srodek']     = int(srodek)
 	dictionaryElement['shapeType']  = shapeType
@@ -116,7 +115,6 @@ def generateBasicStructures(time , config):
 
 		sigmaActual = sigmaActual * sigmaParity
 	return dictionary
-
 
 def gaussEnvelope(sigma , time , shapeType=1 , cutOutput=1):
 	'''
