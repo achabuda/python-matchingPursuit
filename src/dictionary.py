@@ -134,7 +134,7 @@ def gaussEnvelope(sigma , time , shapeType=1 , cutOutput=1):
 
 	whereFrom  = ind[0]
 	whereTo    = ind[-1]
-	expected   = (whereFrom + whereTo)/2 - whereFrom + 1
+	expected   = (whereFrom + whereTo)/2.0 - whereFrom + 1
 	envelope   = y / np.linalg.norm(y)
 
 	if cutOutput == 1:
@@ -168,4 +168,4 @@ def minSigEnerg(testSigma , testEnvelope , density , time , shapeType):
 def minPosEnerg(testEnvelope , density):
 	xcorr  = np.abs(1 - density - np.correlate(testEnvelope , testEnvelope , 'full'))
 	where  = xcorr.argmin()
-	return np.abs(testEnvelope.size - where)
+	return np.abs(testEnvelope.size - where -1)

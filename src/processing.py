@@ -24,6 +24,7 @@ University of Warsaw, July 06, 2015
 from __future__ import division
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from scipy.signal import hilbert
 
 
@@ -36,6 +37,7 @@ def calculateMP(dictionary , signal , config):
 	'''
 
 	signal = hilbert(signal)
+
 	signalRest   = signal
 	signalEnergy = calculateSignalEnergy(signal)
 	signalLength = signal.shape[0]
@@ -47,11 +49,15 @@ def calculateMP(dictionary , signal , config):
 
 	# print 'MP initialization - done'
 
+	flag = 'dupa'
+
 	for index, atom in dictionary.iterrows():
 		tmpEnergyStep = atom['step']
 		tmpTimeCourse = atom['timeCourse']
 		tmpSrodek     = atom['srodek']
 		tmpSigma      = atom['sigma']
+
+		print tmpEnergyStep
 		
 		for ind1 in np.arange(0, signalLength+tmpEnergyStep , tmpEnergyStep):
 			# This could be optimised:
@@ -64,6 +70,11 @@ def calculateMP(dictionary , signal , config):
 			##########################
 			envelopeRange2go = np.arange(tmpWhereStart , tmpWhereStop)
 
+			#if flag == 'dupa':
+			#	print tmpWhereStart
+			#	print tmpWhereStop
+				
+
 			# This could be optimised:
 			tmp1 = ind1 - tmpSrodek
 			if tmp1 < 0:
@@ -71,6 +82,11 @@ def calculateMP(dictionary , signal , config):
 			##########################
 			tmp2 = tmp1 + (tmpWhereStop - tmpWhereStart)
 			tmp_ind = np.arange(tmp1,tmp2)
+
+
+			#if flag == 'dupa':
+			#	print tmp1
+			#	print tmp2
 
 			if envelopeRange2go.shape[0] < 3:
 				break
@@ -90,6 +106,15 @@ def calculateMP(dictionary , signal , config):
 			DOT        = np.fft.fft(signal2fft , nfft)
 			ind        = np.abs(DOT[0:freqencies.shape[0]]).argmax()
 
+			#if flag == 'dupa':
+				# print signal2fft
+				# print 'nfft={}'.format(nfft)
+				# print 'DOT={}'.format(DOT)
+				# print ind
+				# plt.scatter(signal2fft.real,signal2fft.imag, color='red')
+				# plt.show()
+				# flag = ''
+
 			subMaxDOT.append(DOT[ind])
 			subMaxFreq.append(2*np.pi*freqencies[ind])
 			partialResults.append(pd.Series(partialResultsElement))
@@ -98,8 +123,19 @@ def calculateMP(dictionary , signal , config):
 	subMaxFreq     = np.array(subMaxFreq)
 	subMaxDOT      = np.array(subMaxDOT)
 
+	#if flag == 'dupa':
+	#	print subMaxFreq[0]
+	#	print subMaxDOT[0]
+	#	flag = ''
 	iteration = 1
 	whereMax  = np.abs(subMaxDOT).argmax()
+
+	#if flag == 'dupa':
+		# print whereMax
+		# print subMaxDOT[whereMax]
+		# plt.plot(np.abs(subMaxDOT))
+		# plt.show()
+		# flag = ''
 
 	time = np.arange(0,partialResults['time'][whereMax].shape[0])
 	
@@ -113,7 +149,8 @@ def calculateMP(dictionary , signal , config):
 	bookElement['envelope'][0][bookElement['time']]       = partialResults['timeCourse'][whereMax]
 	
 	bookElement['reconstruction'] = np.zeros((1,signalLength))
-	bookElement['reconstruction'][0][bookElement['time']]   = bookElement['amplitude']*partialResults['timeCourse'][whereMax]*np.exp(1j*bookElement['freq']*time)
+	tmp = bookElement['amplitude']*partialResults['timeCourse'][whereMax]*np.exp(1j*bookElement['freq']*time)
+	bookElement['reconstruction'][0][bookElement['time']]   = tmp.real
 
 	book.append(pd.Series(bookElement))
 

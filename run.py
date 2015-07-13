@@ -29,11 +29,19 @@ from src.processing       import calculateMP
 import matplotlib.pyplot as plt
 import numpy             as np
 
+from scipy.io import savemat
+
 
 if __name__ == '__main__':
 	# create a syntetic signal
 	(gaborParams , sinusParams , noiseRatio, samplingFrequency) = defaultValues()
 	(signal,time) = generateTestSignal(gaborParams,sinusParams,noiseRatio)
+
+
+	tmp = {}
+	tmp['signal'] = signal
+	tmp['czas']   = time
+	savemat('syg.mat' , tmp)
 
 	# generate dictionary
 	flags = {}
@@ -41,8 +49,8 @@ if __name__ == '__main__':
 	flags['useRectA'] = 0
 	config = {}
 	config['flags']   = flags
-	config['minS']    = 10
-	config['maxS']    = 30
+	config['minS']    = 32
+	config['maxS']    = 512
 	config['density'] = 0.01
 
 	dictionary = generateDictionary(time , config)
@@ -52,14 +60,14 @@ if __name__ == '__main__':
 	config['maxNumberOfIterations']            = 15
 	config['minEnergyExplained']               = 0.99
 	config['samplingFrequency']                = samplingFrequency
-	config['minNFFT']                          = 2*samplingFrequency
+	config['minNFFT']                          = 256#2*samplingFrequency
 	config['flags']['useGradientOptimization'] = 1
 
 	book = calculateMP(dictionary , signal , config) 
 
-	
+	# print book['freq'][0]
 
 	# envelope = dictionary[7]['timeCourse']
-	# plt.plot(book['reconstruction'][0])
-	# plt.show()
+	plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][0][0])
+	plt.show()
 
