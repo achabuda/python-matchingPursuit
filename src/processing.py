@@ -106,10 +106,10 @@ def calculateMP(dictionary , signal , config):
 	bookElement['amplitude']      = subMaxDOT[whereMax]
 	bookElement['sigma']          = partialResults['sigma'][whereMax]
 
-	bookElement['envelope']       = np.zeros((1,signalLength))	
+	bookElement['envelope']       = np.zeros((0,signalLength))	
 	bookElement['envelope'][0][bookElement['time']]       = partialResults['timeCourse'][whereMax]
 	
-	bookElement['reconstruction'] = np.zeros((1,signalLength))
+	bookElement['reconstruction'] = np.zeros((0,signalLength))
 	tmp = bookElement['amplitude']*partialResults['timeCourse'][whereMax]*np.exp(1j*bookElement['freq']*time)
 	bookElement['reconstruction'][0][bookElement['time']]   = tmp.real
 

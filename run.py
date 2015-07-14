@@ -29,7 +29,7 @@ from src.processing       import calculateMP
 import matplotlib.pyplot as plt
 import numpy             as np
 
-from scipy.io import savemat
+#from scipy.io import savemat
 
 
 if __name__ == '__main__':
@@ -37,11 +37,13 @@ if __name__ == '__main__':
 	(gaborParams , sinusParams , noiseRatio, samplingFrequency) = defaultValues()
 	(signal,time) = generateTestSignal(gaborParams,sinusParams,noiseRatio)
 
+	plt.plot(time,signal)
+	plt.show()
 
-	tmp = {}
-	tmp['signal'] = signal
-	tmp['czas']   = time
-	savemat('syg.mat' , tmp)
+	#tmp = {}
+	#tmp['signal'] = signal
+	#tmp['czas']   = time
+	#savemat('syg.mat' , tmp)
 
 	# generate dictionary
 	flags = {}

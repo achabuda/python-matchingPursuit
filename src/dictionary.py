@@ -146,6 +146,10 @@ def asymetricEnvelope(increase , decay , expectation , time , shapeType=1 , cutO
 	'''
 	shapeType:int
 	1 - envelope of type asymA
+
+	cutOutput:int
+	0 - return raw envelope, ie. size of the signal
+	1 - cut based on eps
 	'''
 	eps = 1e-4
 	if shapeType == 1:
