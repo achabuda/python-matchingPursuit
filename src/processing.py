@@ -105,13 +105,15 @@ def calculateMP(dictionary , signal , config):
 	bookElement['freq']           = subMaxFreq[whereMax]
 	bookElement['amplitude']      = subMaxDOT[whereMax]
 	bookElement['sigma']          = partialResults['sigma'][whereMax]
-
-	bookElement['envelope']       = np.zeros((1,signalLength))	
-	bookElement['envelope'][0][bookElement['time']] = partialResults['timeCourse'][whereMax]
 	
-	bookElement['reconstruction'] = np.zeros((1,signalLength))
+	bookElement['envelope']       = np.zeros((signalLength))
+	envelopeBeginIndex = bookElement['time'].values[0]
+	envelopeEndIndex =  bookElement['time'].values[-1]+1	
+	bookElement['envelope'][envelopeBeginIndex:envelopeEndIndex] = partialResults['timeCourse'][whereMax]
+	
+	bookElement['reconstruction'] = np.zeros((signalLength))
 	tmp = bookElement['amplitude']*partialResults['timeCourse'][whereMax]*np.exp(1j*bookElement['freq']*time)
-	bookElement['reconstruction'][0][bookElement['time']] = tmp.real
+	bookElement['reconstruction'][envelopeBeginIndex:envelopeEndIndex] = tmp.real
 
 	# not needed:
 	# PrzedM(1+length(PrzedM))=abs(mmax);
@@ -122,7 +124,7 @@ def calculateMP(dictionary , signal , config):
 		mi_0     = partialResults['time'][whereMax][where_mi]
 		sigma_0  = partialResults['sigma'][whereMax]
 
-		(freq,amplitude,envelope,reconstruction,mi,sigma) = gradientSearch(subMaxDOT[whereMax],mi_0,sigma_0,signalRest,partialResults['time'][0],partialResults['shapeType'][whereMax],subMaxFreq[whereMax],config['flags']['useAsymA'])
+		(freq,amplitude,envelope,reconstruction,mi,sigma) = gradientSearch(subMaxDOT[whereMax],mi_0,sigma_0,signalRest,partialResults['time'],partialResults['shapeType'][whereMax],subMaxFreq[whereMax],config['flags']['useAsymA'])
 
 		if np.abs(amplitude) > np.abs(bookElement['amplitude']):
 			bookElement['amplitude']      = amplitude
