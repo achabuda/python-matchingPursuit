@@ -107,14 +107,15 @@ def calculateMP(dictionary , signal , config):
 	bookElement['sigma']          = partialResults['sigma'][whereMax]
 	
 	bookElement['envelope']       = np.zeros((signalLength))
-	# PROBLEM HERE #
-	# print type(bookElement['time'])
-	# envelopeBeginIndex = bookElement['time'].values[0]
-	envelopeBeginIndex = bookElement['time'][0]
-	# envelopeEndIndex =  bookElement['time'].values[-1]+1
-	envelopeEndIndex =  bookElement['time'][-1]+1	
-	bookElement['envelope'][envelopeBeginIndex:envelopeEndIndex] = partialResults['timeCourse'][whereMax]
 	
+	if isinstance(bookElement['time'], (np.ndarray, np.generic) ):
+		envelopeBeginIndex = bookElement['time'][0]
+		envelopeEndIndex =  bookElement['time'][-1]+1
+	else:
+		# in case of older pandas library:
+		envelopeBeginIndex = bookElement['time'].values[0]
+		envelopeEndIndex =  bookElement['time'].values[-1]+1	
+	bookElement['envelope'][envelopeBeginIndex:envelopeEndIndex] = partialResults['timeCourse'][whereMax]
 	bookElement['reconstruction'] = np.zeros(signalLength)+0j
 	bookElement['reconstruction'][envelopeBeginIndex:envelopeEndIndex] = bookElement['amplitude']*partialResults['timeCourse'][whereMax]*np.exp(1j*bookElement['freq']*time)
 
