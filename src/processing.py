@@ -36,23 +36,93 @@ def calculateMP(dictionary , signal , config):
 	- 
 	'''
 
-	signal = hilbert(signal)
+	signal         = hilbert(signal)
 
-	signalRest   = signal
-	signalEnergy = calculateSignalEnergy(signal)
-	signalLength = signal.shape[0]
+	signalRest     = signal
+	signalEnergy   = calculateSignalEnergy(signal)
+	signalLength   = signal.shape[0]
 
 	partialResults = []
-	subMaxDOT      = []
-	subMaxFreq     = []
 	book           = []
+
+	
+	for iteration in np.arange(0 , config['maxNumberOfIterations']):
+		(partialResults , subMaxDOT , subMaxFreq) = recalculateDotProducts(dictionary , partialResults , signalRest , config['minNFFT'] , signalLength , iteration)
+
+		whereMax  = np.abs(subMaxDOT).argmax()
+
+		time = np.arange(0,partialResults['time'][whereMax].shape[0])
+		
+		bookElement = {}
+		bookElement['time']           = partialResults['time'][whereMax]
+		bookElement['freq']           = subMaxFreq[whereMax]
+		bookElement['amplitude']      = subMaxDOT[whereMax]
+		bookElement['sigma']          = partialResults['sigma'][whereMax]
+		
+		bookElement['envelope']       = np.zeros((signalLength))
+		
+		if isinstance(bookElement['time'], (np.ndarray, np.generic)):
+			envelopeBeginIndex = bookElement['time'][0]
+			envelopeEndIndex =  bookElement['time'][-1]+1
+		else:
+			# in case of older pandas library:
+			envelopeBeginIndex = bookElement['time'].values[0]
+			envelopeEndIndex =  bookElement['time'].values[-1]+1	
+		bookElement['envelope'][envelopeBeginIndex:envelopeEndIndex] = partialResults['timeCourse'][whereMax]
+		bookElement['reconstruction'] = np.zeros(signalLength)+0j
+		bookElement['reconstruction'][envelopeBeginIndex:envelopeEndIndex] = bookElement['amplitude']*partialResults['timeCourse'][whereMax]*np.exp(1j*bookElement['freq']*time)
+
+		# not needed yet:
+		# PrzedM(1+length(PrzedM))=abs(mmax);
+		# PoM(1+length(PoM))=abs(mmax);
+
+
+		if config['flags']['useGradientOptimization'] == 1:
+			where_mi = partialResults['timeCourse'][whereMax].argmax()
+			mi_0     = partialResults['time'][whereMax][where_mi]
+			sigma_0  = partialResults['sigma'][whereMax]
+
+			(freq,amplitude,envelope,reconstruction,mi,sigma) = gradientSearch(subMaxDOT[whereMax],mi_0,sigma_0,signalRest,partialResults['time'],partialResults['shapeType'][whereMax],subMaxFreq[whereMax],config['flags']['useAsymA'])
+
+			if np.abs(amplitude) > np.abs(bookElement['amplitude']):
+				bookElement['amplitude']      = amplitude
+				bookElement['freq']           = freq
+				bookElement['envelope']       = envelope
+				bookElement['reconstruction'] = reconstruction
+				bookElement['sigma']          = sigma
+				# not needed yet:
+				# bookElement['mi']             = mi
+				# PoM(length(PoM))=abs(out_book(ii).amplitude);
+
+		book.append(pd.Series(bookElement))
+
+		minEnergyExplained = config['minEnergyExplained'] - config['density'] * (np.dot(bookElement['reconstruction'] , bookElement['reconstruction']) / np.dot(signalRest , signalRest))
+		signalRest         = signalRest - bookElement['reconstruction']
+		energyExplained    = np.abs(1 - calculateSignalEnergy(signalRest) / signalEnergy)
+
+		print 'Iteration {} done, energy explained: {}.'.format(iteration , energyExplained)
+
+		if energyExplained > minEnergyExplained:
+			return pd.DataFrame(book) 
+
+	return pd.DataFrame(book)
+
+
+def recalculateDotProducts(dictionary , partialResults , signalRest , minNFFT , signalLength , iteration):
+	'''
+	iteration:int - tells if this is the first iteration of the algorithm:
+	- 0: very first iteration 
+	'''
+	subMaxDOT     = []
+	subMaxFreq    = []
+	innerIterator = 0
 
 	for index, atom in dictionary.iterrows():
 		tmpEnergyStep = atom['step']
 		tmpTimeCourse = atom['timeCourse']
 		tmpSrodek     = atom['srodek']
 		tmpSigma      = atom['sigma']
-		
+
 		for ind1 in np.arange(0, signalLength+tmpEnergyStep , tmpEnergyStep):
 			# This could be optimised:
 			tmpWhereStart = tmpSrodek - ind1
@@ -75,86 +145,32 @@ def calculateMP(dictionary , signal , config):
 			if envelopeRange2go.shape[0] < 3:
 				break
 
-			partialResultsElement = {}
-			partialResultsElement['timeCourse'] = tmpTimeCourse[envelopeRange2go] / np.linalg.norm(tmpTimeCourse[envelopeRange2go])
-			partialResultsElement['time']       = tmp_ind
-			partialResultsElement['sigma']      = atom['sigma']
-			partialResultsElement['shapeType']  = atom['shapeType']
-			# partialResultsElement['decay']      = atom['decay']
+			if iteration == 0:
+				partialResultsElement = {}
+				partialResultsElement['timeCourse'] = tmpTimeCourse[envelopeRange2go] / np.linalg.norm(tmpTimeCourse[envelopeRange2go])
+				partialResultsElement['time']       = tmp_ind
+				partialResultsElement['sigma']      = atom['sigma']
+				partialResultsElement['shapeType']  = atom['shapeType']
+				partialResults.append(pd.Series(partialResultsElement))
+				signal2fft     = signalRest[tmp_ind] * partialResultsElement['timeCourse']
+			else:
+				signal2fft     = signalRest[tmp_ind] * partialResults['timeCourse'][innerIterator]
+				innerIterator += 1
 
-			signal2fft = signal[tmp_ind] * partialResultsElement['timeCourse']
-			nfft       = int(np.array([signal2fft.shape[0] , config['minNFFT']]).max())
+			nfft       = int(np.array([signal2fft.shape[0] , minNFFT]).max())
 			freqencies = np.arange(0 , nfft/2.)/nfft
 			DOT        = np.fft.fft(signal2fft , nfft)
 			ind        = np.abs(DOT[0:freqencies.shape[0]]).argmax()
 
 			subMaxDOT.append(DOT[ind])
 			subMaxFreq.append(2*np.pi*freqencies[ind])
-			partialResults.append(pd.Series(partialResultsElement))
 
-	partialResults = pd.DataFrame(partialResults)
+	if iteration == 0:
+		partialResults = pd.DataFrame(partialResults)
 	subMaxFreq     = np.array(subMaxFreq)
 	subMaxDOT      = np.array(subMaxDOT)
 
-	whereMax  = np.abs(subMaxDOT).argmax()
-
-	time = np.arange(0,partialResults['time'][whereMax].shape[0])
-	
-	bookElement = {}
-	bookElement['time']           = partialResults['time'][whereMax]
-	bookElement['freq']           = subMaxFreq[whereMax]
-	bookElement['amplitude']      = subMaxDOT[whereMax]
-	bookElement['sigma']          = partialResults['sigma'][whereMax]
-	
-	bookElement['envelope']       = np.zeros((signalLength))
-	
-	if isinstance(bookElement['time'], (np.ndarray, np.generic) ):
-		envelopeBeginIndex = bookElement['time'][0]
-		envelopeEndIndex =  bookElement['time'][-1]+1
-	else:
-		# in case of older pandas library:
-		envelopeBeginIndex = bookElement['time'].values[0]
-		envelopeEndIndex =  bookElement['time'].values[-1]+1	
-	bookElement['envelope'][envelopeBeginIndex:envelopeEndIndex] = partialResults['timeCourse'][whereMax]
-	bookElement['reconstruction'] = np.zeros(signalLength)+0j
-	bookElement['reconstruction'][envelopeBeginIndex:envelopeEndIndex] = bookElement['amplitude']*partialResults['timeCourse'][whereMax]*np.exp(1j*bookElement['freq']*time)
-
-	# not needed:
-	# PrzedM(1+length(PrzedM))=abs(mmax);
-	# PoM(1+length(PoM))=abs(mmax);
-
-	if config['flags']['useGradientOptimization'] == 1:
-		where_mi = partialResults['timeCourse'][whereMax].argmax()
-		mi_0     = partialResults['time'][whereMax][where_mi]
-		sigma_0  = partialResults['sigma'][whereMax]
-
-		(freq,amplitude,envelope,reconstruction,mi,sigma) = gradientSearch(subMaxDOT[whereMax],mi_0,sigma_0,signalRest,partialResults['time'],partialResults['shapeType'][whereMax],subMaxFreq[whereMax],config['flags']['useAsymA'])
-
-		if np.abs(amplitude) > np.abs(bookElement['amplitude']):
-			bookElement['amplitude']      = amplitude
-			bookElement['freq']           = freq
-			bookElement['envelope']       = envelope
-			bookElement['reconstruction'] = reconstruction
-			bookElement['sigma']          = sigma
-			# not needed:
-			# bookElement['mi']             = mi
-			# PoM(length(PoM))=abs(out_book(ii).amplitude);
-
-	book.append(pd.Series(bookElement))
-
-	minEnergyExplained = config['minEnergyExplained'] - config['density'] * (np.dot(bookElement['reconstruction'] , bookElement['reconstruction']) / np.dot(signalRest , signalRest))
-	signalRest         = signalRest - bookElement['reconstruction']
-	energyExplained    = np.abs(1 - calculateSignalEnergy(signalRest) / signalEnergy)
-
-	print 'Iteration {} done, energy explained: {}.'.format(1 , energyExplained)
-
-	if energyExplained > minEnergyExplained:
-		return pd.DataFrame(book) 
-
-	# next iterations here
-
-	return pd.DataFrame(book)
-
+	return (partialResults , subMaxDOT , subMaxFreq)
 
 
 def gradientSearch(amplitude_0 , mi_0 , sigma_0 , signalRest , whereStart , shapeType , freq , asym):
