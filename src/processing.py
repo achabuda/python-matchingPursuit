@@ -107,13 +107,16 @@ def calculateMP(dictionary , signal , config):
 	bookElement['sigma']          = partialResults['sigma'][whereMax]
 	
 	bookElement['envelope']       = np.zeros((signalLength))
-	envelopeBeginIndex = bookElement['time'].values[0]
-	envelopeEndIndex =  bookElement['time'].values[-1]+1	
+	# PROBLEM HERE #
+	# print type(bookElement['time'])
+	# envelopeBeginIndex = bookElement['time'].values[0]
+	envelopeBeginIndex = bookElement['time'][0]
+	# envelopeEndIndex =  bookElement['time'].values[-1]+1
+	envelopeEndIndex =  bookElement['time'][-1]+1	
 	bookElement['envelope'][envelopeBeginIndex:envelopeEndIndex] = partialResults['timeCourse'][whereMax]
 	
-	bookElement['reconstruction'] = np.zeros((signalLength))
-	tmp = bookElement['amplitude']*partialResults['timeCourse'][whereMax]*np.exp(1j*bookElement['freq']*time)
-	bookElement['reconstruction'][envelopeBeginIndex:envelopeEndIndex] = tmp.real
+	bookElement['reconstruction'] = np.zeros(signalLength)+0j
+	bookElement['reconstruction'][envelopeBeginIndex:envelopeEndIndex] = bookElement['amplitude']*partialResults['timeCourse'][whereMax]*np.exp(1j*bookElement['freq']*time)
 
 	# not needed:
 	# PrzedM(1+length(PrzedM))=abs(mmax);
@@ -138,8 +141,8 @@ def calculateMP(dictionary , signal , config):
 
 	book.append(pd.Series(bookElement))
 
-	minEnergyExplained = config['minEnergyExplained'] - config['density'] * (np.dot(bookElement['reconstruction'][0] , bookElement['reconstruction'][0]) / np.dot(signalRest , signalRest))
-	signalRest         = signalRest - bookElement['reconstruction'][0]
+	minEnergyExplained = config['minEnergyExplained'] - config['density'] * (np.dot(bookElement['reconstruction'] , bookElement['reconstruction']) / np.dot(signalRest , signalRest))
+	signalRest         = signalRest - bookElement['reconstruction']
 	energyExplained    = np.abs(1 - calculateSignalEnergy(signalRest) / signalEnergy)
 
 	print 'Iteration {} done, energy explained: {}.'.format(1 , energyExplained)
@@ -149,7 +152,7 @@ def calculateMP(dictionary , signal , config):
 
 	# next iterations here
 
-	return pd.DataFrame(book) 
+	return pd.DataFrame(book)
 
 
 
@@ -158,4 +161,4 @@ def gradientSearch(amplitude_0 , mi_0 , sigma_0 , signalRest , whereStart , shap
 	return (1,1,1,1,1,1)
 
 def calculateSignalEnergy(signal):
-	return sum( signal * signal.conjugate() )
+	return sum(signal * np.conj(signal)).real
