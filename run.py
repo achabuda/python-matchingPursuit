@@ -29,7 +29,7 @@ from src.processing       import calculateMP
 import matplotlib.pyplot as plt
 import numpy             as np
 
-#from scipy.io import savemat
+# from scipy.io import savemat
 
 
 if __name__ == '__main__':
@@ -37,13 +37,10 @@ if __name__ == '__main__':
 	(gaborParams , sinusParams , noiseRatio, samplingFrequency) = defaultValues()
 	(signal,time) = generateTestSignal(gaborParams,sinusParams,noiseRatio)
 
-	plt.plot(time,signal)
-	plt.show()
-
-	#tmp = {}
-	#tmp['signal'] = signal
-	#tmp['czas']   = time
-	#savemat('syg.mat' , tmp)
+	# tmp = {}
+	# tmp['signal'] = signal
+	# tmp['czas']   = time
+	# savemat('../syg.mat' , tmp)
 
 	# generate dictionary
 	flags = {}
@@ -58,7 +55,7 @@ if __name__ == '__main__':
 	dictionary = generateDictionary(time , config)
 
 	# calculate Matching Pursuit
-	config['maxNumberOfIterations']            = 3
+	config['maxNumberOfIterations']            = 4
 	config['minEnergyExplained']               = 0.99
 	config['samplingFrequency']                = samplingFrequency
 	config['minNFFT']                          = 256 # 2*samplingFrequency
@@ -67,8 +64,27 @@ if __name__ == '__main__':
 	book = calculateMP(dictionary , signal , config) 
 
 	# print book['freq'][0]
-
 	# envelope = dictionary[7]['timeCourse']
-	plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][0][0])
+
+	plt.subplot(5,1,1)
+	plt.plot(time,signal)
+	
+	plt.subplot(5,1,2)
+	plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][0].real)
+
+	plt.subplot(5,1,3)
+	plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][1].real)
+
+	plt.subplot(5,1,4)
+	try:
+		plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][2].real)
+	except KeyError:
+		pass
+
+	plt.subplot(5,1,5)
+	try:
+		plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][3].real)
+	except KeyError:
+		pass
 	plt.show()
 
