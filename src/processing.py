@@ -45,7 +45,6 @@ def calculateMP(dictionary , signal , config):
 	partialResults = []
 	book           = []
 
-	
 	for iteration in np.arange(0 , config['maxNumberOfIterations']):
 		(partialResults , subMaxDOT , subMaxFreq) = recalculateDotProducts(dictionary , partialResults , signalRest , config['minNFFT'] , signalLength , iteration)
 
@@ -69,7 +68,7 @@ def calculateMP(dictionary , signal , config):
 			envelopeBeginIndex = bookElement['time'].values[0]
 			envelopeEndIndex =  bookElement['time'].values[-1]+1	
 		bookElement['envelope'][envelopeBeginIndex:envelopeEndIndex] = partialResults['timeCourse'][whereMax]
-		bookElement['reconstruction'] = np.zeros(signalLength)+0j
+		bookElement['reconstruction'] = np.zeros(signalLength,dtype='complex')
 		bookElement['reconstruction'][envelopeBeginIndex:envelopeEndIndex] = bookElement['amplitude']*partialResults['timeCourse'][whereMax]*np.exp(1j*bookElement['freq']*time)
 
 		# not needed yet:
@@ -178,4 +177,4 @@ def gradientSearch(amplitude_0 , mi_0 , sigma_0 , signalRest , whereStart , shap
 	return (1,1,1,1,1,1)
 
 def calculateSignalEnergy(signal):
-	return sum(signal * np.conj(signal)).real
+	return sum((signal * np.conj(signal)).real)
