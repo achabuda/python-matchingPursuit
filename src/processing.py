@@ -22,10 +22,16 @@ e-mail: tomasz@spustek.pl
 University of Warsaw, July 06, 2015
 '''
 from __future__ import division
+
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+
 from scipy.signal import hilbert
+from scipy.optimize import fmin
+
+import dictionary as dic
+
+import matplotlib.pyplot as plt
 
 
 def calculateMP(dictionary , signal , config):
@@ -59,14 +65,13 @@ def calculateMP(dictionary , signal , config):
 		bookElement['sigma']          = partialResults['sigma'][whereMax]
 		
 		bookElement['envelope']       = np.zeros((signalLength))
-		
 		if isinstance(bookElement['time'], (np.ndarray, np.generic)):
 			envelopeBeginIndex = bookElement['time'][0]
-			envelopeEndIndex =  bookElement['time'][-1]+1
+			envelopeEndIndex   = bookElement['time'][-1]+1
 		else:
 			# in case of older pandas library:
 			envelopeBeginIndex = bookElement['time'].values[0]
-			envelopeEndIndex =  bookElement['time'].values[-1]+1	
+			envelopeEndIndex   = bookElement['time'].values[-1]+1
 		bookElement['envelope'][envelopeBeginIndex:envelopeEndIndex] = partialResults['timeCourse'][whereMax]
 		bookElement['reconstruction'] = np.zeros(signalLength,dtype='complex')
 		bookElement['reconstruction'][envelopeBeginIndex:envelopeEndIndex] = bookElement['amplitude']*partialResults['timeCourse'][whereMax]*np.exp(1j*bookElement['freq']*time)
@@ -75,34 +80,53 @@ def calculateMP(dictionary , signal , config):
 		# PrzedM(1+length(PrzedM))=abs(mmax);
 		# PoM(1+length(PoM))=abs(mmax);
 
+		plt.figure()
+		plt.subplot(2,1,1)
+		plt.plot(bookElement['reconstruction'].real)
 
 		if config['flags']['useGradientOptimization'] == 1:
 			where_mi = partialResults['timeCourse'][whereMax].argmax()
 			mi_0     = partialResults['time'][whereMax][where_mi]
 			sigma_0  = partialResults['sigma'][whereMax]
 
-			(freq,amplitude,envelope,reconstruction,mi,sigma) = gradientSearch(subMaxDOT[whereMax],mi_0,sigma_0,signalRest,partialResults['time'],partialResults['shapeType'][whereMax],subMaxFreq[whereMax],config['flags']['useAsymA'])
+			(freq,amplitude,sigma,envelope,time) = gradientSearch(subMaxDOT[whereMax],mi_0,sigma_0,subMaxFreq[whereMax],signalRest,partialResults['time'][whereMax][0],partialResults['shapeType'][whereMax],config['flags']['useAsymA'])
+
+			envelopeBeginIndex = time[0]
+			envelopeEndIndex   = time[-1]+1
+
+			tmp_envelope = np.zeros(signalLength,dtype='complex')
+			tmp_envelope[envelopeBeginIndex:envelopeEndIndex] = envelope
+			
+			plt.subplot(2,1,2)
+			plt.plot( (amplitude*tmp_envelope*np.exp(1j*freq*time)).real)
+			plt.show()
 
 			if np.abs(amplitude) > np.abs(bookElement['amplitude']):
 				bookElement['amplitude']      = amplitude
 				bookElement['freq']           = freq
-				bookElement['envelope']       = envelope
-				bookElement['reconstruction'] = reconstruction
 				bookElement['sigma']          = sigma
+
+				bookElement['envelope']       = np.zeros((signalLength))
+				bookElement['envelope'][envelopeBeginIndex:envelopeEndIndex] = envelope
+				
+				bookElement['reconstruction'] = np.zeros(signalLength,dtype='complex')
+				bookElement['reconstruction'][envelopeBeginIndex:envelopeEndIndex] = bookElement['amplitude'] * bookElement['envelope'] * np.exp(1j*bookElement['freq']*time)
+
 				# not needed yet:
 				# bookElement['mi']             = mi
 				# PoM(length(PoM))=abs(out_book(ii).amplitude);
 
 		book.append(pd.Series(bookElement))
 
-		minEnergyExplained = config['minEnergyExplained'] - config['density'] * (np.dot(bookElement['reconstruction'] , bookElement['reconstruction']) / np.dot(signalRest , signalRest))
+		minEnergyExplained = config['minEnergyExplained'] - config['density'] * (calculateSignalEnergy(bookElement['reconstruction']) / calculateSignalEnergy(signalRest))
+
 		signalRest         = signalRest - bookElement['reconstruction']
 		energyExplained    = np.abs(1 - calculateSignalEnergy(signalRest) / signalEnergy)
 
 		print 'Iteration {} done, energy explained: {}.'.format(iteration , energyExplained)
 
 		if energyExplained > minEnergyExplained:
-			return pd.DataFrame(book) 
+			return pd.DataFrame(book)
 
 	return pd.DataFrame(book)
 
@@ -172,9 +196,49 @@ def recalculateDotProducts(dictionary , partialResults , signalRest , minNFFT , 
 	return (partialResults , subMaxDOT , subMaxFreq)
 
 
-def gradientSearch(amplitude_0 , mi_0 , sigma_0 , signalRest , whereStart , shapeType , freq , asym):
-	# gradient optimization here
-	return (1,1,1,1,1,1)
-
 def calculateSignalEnergy(signal):
 	return sum((signal * np.conj(signal)).real)
+
+
+def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , signal , whereStart , shapeType , asym):
+	epsilon = 1e-4
+	time        = np.arange(0 , signal.shape[0])
+	timeShifted = time - whereStart
+
+	if shapeType == 1:
+		# case of standard gauss envelopes
+
+		sigma           = fmin(func=dic.minEnvGauss , x0=sigmaStart , args=(time,signal*np.exp(-1j*freqStart*timeShifted),shapeType))[0]
+		envelope        = dic.gaussEnvelope(sigma,time,shapeType,0)[0]
+		amplitude       = sum(signal * envelope * np.exp(-1j*freqStart*timeShifted))
+		# reconstruction  = amplitude * envelope * np.exp(1j*freqStart*timeShifted)
+		freq            = fmin(func=dic.bestFreq , x0=freqStart , args=(signal*envelope,timeShifted))[0]
+		amplitudeTmp    = sum(signal * envelope * np.exp(-1j*freq*timeShifted))
+
+		if np.abs(amplitude) < np.abs(amplitudeTmp):
+			amplitude      = amplitudeTmp
+			# reconstruction = amplitude * envelope * np.exp(-1j*freq*timeShifted)
+		else:
+			print 'returning before while loop'
+			return (freqStart,amplitude,sigma,envelope,time)
+
+		amplitudeActual = np.abs(amplitudeStart)
+		while ((np.abs(amplitude) - amplitudeActual)/amplitudeActual > epsilon):
+			amplitudeActual = np.abs(amplitude)
+			sigma           = fmin(func=dic.minEnvGauss , x0=sigmaStart , args=(time,signal*np.exp(-1j*freq*timeShifted),shapeType))[0]
+			envelope        = dic.gaussEnvelope(sigma,time,shapeType,0)[0]
+			amplitude       = sum(signal * envelope * np.exp(-1j*freq*timeShifted))
+			# reconstruction  = amplitude * envelope * np.exp(1j*freq*timeShifted)
+			newFreq         = fmin(func=dic.bestFreq , x0=freq , args=(signal*envelope,timeShifted))[0]
+			amplitudeTmp    = sum(signal * envelope * np.exp(-1j*newFreq*timeShifted))
+
+			if np.abs(amplitude) < np.abs(amplitudeTmp):
+				freq           = newFreq
+				amplitude      = amplitudeTmp
+				# reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
+			else:
+				print 'returning within while loop'
+				return (freq,amplitude,sigma,envelope,time)
+
+	print 'returning after while loop'
+	return (freq,amplitude,sigma,envelope,time)

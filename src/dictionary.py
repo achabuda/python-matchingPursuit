@@ -51,6 +51,7 @@ def appendToDictionary(dictionary , density , envelope , srodek , sigma , shapeT
 	dictionaryElement['timeCourse'] = envelope
 	dictionaryElement['step']       = np.array([minPosEnerg(envelope , density) , 1]).max()
 	dictionaryElement['sigma']      = sigma
+	# decay parameter as well
 	dictionaryElement['srodek']     = int(srodek)
 	dictionaryElement['shapeType']  = shapeType
 
@@ -173,3 +174,10 @@ def minPosEnerg(testEnvelope , density):
 	xcorr  = np.abs(1 - density - np.correlate(testEnvelope , testEnvelope , 'full'))
 	where  = xcorr.argmin()
 	return np.abs(testEnvelope.size - where -1)
+
+def minEnvGauss(sigma,time,signal,shapeType):
+	envelope = gaussEnvelope(sigma,time,shapeType,0)[0]
+	return -1*np.abs(sum(signal * envelope))
+
+def bestFreq(freq , signal , time):
+	return -1*np.abs(sum(signal * np.exp(-1j*freq*time)))

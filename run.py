@@ -59,7 +59,7 @@ if __name__ == '__main__':
 	config['minEnergyExplained']               = 0.99
 	config['samplingFrequency']                = samplingFrequency
 	config['minNFFT']                          = 256 # 2*samplingFrequency
-	config['flags']['useGradientOptimization'] = 0
+	config['flags']['useGradientOptimization'] = 1
 
 	book = calculateMP(dictionary , signal , config) 
 
