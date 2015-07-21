@@ -55,7 +55,7 @@ if __name__ == '__main__':
 	dictionary = generateDictionary(time , config)
 
 	# calculate Matching Pursuit
-	config['maxNumberOfIterations']            = 4
+	config['maxNumberOfIterations']            = 3
 	config['minEnergyExplained']               = 0.99
 	config['samplingFrequency']                = samplingFrequency
 	config['minNFFT']                          = 256 # 2*samplingFrequency
@@ -63,11 +63,11 @@ if __name__ == '__main__':
 
 	book = calculateMP(dictionary , signal , config) 
 
-	# print book['freq'][0]
-	# envelope = dictionary[7]['timeCourse']
+	#print book['freq'][0]
+	#envelope = dictionary[7]['timeCourse']
 
 	plt.subplot(5,1,1)
-	plt.plot(time,signal)
+	plt.plot(np.arange(0,4,1/250.),signal)
 	
 	plt.subplot(5,1,2)
 	plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][0].real)

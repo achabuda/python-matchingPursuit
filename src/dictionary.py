@@ -25,6 +25,7 @@ from __future__ import division
 from scipy.optimize import fmin
 import numpy  as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 def generateDictionary(time , config):
 	'''
@@ -117,15 +118,20 @@ def generateBasicStructures(time , config):
 		sigmaActual = sigmaActual * sigmaParity
 	return dictionary
 
-def gaussEnvelope(sigma , time , shapeType=1 , cutOutput=1):
+def gaussEnvelope(sigma , time , shapeType=1 , cutOutput=1 , *argv):
 	'''
 	shapeType:int
 	1 - standard gaussian shape
 	2 - flatten on top
 	'''
+	if len(argv) == 0:
+		mi = time[-1]/2
+	else:
+		mi = argv[0]
+	
+	x  = (time - mi) / (sigma)
+
 	eps = 1e-4
-	mi  = time[-1]/2
-	x   = (mi - time) / sigma
 
 	if shapeType == 1:
 		y = np.exp(-1 * x**2 /2)
@@ -175,9 +181,19 @@ def minPosEnerg(testEnvelope , density):
 	where  = xcorr.argmin()
 	return np.abs(testEnvelope.size - where -1)
 
-def minEnvGauss(sigma,time,signal,shapeType):
-	envelope = gaussEnvelope(sigma,time,shapeType,0)[0]
-	return -1*np.abs(sum(signal * envelope))
+def minEnvGauss(x,time,timeShifted,signal,freq,shapeType):
+	sigma     = x[0]
+	mi        = x[1]
+	#print (sigma,mi)
+	cutOutput = 0
+	envelope  = gaussEnvelope(sigma,time,shapeType,cutOutput,mi)[0]
 
+	#plt.figure()
+	#plt.plot(envelope*np.exp(-1j*freq*time),'b')
+	#plt.plot(signal,'r')
+	#plt.show()
+
+	return -1 * np.abs(np.dot(signal , envelope * np.exp(-1j*freq*timeShifted)))
+	
 def bestFreq(freq , signal , time):
-	return -1*np.abs(sum(signal * np.exp(-1j*freq*time)))
+	return -1 * np.abs(sum(signal * np.exp(-1j*freq*time)))
