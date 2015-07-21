@@ -67,7 +67,7 @@ def generateRectangularEnvelopes(dictionary , time , config):
 
 	sigmaStart = (minS + maxS)/2
 	gc          = gaussEnvelope(sigmaStart , time , 2 , 0)[0]
-	sigmaStop  = fmin(func=minSigEnerg , x0=sigmaStart, args=(gc,density,time,2))[0]
+	sigmaStop  = fmin(func=minSigEnerg , x0=sigmaStart, args=(gc,density,time,2) , disp=0)[0]
 
 	sigmaActual = minS
 	sigmaParity = sigmaStop / sigmaStart
@@ -92,7 +92,7 @@ def generateBasicStructures(time , config):
 
 	sigmaStart = (minS + maxS)/2
 	gc         = gaussEnvelope(sigmaStart , time , 1 , 0)[0]
-	sigmaStop  = fmin(func=minSigEnerg , x0=sigmaStart, args=(gc,density,time,1))[0]
+	sigmaStop  = fmin(func=minSigEnerg , x0=sigmaStart, args=(gc,density,time,1) , disp=0)[0]
 
 	sigmaActual = minS
 	sigmaParity = sigmaStop / sigmaStart
