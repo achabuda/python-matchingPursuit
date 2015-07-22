@@ -81,7 +81,7 @@ def calculateMP(dictionary , signal , config):
 		# PoM(1+length(PoM))=abs(mmax);
 
 		plt.figure()
-		plt.subplot(3,1,1)
+		plt.subplot(2,1,1)
 		plt.plot(bookElement['reconstruction'].real)
 
 		if config['flags']['useGradientOptimization'] == 1:
@@ -98,7 +98,7 @@ def calculateMP(dictionary , signal , config):
 			# tmp_envelope = np.zeros(signalLength,dtype='complex')
 			# tmp_envelope[envelopeBeginIndex:envelopeEndIndex] = envelope
 			
-			plt.subplot(3,1,2)
+			plt.subplot(2,1,2)
 			plt.plot( reconstruction.real)
 			plt.show()
 
@@ -110,10 +110,6 @@ def calculateMP(dictionary , signal , config):
 				bookElement['sigma']          = sigma
 				bookElement['envelope']       = envelope
 				bookElement['reconstruction'] = reconstruction
-
-				plt.subplot(3,1,3)
-				plt.plot(bookElement['reconstruction'].real)
-				plt.show()
 
 				# not needed yet:
 				# bookElement['mi']             = mi
@@ -130,8 +126,8 @@ def calculateMP(dictionary , signal , config):
 		plt.plot(signalRest.real)
 
 		plt.subplot(3,1,2)
-		plt.plot(signalRest.real,'r')
-		plt.plot(bookElement['reconstruction'].real,'b')
+		plt.plot(signalRest.real,'b')
+		plt.plot(bookElement['reconstruction'].real,'r')
 
 		signalRest = signalRest - bookElement['reconstruction']
 
@@ -159,7 +155,7 @@ def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , signal , 
 		# case of standard gauss envelopes
 		#print 'sigmaStart={}'.format(sigmaStart)
 		#print 'miStart={}'.format(miStart)
-		output = fmin(func=dic.minEnvGauss , x0=np.array([sigmaStart,miStart]) , args=(time,timeShifted,signal,freqStart,shapeType) , disp=0, xtol=epsilon, ftol=epsilon)
+		output = fmin(func=dic.minEnvGauss , x0=np.array([sigmaStart,miStart]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),freqStart,shapeType) , disp=0, xtol=epsilon, ftol=epsilon)
 		sigma  = output[0]
 		mi     = output[1]
 		#print 'mi={}'.format(mi)
@@ -187,7 +183,7 @@ def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , signal , 
 		 	amplitudeActual = np.abs(amplitude)
 		 	#print 'sigmaBefore={}'.format(sigma)
 		 	#print 'miBefore={}'.format(mi)
-		 	output = fmin(func=dic.minEnvGauss , x0=np.array([sigmaStart,miStart]) , args=(time,timeShifted,signal,freq,shapeType) ,disp=0,xtol=epsilon,ftol=epsilon)
+		 	output = fmin(func=dic.minEnvGauss , x0=np.array([sigmaStart,miStart]) , args=(time,signal*np.exp(-1j*freq*timeShifted),freq,shapeType) ,disp=0,xtol=epsilon,ftol=epsilon)
 		 	sigma  = output[0]
 		 	mi     = output[1]
 		 	#print 'sigmaAfter={}'.format(sigma)
@@ -205,7 +201,7 @@ def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , signal , 
 		 		amplitude      = amplitudeTmp
 		 		reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		 	else:
-		 		print 'returning within while loop'
+		 		#print 'returning within while loop'
 		 		return (freq,amplitude,sigma,envelope,reconstruction)
 
 	print 'returning after while loop'

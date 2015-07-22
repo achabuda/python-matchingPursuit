@@ -181,19 +181,15 @@ def minPosEnerg(testEnvelope , density):
 	where  = xcorr.argmin()
 	return np.abs(testEnvelope.size - where -1)
 
-def minEnvGauss(x,time,timeShifted,signal,freq,shapeType):
-	sigma     = x[0]
-	mi        = x[1]
-	#print (sigma,mi)
-	cutOutput = 0
-	envelope  = gaussEnvelope(sigma,time,shapeType,cutOutput,mi)[0]
+def minEnvGauss(x,time,signal,freq,shapeType):
+	envelope  = gaussEnvelope(x[0],time,shapeType,0,x[1])[0]
 
 	#plt.figure()
 	#plt.plot(envelope*np.exp(-1j*freq*time),'b')
 	#plt.plot(signal,'r')
 	#plt.show()
 
-	return -1 * np.abs(np.dot(signal , envelope * np.exp(-1j*freq*timeShifted)))
+	return -1 * np.abs(np.dot(signal , envelope))
 	
 def bestFreq(freq , signal , time):
-	return -1 * np.abs(sum(signal * np.exp(-1j*freq*time)))
+	return -1 * np.abs(np.dot(signal , np.exp(-1j*freq*time)))
