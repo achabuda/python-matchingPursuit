@@ -23,7 +23,7 @@ University of Warsaw, July 06, 2015
 '''
 
 from src.dictionary       import generateDictionary
-from data.signalGenerator import generateTestSignal , defaultValues
+from data.signalGenerator import generateTestSignal , defaultValues , advancedValues
 from src.processing       import calculateMP
 
 import matplotlib.pyplot as plt
@@ -34,17 +34,27 @@ import numpy             as np
 
 if __name__ == '__main__':
 	# create a synthetic signal
-	(gaborParams , sinusParams , noiseRatio, samplingFrequency) = defaultValues()
-	(signal,time) = generateTestSignal(gaborParams,sinusParams,noiseRatio)
+	# (gaborParams , sinusParams , asymetricParams , noiseRatio , samplingFrequency , numberOfSamples) = defaultValues()
+	# (signal1,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,numberOfSamples,samplingFrequency,noiseRatio)
+
+	(gaborParams , sinusParams , asymetricParams , noiseRatio , samplingFrequency , numberOfSamples) = advancedValues()
+	(signal,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,numberOfSamples,samplingFrequency,noiseRatio)
+
+	# plt.figure()
+	# plt.subplot(2,1,1)
+	# plt.plot(time,signal1)
+	# plt.subplot(2,1,2)
+	# plt.plot(time,signal2)
+	# plt.show()
 
 	# tmp = {}
-	# tmp['signal'] = signal
+	# tmp['signal'] = signal2
 	# tmp['czas']   = time
-	# savemat('../syg.mat' , tmp)
+	# savemat('../syg_advanced.mat' , tmp)
 
 	# generate dictionary
 	flags = {}
-	flags['useAsymA'] = 0
+	flags['useAsymA'] = 1
 	flags['useRectA'] = 0
 	config = {}
 	config['flags']   = flags
@@ -54,37 +64,36 @@ if __name__ == '__main__':
 
 	dictionary = generateDictionary(time , config)
 
+	print dictionary.shape
+
 	# calculate Matching Pursuit
 	config['maxNumberOfIterations']            = 3
 	config['minEnergyExplained']               = 0.99
 	config['samplingFrequency']                = samplingFrequency
 	config['minNFFT']                          = 256 # 2*samplingFrequency
-	config['flags']['useGradientOptimization'] = 1
+	config['flags']['useGradientOptimization'] = 0
 
-	book = calculateMP(dictionary , signal , config) 
+	# book = calculateMP(dictionary , signal , config) 
 
-	#print book['freq'][0]
-	#envelope = dictionary[7]['timeCourse']
-
-	plt.subplot(5,1,1)
-	plt.plot(np.arange(0,4,1/250.),signal)
+	# plt.subplot(5,1,1)
+	# plt.plot(np.arange(0,4,1/250.),signal)
 	
-	plt.subplot(5,1,2)
-	plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][0].real)
+	# plt.subplot(5,1,2)
+	# plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][0].real)
 
-	plt.subplot(5,1,3)
-	plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][1].real)
+	# plt.subplot(5,1,3)
+	# plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][1].real)
 
-	plt.subplot(5,1,4)
-	try:
-		plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][2].real)
-	except KeyError:
-		pass
+	# plt.subplot(5,1,4)
+	# try:
+	# 	plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][2].real)
+	# except KeyError:
+	# 	pass
 
-	plt.subplot(5,1,5)
-	try:
-		plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][3].real)
-	except KeyError:
-		pass
-	plt.show()
+	# plt.subplot(5,1,5)
+	# try:
+	# 	plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][3].real)
+	# except KeyError:
+	# 	pass
+	# plt.show()
 

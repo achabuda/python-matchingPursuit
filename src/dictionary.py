@@ -124,7 +124,7 @@ def gaussEnvelope(sigma , time , shapeType=1 , cutOutput=1 , *argv):
 	1 - standard gaussian shape
 	2 - flatten on top
 	'''
-	if len(argv) == 0:
+	if len(argv) == 0 or len(argv)>1:
 		mi = time[-1]/2
 	else:
 		mi = argv[0]
@@ -183,12 +183,6 @@ def minPosEnerg(testEnvelope , density):
 
 def minEnvGauss(x,time,signal,freq,shapeType):
 	envelope  = gaussEnvelope(x[0],time,shapeType,0,x[1])[0]
-
-	#plt.figure()
-	#plt.plot(envelope*np.exp(-1j*freq*time),'b')
-	#plt.plot(signal,'r')
-	#plt.show()
-
 	return -1 * np.abs(np.dot(signal , envelope))
 	
 def bestFreq(freq , signal , time):
