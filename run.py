@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
 	dictionary = generateDictionary(time , config)
 
-	print dictionary.shape
+	# print dictionary['shapeType']
 
 	# calculate Matching Pursuit
 	config['maxNumberOfIterations']            = 3
@@ -73,27 +73,31 @@ if __name__ == '__main__':
 	config['minNFFT']                          = 256 # 2*samplingFrequency
 	config['flags']['useGradientOptimization'] = 0
 
-	# book = calculateMP(dictionary , signal , config) 
+	book = calculateMP(dictionary , signal , config) 
 
-	# plt.subplot(5,1,1)
-	# plt.plot(np.arange(0,4,1/250.),signal)
+	print book['shapeType']
+
+	plt.figure()
+	plt.subplot(4,1,1)
+	plt.plot(np.arange(0,4,1/250.),signal)
 	
-	# plt.subplot(5,1,2)
-	# plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][0].real)
+	plt.subplot(4,1,2)
+	plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][0].real)
 
-	# plt.subplot(5,1,3)
-	# plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][1].real)
+	plt.subplot(4,1,3)
+	plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][1].real)
 
-	# plt.subplot(5,1,4)
-	# try:
-	# 	plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][2].real)
-	# except KeyError:
-	# 	pass
+	plt.subplot(4,1,4)
+	try:
+		plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][2].real)
+	except KeyError:
+		pass
 
 	# plt.subplot(5,1,5)
 	# try:
 	# 	plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][3].real)
 	# except KeyError:
 	# 	pass
-	# plt.show()
+	
+	plt.show()
 
