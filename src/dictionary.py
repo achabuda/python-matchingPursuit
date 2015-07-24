@@ -163,16 +163,28 @@ def gaussEnvelope(sigma , time , shapeType=1 , cutOutput=1 , *argv):
 def asymetricEnvelope(increase , decay , mi , time , shapeType=1 , cutOutput=1):
 	'''
 	shapeType:int
-	1 - envelope of type asymA
+	1 - envelope of type asymA (power of 2 for increasing slope)
+	2 - envelope of type asymB (power of 4 for increasing slope)
+	3 - envelope of type asymC (power of 8 for increasing slope)
+	4 - envelope of type asymD (power of 8 for increasing slope and 5 for decaying slope)
+	asymB and asymC are not present in the base dictionary, but
+	they are available due to a gradient optimisation procedure
 
 	cutOutput:int
 	0 - return raw envelope, ie. size of the signal
 	1 - cut based on eps
 	'''
 	eps = 1e-4
+	tmp = time - mi
 	if shapeType == 1:
-		tmp = time - mi
 		y = np.exp(-increase*(tmp**2) / (1 + decay * tmp * (np.arctan(1e16*tmp)+np.pi/2)/np.pi))
+	elif shapeType == 2:
+		y = np.exp(-increase*(tmp**4) / (1 + decay * tmp * (np.arctan(1e16*tmp)+np.pi/2)/np.pi))
+	elif shapeType == 3:
+		y = np.exp(-increase*(tmp**8) / (1 + decay * tmp * (np.arctan(1e16*tmp)+np.pi/2)/np.pi))
+	elif shapeType == 4:
+		y = np.exp(-increase*(tmp**8) / (1 + decay * (tmp**5) * (np.arctan(1e16*tmp)+np.pi/2)/np.pi))
+
 	ind        = np.where(y>eps)[0]
 	whereFrom  = ind[0]
 	whereTo    = ind[-1]
@@ -196,8 +208,8 @@ def minEnvGauss(x,time,signal,freq,shapeType):
 	envelope  = gaussEnvelope(x[0],time,shapeType,0,x[1])[0]
 	return -1 * np.abs(np.dot(signal , envelope))
 
-def minEnvAsymetric(x,time,signal,freq):
-	envelope  = asymetricEnvelope(x[0],x[1],x[2],time,1,0)[0]
+def minEnvAsymetric(x,time,signal,freq,shapeType):
+	envelope  = asymetricEnvelope(x[0],x[1],x[2],time,shapeType,0)[0]
 	return -1 * np.abs(np.dot(signal , envelope))
 	
 def bestFreq(freq , signal , time):
