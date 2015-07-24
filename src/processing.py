@@ -90,7 +90,7 @@ def calculateMP(dictionary , signal , config):
 
 			whereStart = partialResults['time'][whereMax][0]
 
-			(freq,amplitude,sigma,envelope,reconstruction) = gradientSearch(subMaxDOT[whereMax],mi_0,sigma_0,subMaxFreq[whereMax],increase_0,decay_0,signalRest,whereStart,partialResults['shapeType'][whereMax])
+			(freq,amplitude,sigma,envelope,reconstruction) = gradientSearch(subMaxDOT[whereMax],mi_0,sigma_0,subMaxFreq[whereMax],increase_0,decay_0,signalRest,whereStart,partialResults['shapeType'][whereMax],config['flags']['useAsymA'])
 
 			if np.abs(amplitude) > np.abs(bookElement['amplitude']):
 				bookElement['amplitude']      = amplitude
@@ -117,7 +117,7 @@ def calculateMP(dictionary , signal , config):
 	return pd.DataFrame(book)
 
 
-def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , increaseStart , decayStart , signal , whereStart , shapeType):
+def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , increaseStart , decayStart , signal , whereStart , shapeType , forceAsymetry=1):
 	epsilon     = 1e-3
 	time        = np.arange(0 , signal.shape[0])
 	timeShifted = time - whereStart
@@ -133,15 +133,17 @@ def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , increaseS
 		envelopeGauss       = dic.gaussEnvelope(sigma,time,shapeType,cutOutput,mi)[0]
 		amplitudeGauss      = np.dot(signal , envelopeGauss*np.exp(-1j*freqStart*timeShifted))
 
-		output   = fmin(func=dic.minEnvAsymetric , x0=np.array([increaseStart,decayStart,miStart]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),freqStart) , disp=0 , xtol=epsilon , ftol=epsilon)
-		increase = output[0]
-		decay    = output[1]
-		mi       = output[2]
+		if forceAsymetry == 1:
+			output   = fmin(func=dic.minEnvAsymetric , x0=np.array([increaseStart,decayStart,miStart]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),freqStart) , disp=0 , xtol=epsilon , ftol=epsilon)
+			increase = output[0]
+			decay    = output[1]
+			mi       = output[2]
 
-		envelopeAsym  = dic.asymetricEnvelope(increase , decay , mi , time , 1 , cutOutput)[0]
-		amplitudeAsym = np.dot(signal , envelopeAsym*np.exp(-1j*freqStart*timeShifted))
-
-		print 'Asym={}, Gauss={}'.format(amplitudeAsym,amplitudeGauss)
+			envelopeAsym  = dic.asymetricEnvelope(increase , decay , mi , time , 1 , cutOutput)[0]
+			amplitudeAsym = np.dot(signal , envelopeAsym*np.exp(-1j*freqStart*timeShifted))
+			#print 'Asym={}, Gauss={}'.format(amplitudeAsym,amplitudeGauss)
+		else:
+			amplitudeAsym = 0
 
 		if np.abs(amplitudeAsym) > np.abs(amplitudeGauss):
 			amplitude     = amplitudeAsym

@@ -67,15 +67,13 @@ if __name__ == '__main__':
 	# print dictionary['shapeType']
 
 	# calculate Matching Pursuit
-	config['maxNumberOfIterations']            = 1
+	config['maxNumberOfIterations']            = 3
 	config['minEnergyExplained']               = 0.99
 	config['samplingFrequency']                = samplingFrequency
 	config['minNFFT']                          = 256 # 2*samplingFrequency
 	config['flags']['useGradientOptimization'] = 1
 
 	book = calculateMP(dictionary , signal , config) 
-
-	print book['shapeType']
 
 	plt.figure()
 	plt.subplot(4,1,1)
