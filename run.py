@@ -29,7 +29,7 @@ from src.processing       import calculateMP
 import matplotlib.pyplot as plt
 import numpy             as np
 
-# from scipy.io import savemat
+#from scipy.io import savemat
 
 
 if __name__ == '__main__':
@@ -47,10 +47,10 @@ if __name__ == '__main__':
 	# plt.plot(time,signal2)
 	# plt.show()
 
-	# tmp = {}
-	# tmp['signal'] = signal2
-	# tmp['czas']   = time
-	# savemat('../syg_advanced.mat' , tmp)
+	#tmp = {}
+	#tmp['signal'] = signal
+	#tmp['czas']   = time
+	#savemat('../syg_asym.mat' , tmp)
 
 	# generate dictionary
 	flags = {}
@@ -67,11 +67,11 @@ if __name__ == '__main__':
 	# print dictionary['shapeType']
 
 	# calculate Matching Pursuit
-	config['maxNumberOfIterations']            = 3
+	config['maxNumberOfIterations']            = 1
 	config['minEnergyExplained']               = 0.99
 	config['samplingFrequency']                = samplingFrequency
 	config['minNFFT']                          = 256 # 2*samplingFrequency
-	config['flags']['useGradientOptimization'] = 0
+	config['flags']['useGradientOptimization'] = 1
 
 	book = calculateMP(dictionary , signal , config) 
 
@@ -85,7 +85,10 @@ if __name__ == '__main__':
 	plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][0].real)
 
 	plt.subplot(4,1,3)
-	plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][1].real)
+	try:
+		plt.plot(np.arange(0,4,1/250.) , book['reconstruction'][1].real)
+	except KeyError:
+		pass
 
 	plt.subplot(4,1,4)
 	try:

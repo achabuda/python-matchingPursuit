@@ -124,8 +124,10 @@ def advancedValues():
 	sigma           = 500
 	asymetry        = 0.45
 
-	asymetricParams = np.array([[amplitude1,freq1,pos1,sigma,asymetry],[amplitude2,freq2,pos2,sigma,asymetry]])
-	sinusParams     = np.array([[2.0,5.0,0.0]])
+	#asymetricParams = np.array([[amplitude1,freq1,pos1,sigma,asymetry],[amplitude2,freq2,pos2,sigma,asymetry]])
+	asymetricParams = np.array([[amplitude1,freq1,pos1,sigma,asymetry]])
+	#sinusParams     = np.array([[2.0,5.0,0.0]])
+	sinusParams = None
 	noiseRatio      = 0.0
 	return(None , sinusParams , asymetricParams , noiseRatio , samplingFreq , numberOfSamples)
 

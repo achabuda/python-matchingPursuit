@@ -85,9 +85,12 @@ def calculateMP(dictionary , signal , config):
 			where_mi   = partialResults['timeCourse'][whereMax].argmax()
 			mi_0       = partialResults['time'][whereMax][where_mi]
 			sigma_0    = partialResults['sigma'][whereMax]
+			increase_0 = partialResults['increase'][whereMax]
+			decay_0    = partialResults['decay'][whereMax]
+
 			whereStart = partialResults['time'][whereMax][0]
 
-			(freq,amplitude,sigma,envelope,reconstruction) = gradientSearch(subMaxDOT[whereMax],mi_0,sigma_0,subMaxFreq[whereMax],signalRest,whereStart,partialResults['shapeType'][whereMax])
+			(freq,amplitude,sigma,envelope,reconstruction) = gradientSearch(subMaxDOT[whereMax],mi_0,sigma_0,subMaxFreq[whereMax],increase_0,decay_0,signalRest,whereStart,partialResults['shapeType'][whereMax])
 
 			if np.abs(amplitude) > np.abs(bookElement['amplitude']):
 				bookElement['amplitude']      = amplitude
@@ -114,7 +117,7 @@ def calculateMP(dictionary , signal , config):
 	return pd.DataFrame(book)
 
 
-def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , signal , whereStart , shapeType):
+def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , increaseStart , decayStart , signal , whereStart , shapeType):
 	epsilon     = 1e-3
 	time        = np.arange(0 , signal.shape[0])
 	timeShifted = time - whereStart
@@ -123,12 +126,32 @@ def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , signal , 
 	if shapeType == 1:
 		# case of standard gauss envelopes
 
-		output = fmin(func=dic.minEnvGauss , x0=np.array([sigmaStart,miStart]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),freqStart,shapeType) , disp=0, xtol=epsilon, ftol=epsilon)
+		output = fmin(func=dic.minEnvGauss , x0=np.array([sigmaStart,miStart]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),freqStart,shapeType) , disp=0 , xtol=epsilon , ftol=epsilon)
 		sigma  = output[0]
 		mi     = output[1]
 		
-		envelope        = dic.gaussEnvelope(sigma,time,shapeType,cutOutput,mi)[0]
-		amplitude       = np.dot(signal , envelope*np.exp(-1j*freqStart*timeShifted))
+		envelopeGauss       = dic.gaussEnvelope(sigma,time,shapeType,cutOutput,mi)[0]
+		amplitudeGauss      = np.dot(signal , envelopeGauss*np.exp(-1j*freqStart*timeShifted))
+
+		output   = fmin(func=dic.minEnvAsymetric , x0=np.array([increaseStart,decayStart,miStart]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),freqStart) , disp=0 , xtol=epsilon , ftol=epsilon)
+		increase = output[0]
+		decay    = output[1]
+		mi       = output[2]
+
+		envelopeAsym  = dic.asymetricEnvelope(increase , decay , mi , time , 1 , cutOutput)[0]
+		amplitudeAsym = np.dot(signal , envelopeAsym*np.exp(-1j*freqStart*timeShifted))
+
+		print 'Asym={}, Gauss={}'.format(amplitudeAsym,amplitudeGauss)
+
+		if np.abs(amplitudeAsym) > np.abs(amplitudeGauss):
+			amplitude     = amplitudeAsym
+			envelope      = envelopeAsym
+			func2optimize = 1
+		else:
+			amplitude     = amplitudeGauss
+			envelope      = envelopeGauss
+			func2optimize  = 0
+
 		reconstruction  = amplitude * envelope * np.exp(1j*freqStart*timeShifted)
 
 		freq            = fmin(func=dic.bestFreq , x0=freqStart , args=(signal*envelope,timeShifted) ,disp=0,xtol=epsilon,ftol=epsilon)[0]
@@ -147,12 +170,19 @@ def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , signal , 
 
 		 	amplitudeActual = np.abs(amplitude)
 
-		 	output = fmin(func=dic.minEnvGauss , x0=np.array([sigmaStart,miStart]) , args=(time,signal*np.exp(-1j*freq*timeShifted),freq,shapeType) ,disp=0,xtol=epsilon,ftol=epsilon)
-		 	sigma  = output[0]
-		 	mi     = output[1]
+		 	if func2optimize == 0:
+		 		output   = fmin(func=dic.minEnvGauss , x0=np.array([sigmaStart,miStart]) , args=(time,signal*np.exp(-1j*freq*timeShifted),freq,shapeType) ,disp=0,xtol=epsilon,ftol=epsilon)
+		 		sigma    = output[0]
+		 		mi       = output[1]
+		 		envelope = dic.gaussEnvelope(sigma,time,shapeType,cutOutput,mi)[0]
+		 	else:
+		 		output   = fmin(func=dic.minEnvAsymetric , x0=np.array([increase,decay,miStart]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),freqStart) , disp=0 , xtol=epsilon , ftol=epsilon)
+				increase = output[0]
+				decay    = output[1]
+				mi       = output[2]
+				envelope = dic.asymetricEnvelope(increase,decay,mi,time,1,cutOutput)[0]
 
-		 	envelope        = dic.gaussEnvelope(sigma,time,shapeType,cutOutput,mi)[0]
-		 	amplitude       = np.dot(signal , envelope*np.exp(-1j*freq*timeShifted))
+			amplitude       = np.dot(signal , envelope*np.exp(-1j*freq*timeShifted))
 		 	reconstruction  = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		 	newFreq         = fmin(func=dic.bestFreq , x0=freq , args=(signal*envelope,timeShifted) ,disp=0,xtol=epsilon,ftol=epsilon)[0]
 		 	amplitudeTmp    = np.dot(signal , envelope*np.exp(-1j*newFreq*timeShifted))
@@ -166,6 +196,21 @@ def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , signal , 
 		 		return (freq,amplitude,sigma,envelope,reconstruction)
 
 	# print 'returning after while loop'
+
+	else:
+		timeShifted    = time - whereStart
+		freq           = freqStart
+		amplitude      = amplitudeStart
+		sigma          = sigmaStart
+
+		if shapeType == 2:
+			envelope = dic.gaussEnvelope(sigma,time,shapeType,0,miStart)[0]
+		elif shapeType == 3:
+			increase = 0.5 / (sigma**2)
+			decay    = 1.5 / sigma
+			envelope = dic.asymetricEnvelope(increase , decay , miStart , time , 1 , 0)[0]
+		reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
+
 	return (freq,amplitude,sigma,envelope,reconstruction)
 
 
@@ -176,30 +221,27 @@ def recalculateDotProducts(dictionary , partialResults , signalRest , minNFFT , 
 	'''
 	subMaxDOT     = []
 	subMaxFreq    = []
-	innerIterator = 0
+	if iteration > 0:
+		innerIterator = 0
+
+	#dupa = 0
 
 	for index, atom in dictionary.iterrows():
 		tmpEnergyStep = atom['step']
 		tmpTimeCourse = atom['timeCourse']
-		tmpSrodek     = atom['srodek']
+		tmpMi         = atom['mi']
 		tmpSigma      = atom['sigma']
 
 		for ind1 in np.arange(0, signalLength+tmpEnergyStep , tmpEnergyStep):
-			# This could be optimised:
-			tmpWhereStart = tmpSrodek - ind1
-			if tmpWhereStart < 0:
-				tmpWhereStart = 0
-			tmpWhereStop  = tmpTimeCourse.shape[0]
-			if tmpWhereStop > tmpSrodek + signalLength - ind1:
-				tmpWhereStop = tmpSrodek + signalLength - ind1
-			##########################
+
+			#dupa += 1
+
+			tmpWhereStart = np.array([tmpMi-ind1 , 0]).max()
+			tmpWhereStop  = np.array([tmpTimeCourse.shape[0] , tmpMi + signalLength - ind1]).min()
+
 			envelopeRange2go = np.arange(tmpWhereStart , tmpWhereStop)
-			
-			# This could be optimised:
-			tmp1 = ind1 - tmpSrodek
-			if tmp1 < 0:
-				tmp1 = 0
-			##########################
+
+			tmp1 = np.array([ind1-tmpMi , 0]).max()
 			tmp2 = tmp1 + (tmpWhereStop - tmpWhereStart)
 			tmp_ind = np.arange(tmp1,tmp2)
 
@@ -211,6 +253,8 @@ def recalculateDotProducts(dictionary , partialResults , signalRest , minNFFT , 
 				partialResultsElement['timeCourse'] = tmpTimeCourse[envelopeRange2go] / np.linalg.norm(tmpTimeCourse[envelopeRange2go])
 				partialResultsElement['time']       = tmp_ind
 				partialResultsElement['sigma']      = atom['sigma']
+				partialResultsElement['increase']   = atom['increase']
+				partialResultsElement['decay']      = atom['decay']
 				partialResultsElement['shapeType']  = atom['shapeType']
 				partialResults.append(pd.Series(partialResultsElement))
 				signal2fft     = signalRest[tmp_ind] * partialResultsElement['timeCourse']
@@ -222,6 +266,14 @@ def recalculateDotProducts(dictionary , partialResults , signalRest , minNFFT , 
 			freqencies = np.arange(0 , nfft/2.)/nfft
 			DOT        = np.fft.fft(signal2fft , nfft)
 			ind        = np.abs(DOT[0:freqencies.shape[0]]).argmax()
+
+			#if dupa == 263:
+			#	print '#########'
+			#	print tmpTimeCourse[envelopeRange2go][0:10]
+			#	print '#########'
+				#plt.figure()
+				#plt.plot(signal2fft.real)
+				#plt.show()
 
 			subMaxDOT.append(DOT[ind])
 			subMaxFreq.append(2*np.pi*freqencies[ind])
