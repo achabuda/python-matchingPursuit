@@ -105,6 +105,13 @@ def calculateMP(dictionary , signal , config):
 
 		book.append(pd.Series(bookElement))
 
+		# plt.figure()
+		# plt.subplot(2,1,1)
+		# plt.plot(signalRest.real)
+		# plt.subplot(2,1,2)
+		# plt.plot(bookElement['reconstruction'].real)
+		# plt.show()
+
 		minEnergyExplained = config['minEnergyExplained'] - config['density'] * (calculateSignalEnergy(bookElement['reconstruction']) / calculateSignalEnergy(signalRest))
 		signalRest         = signalRest - bookElement['reconstruction']
 		energyExplained    = np.abs(1 - calculateSignalEnergy(signalRest) / signalEnergy)
@@ -154,8 +161,6 @@ def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , increaseS
 			envelope      = envelopeGauss
 			func2optimize  = 0
 
-		reconstruction  = amplitude * envelope * np.exp(1j*freqStart*timeShifted)
-
 		freq            = fmin(func=dic.bestFreq , x0=freqStart , args=(signal*envelope,timeShifted) ,disp=0,xtol=epsilon,ftol=epsilon)[0]
 		amplitudeTmp    = np.dot(signal , envelope*np.exp(-1j*freq*timeShifted))
 
@@ -164,6 +169,7 @@ def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , increaseS
 			reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		else:
 			# print 'returning before while loop'
+			reconstruction  = amplitude * envelope * np.exp(1j*freqStart*timeShifted)
 			return (freqStart,amplitude,sigma,increase,decay,envelope,reconstruction)
 
 		amplitudeActual = np.abs(amplitudeStart)
@@ -185,7 +191,6 @@ def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , increaseS
 				envelope = dic.asymetricEnvelope(increase,decay,mi,time,1,cutOutput)[0]
 
 			amplitude       = np.dot(signal , envelope*np.exp(-1j*freq*timeShifted))
-		 	reconstruction  = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		 	newFreq         = fmin(func=dic.bestFreq , x0=freq , args=(signal*envelope,timeShifted) ,disp=0,xtol=epsilon,ftol=epsilon)[0]
 		 	amplitudeTmp    = np.dot(signal , envelope*np.exp(-1j*newFreq*timeShifted))
 
@@ -195,6 +200,7 @@ def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , increaseS
 		 		reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		 	else:
 		 		# print 'returning within while loop'
+		 		reconstruction  = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		 		return (freqStart,amplitude,sigma,increase,decay,envelope,reconstruction)
 
 	# print 'returning after while loop'
@@ -213,8 +219,8 @@ def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , increaseS
 			outputs.append(output)
 			envelopes.append(dic.asymetricEnvelope(output[0],output[1],output[2],time,subShapeType,cutOutput)[0])
 			amplitude = np.dot(signal , envelopes[-1] * np.exp(-1j*freqStart*timeShifted))
-			subTypeTest.append(np.abs(amplitude))
-		subTypeTest = np.array(subTypeTest)
+			subTypeTest.append(amplitude)
+		subTypeTest = np.array(subTypeTest , dtype='complex')
 
 		ind = subTypeTest.argmax()
 
@@ -226,8 +232,6 @@ def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , increaseS
 		mi        = output[2]
 
 		finalShapeType = types2test[ind]
-
-		reconstruction = amplitude * envelope * np.exp(1j*freqStart*timeShifted)
 		
 		## -- FROM HERE -- ##
 
@@ -239,6 +243,7 @@ def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , increaseS
 			reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		else:
 			# print 'returning before while loop'
+			reconstruction = amplitude * envelope * np.exp(1j*freqStart*timeShifted)
 			return (freqStart,amplitude,sigma,increase,decay,envelope,reconstruction)
 
 		amplitudeActual = np.abs(amplitudeStart)
@@ -254,7 +259,6 @@ def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , increaseS
 			envelope = dic.asymetricEnvelope(increase,decay,mi,time,finalShapeType,cutOutput)[0]
 
 			amplitude       = np.dot(signal , envelope*np.exp(-1j*freq*timeShifted))
-		 	reconstruction  = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		 	newFreq         = fmin(func=dic.bestFreq , x0=freq , args=(signal*envelope,timeShifted) ,disp=0,xtol=epsilon,ftol=epsilon)[0]
 		 	amplitudeTmp    = np.dot(signal , envelope*np.exp(-1j*newFreq*timeShifted))
 
@@ -264,9 +268,10 @@ def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , increaseS
 		 		reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		 	else:
 		 		# print 'returning within while loop'
+		 		reconstruction  = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		 		return (freqStart,amplitude,sigma,increase,decay,envelope,reconstruction)
 
-	# print 'returning after while loop'
+		# print 'returning after while loop'
 
 	## -- TO HERE -- ##
 
@@ -284,7 +289,7 @@ def gradientSearch(amplitudeStart , miStart , sigmaStart , freqStart , increaseS
 			envelope = dic.asymetricEnvelope(increase , decay , miStart , time , 1 , 0)[0]
 		reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
 
-	return (freqStart,amplitude,sigma,increase,decay,envelope,reconstruction)
+	return (freq,amplitude,sigma,increase,decay,envelope,reconstruction)
 
 
 def recalculateDotProducts(dictionary , partialResults , signalRest , minNFFT , signalLength , iteration):

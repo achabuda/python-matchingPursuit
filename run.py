@@ -40,13 +40,6 @@ if __name__ == '__main__':
 	(gaborParams , sinusParams , asymetricParams , noiseRatio , samplingFrequency , numberOfSamples) = advancedValues()
 	(signal,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,numberOfSamples,samplingFrequency,noiseRatio)
 
-	# plt.figure()
-	# plt.subplot(2,1,1)
-	# plt.plot(time,signal1)
-	# plt.subplot(2,1,2)
-	# plt.plot(time,signal2)
-	# plt.show()
-
 	#tmp = {}
 	#tmp['signal'] = signal
 	#tmp['czas']   = time
