@@ -142,17 +142,19 @@ def gaussEnvelope(sigma , time , shapeType=1 , cutOutput=1 , *argv):
 	
 	x  = (time - mi) / (sigma)
 
-	eps = 1e-4
+	eps = 1e-3
 
 	if shapeType == 1:
 		y = np.exp(-1 * x**2 /2)
 	elif shapeType == 2:
 		y = np.exp(-7 * x**8 /8)
-	ind        = np.where(y>eps)[0]
 
-	whereFrom = ind[0]
-	whereTo   = ind[-1]
-	mi        = (whereFrom + whereTo)/2.0 - whereFrom + 1
+	if (len(argv) == 0 or len(argv)>1) and cutOutput == 1:
+		ind        = np.where(y>eps)[0]
+		whereFrom = ind[0]
+		whereTo   = ind[-1]
+		mi        = (whereFrom + whereTo)/2.0 - whereFrom + 1
+	
 	envelope  = y / np.linalg.norm(y)
 
 	if cutOutput == 1:
@@ -174,7 +176,7 @@ def asymetricEnvelope(increase , decay , mi , time , shapeType=1 , cutOutput=1):
 	0 - return raw envelope, ie. size of the signal
 	1 - cut based on eps
 	'''
-	eps = 1e-4
+	eps = 1e-3
 	tmp = time - mi
 	if shapeType == 1:
 		y = np.exp(-increase*(tmp**2) / (1 + decay * tmp * (np.arctan(1e16*tmp)+np.pi/2)/np.pi))
@@ -185,10 +187,12 @@ def asymetricEnvelope(increase , decay , mi , time , shapeType=1 , cutOutput=1):
 	elif shapeType == 4:
 		y = np.exp(-increase*(tmp**8) / (1 + decay * (tmp**5) * (np.arctan(1e16*tmp)+np.pi/2)/np.pi))
 
-	ind        = np.where(y>eps)[0]
-	whereFrom  = ind[0]
-	whereTo    = ind[-1]
-	mi         = mi + 1 - whereFrom
+	if cutOutput == 1:
+		ind        = np.where(y>eps)[0]
+		whereFrom  = ind[0]
+		whereTo    = ind[-1]
+		mi         = mi + 1 - whereFrom
+	
 	envelope   = y / np.linalg.norm(y)
 
 	if cutOutput == 1:
