@@ -39,18 +39,19 @@ if __name__ == '__main__':
 	# (gaborParams , sinusParams , asymetricParams , noiseRatio , samplingFrequency , numberOfSamples) = defaultValues()
 	# (signal1,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,numberOfSamples,samplingFrequency,noiseRatio)
 
-	# (gaborParams , sinusParams , asymetricParams , noiseRatio , samplingFrequency , numberOfSamples) = advancedValues()
-	# (signal,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,numberOfSamples,samplingFrequency,noiseRatio)
+	(gaborParams , sinusParams , asymetricParams , noiseRatio , samplingFrequency , numberOfSamples) = advancedValues()
+	(signal,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,numberOfSamples,samplingFrequency,noiseRatio)
 
 	#tmp = {}
 	#tmp['signal'] = signal
 	#tmp['czas']   = time
 	#savemat('../syg_asym.mat' , tmp)
 
-	data              = loadmat('../Jena-burstSupression/BSM_trials.mat')
-	data              = data['bsm_gj_4s']
-	samplingFrequency = 128.0
-	time              = np.arange(0,4,1./samplingFrequency)
+	#data              = loadmat('../Jena-burstSupression/BSM_trials.mat')
+	#subject           = 'bsm_gj_4s'
+	#data              = data[subject]
+	#samplingFrequency = 128.0
+	#time              = np.arange(0,4,1./samplingFrequency)
 
 	# config for a dictionary
 	flags = {}
@@ -62,7 +63,7 @@ if __name__ == '__main__':
 	config['maxS']    = 128
 	config['density'] = 0.001
 	# config for Matching Pursuit calculations
-	config['maxNumberOfIterations']            = 20
+	config['maxNumberOfIterations']            = 5
 	config['minEnergyExplained']               = 0.9999
 	config['samplingFrequency']                = samplingFrequency
 	config['minNFFT']                          = 256 # 2*samplingFrequency
@@ -71,15 +72,22 @@ if __name__ == '__main__':
 	dictionary = generateDictionary(time , config)
 
 	#for ind1 in np.arange(0,data.shape[1]):
-	for ind1 in [1,2,4]:#np.arange(0,10):
-		signal      = data[:,ind1]
-		book        = calculateMP(dictionary , signal , config)
-		(T,F,TFmap) = calculateTFMap(book,time,config['samplingFrequency'])
-		if ind1 == 1:
-			maps = np.zeros(TFmap.shape)
-		maps += TFmap
+	# for ind1 in [1,2]:#np.arange(0,10):
+	# 	signal      = data[:,ind1]
+	# 	book        = calculateMP(dictionary , signal , config)
+		
+	# 	nameOfOutputFile = '../Jena-burstSupression/' + subject + '_' + str(ind1) + '.csv'
+	# 	book.to_csv(nameOfOutputFile,header=False,sep =',')
 
-	maps = maps / ind1
+	# 	(T,F,TFmap) = calculateTFMap(book,time,config['samplingFrequency'])
+	# 	if ind1 == 1:
+	# 		maps = np.zeros(TFmap.shape)
+	# 	maps += TFmap
+
+	# maps = maps / ind1
+
+	book        = calculateMP(dictionary , signal , config)
+	(T,F,maps)  = calculateTFMap(book,time,config['samplingFrequency'])
 
 	gs = gridspec.GridSpec(3,1,height_ratios=[3,1,1])#,width_ratios=[1,1,1]) 
 
@@ -89,10 +97,7 @@ if __name__ == '__main__':
 	ax0.imshow(maps,aspect='auto' , origin='lower' , extent=[0.0,4.0 , 0.0,64.0])
 	ax0.set_xlabel(r'Time [s]')
 	ax0.set_ylabel(r'Frequency [Hz]')
-	#ax0.get_axes().xaxis.set_visible(False)
-	#dupa = ticker.FuncFormatter(lambda x,pos: "{}".format(x/samplingFrequency))
-	#ax0.get_axes().xaxis.set_major_formatter(dupa)
-
+	
 	ax1 = plt.subplot(gs[1])
 	ax1.plot(time,signal)
 
