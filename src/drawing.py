@@ -38,7 +38,14 @@ def plotIter(book,signal,time,number):
 	plt.plot(time,book['reconstruction'][number].real)
 	plt.show()
 
-def calculateTFMap(book,time,samplingFrequency):
+def calculateTFMap(book,time,samplingFrequency,*argv):
+	if len(argv) == 2:
+		mapStructFreqs  = argv[0]
+		mapStructWidths = argv[1]
+	else:
+		mapStructFreqs  = [0.0 , samplingFrequency/2.0]
+		mapStructWidths = [0.0 , time.shape[0]/samplingFrequency]
+
 	mapFsize = 1000
 	mapTsize = np.array([2000 , time.shape[0]]).min()
 
@@ -53,19 +60,20 @@ def calculateTFMap(book,time,samplingFrequency):
 	smoothingWindow = tukey(time.shape[0] , 0.1)
 
 	for index, atom in book.iterrows():
-		timeCourse = atom['reconstruction'][:].real
-		signal2fft = timeCourse * smoothingWindow
+		if (atom['freq'] > mapStructFreqs[0] and atom['freq'] < mapStructFreqs[1]) and (atom['width'] > mapStructWidths[0] and atom['width'] < mapStructWidths[1]):
+			timeCourse = atom['reconstruction'][:].real
+			signal2fft = timeCourse * smoothingWindow
 
-		zz = np.fft.fft(signal2fft)
-		z  = np.abs( zz[0 : np.floor(zz.shape[0]/2+1)] )
-		z  = halfWidthGauss(z)
-		z  = resample(z, frequenciesFinal.shape[0])   # = resample(z,finalFlen,length(z));
-		z  = z / z.max()
+			zz = np.fft.fft(signal2fft)
+			z  = np.abs( zz[0 : np.floor(zz.shape[0]/2+1)] )
+			z  = halfWidthGauss(z)
+			z  = resample(z, frequenciesFinal.shape[0])
+			z  = z / z.max()
 
-		envelope = np.abs(atom['envelope'])
-		envelope = resample(envelope , timeFinal.shape[0]) #= resample(env,finalTlen,length(env));
+			envelope = np.abs(atom['envelope']) * np.abs(atom['amplitude'])
+			envelope = resample(envelope , timeFinal.shape[0])
 
-		timeFreqMap += np.outer(z , envelope)
+			timeFreqMap += np.outer(z , envelope)
 
 	return (timeFinal , frequenciesFinal , timeFreqMap)
 

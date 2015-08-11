@@ -142,7 +142,7 @@ def gaussEnvelope(sigma , time , shapeType=1 , cutOutput=1 , *argv):
 	
 	x  = (time - mi) / (sigma)
 
-	eps = 1e-3
+	eps = 1e-4
 
 	if shapeType == 1:
 		y = np.exp(-1 * x**2 /2)
@@ -176,7 +176,7 @@ def asymetricEnvelope(increase , decay , mi , time , shapeType=1 , cutOutput=1):
 	0 - return raw envelope, ie. size of the signal
 	1 - cut based on eps
 	'''
-	eps = 1e-3
+	eps = 1e-4
 	tmp = time - mi
 	if shapeType == 1:
 		y = np.exp(-increase*(tmp**2) / (1 + decay * tmp * (np.arctan(1e16*tmp)+np.pi/2)/np.pi))
@@ -199,6 +199,9 @@ def asymetricEnvelope(increase , decay , mi , time , shapeType=1 , cutOutput=1):
 		envelope = envelope[whereFrom:whereTo]
 	return (envelope , mi)
 
+def findWidth(envelope , samplingFrequency):
+	return np.where(envelope > 0.5 * envelope.max())[0].shape[0] / samplingFrequency
+
 def minSigEnerg(testSigma , testEnvelope , density , time , shapeType):
 	gx = gaussEnvelope(testSigma , time , shapeType , 0)[0]
 	return np.abs(1 - density - np.dot(gx , testEnvelope))
@@ -208,11 +211,11 @@ def minPosEnerg(testEnvelope , density):
 	where  = xcorr.argmin()
 	return np.abs(testEnvelope.size - where -1)
 
-def minEnvGauss(x,time,signal,freq,shapeType):
+def minEnvGauss(x,time,signal,shapeType):
 	envelope  = gaussEnvelope(x[0],time,shapeType,0,x[1])[0]
 	return -1 * np.abs(np.dot(signal , envelope))
 
-def minEnvAsymetric(x,time,signal,freq,shapeType):
+def minEnvAsymetric(x,time,signal,shapeType):
 	envelope  = asymetricEnvelope(x[0],x[1],x[2],time,shapeType,0)[0]
 	return -1 * np.abs(np.dot(signal , envelope))
 	

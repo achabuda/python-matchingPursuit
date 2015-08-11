@@ -39,19 +39,19 @@ if __name__ == '__main__':
 	# (gaborParams , sinusParams , asymetricParams , noiseRatio , samplingFrequency , numberOfSamples) = defaultValues()
 	# (signal1,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,numberOfSamples,samplingFrequency,noiseRatio)
 
-	(gaborParams , sinusParams , asymetricParams , noiseRatio , samplingFrequency , numberOfSamples) = advancedValues()
-	(signal,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,numberOfSamples,samplingFrequency,noiseRatio)
+	#(gaborParams , sinusParams , asymetricParams , noiseRatio , samplingFrequency , numberOfSamples) = advancedValues()
+	#(signal,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,numberOfSamples,samplingFrequency,noiseRatio)
 
 	#tmp = {}
 	#tmp['signal'] = signal
 	#tmp['czas']   = time
 	#savemat('../syg_asym.mat' , tmp)
 
-	#data              = loadmat('../Jena-burstSupression/BSM_trials.mat')
-	#subject           = 'bsm_gj_4s'
-	#data              = data[subject]
-	#samplingFrequency = 128.0
-	#time              = np.arange(0,4,1./samplingFrequency)
+	data              = loadmat('../Jena-burstSupression/BSM_trials.mat')
+	subject           = 'bsm_gj_4s'
+	data              = data[subject]
+	samplingFrequency = 128.0
+	time              = np.arange(0,4,1./samplingFrequency)
 
 	# config for a dictionary
 	flags = {}
@@ -63,49 +63,137 @@ if __name__ == '__main__':
 	config['maxS']    = 128
 	config['density'] = 0.001
 	# config for Matching Pursuit calculations
-	config['maxNumberOfIterations']            = 5
+	config['maxNumberOfIterations']            = 20
 	config['minEnergyExplained']               = 0.9999
 	config['samplingFrequency']                = samplingFrequency
 	config['minNFFT']                          = 256 # 2*samplingFrequency
 	config['flags']['useGradientOptimization'] = 1
+	# config for display
+	config['flags']['drawMeanMap']    = 1
+	config['flags']['saveMeanMap']    = 1
+
+	config['flags']['drawSingleMaps'] = 1
+	config['flags']['saveSingleMaps'] = 1
+	
+	config['mapFreqRange']    = [0.0 , 16.0]
+	config['mapStructFreqs']  = [0.0 , 64.0]
+	config['mapStructSigmas'] = [0.0 , 4.0]
+
+	# config for saving
 	
 	dictionary = generateDictionary(time , config)
 
-	#for ind1 in np.arange(0,data.shape[1]):
-	# for ind1 in [1,2]:#np.arange(0,10):
-	# 	signal      = data[:,ind1]
-	# 	book        = calculateMP(dictionary , signal , config)
+	results  = {}
+	arr      = np.arange(0,data.shape[1])
+	mask     = np.ones(arr.shape , dtype=bool)
+	# mask[80] = 0
+
+	ind2 = 0
+	for ind1 in arr[mask]:
+		ind2 += 1
+		print 'Calculation for {} trial:'.format(ind1)
+	 	signal      = data[:,ind1]
+	 	book        = calculateMP(dictionary , signal , config)
 		
-	# 	nameOfOutputFile = '../Jena-burstSupression/' + subject + '_' + str(ind1) + '.csv'
-	# 	book.to_csv(nameOfOutputFile,header=False,sep =',')
+	 	nameOfStruct     = 'trial_' + str(ind1)
+	 	results[nameOfStruct] = {col_name : book[col_name].values for col_name in book.columns.values}
+	 	# tmpBook.to_csv(nameOfOutputFile,header=False,sep =',')
 
-	# 	(T,F,TFmap) = calculateTFMap(book,time,config['samplingFrequency'])
-	# 	if ind1 == 1:
-	# 		maps = np.zeros(TFmap.shape)
-	# 	maps += TFmap
+	 	(T,F,TFmap) = calculateTFMap(book,time,config['samplingFrequency'],config['mapStructFreqs'],config['mapStructSigmas'])
+	 	if ind2 == 1:
+	 		maps = np.zeros(TFmap.shape)
+	 	maps += TFmap
+	 	
+	 	results[nameOfStruct]['mapM'] = TFmap
+	 	results[nameOfStruct]['mapT'] = time
+	 	results[nameOfStruct]['mapF'] = F
 
-	# maps = maps / ind1
 
-	book        = calculateMP(dictionary , signal , config)
-	(T,F,maps)  = calculateTFMap(book,time,config['samplingFrequency'])
+	 	if config['flags']['drawSingleMaps'] == 1:
+	 		gs = gridspec.GridSpec(3,1,height_ratios=[3,1,1])
+		
+			fig = plt.figure()
 
-	gs = gridspec.GridSpec(3,1,height_ratios=[3,1,1])#,width_ratios=[1,1,1]) 
+			ax0 = plt.subplot(gs[0])
+			m   = ax0.imshow(TFmap,aspect='auto' , origin='lower' , extent=[0.0,4.0 , 0.0,64.0])
+			ax0.set_xlabel(r'Time [s]')
+			ax0.set_ylabel(r'Frequency [Hz]')
+			ax0.set_ylim(config['mapFreqRange'])
+			
+			ax1 = plt.subplot(gs[1])
+			ax1.plot(time,signal)
+			ax1.set_xlabel(r'Time [s]')
+			ax1.set_ylabel(r'Amplitude [uV]')
 
-	fig = plt.figure()#figsize=(8, 6))
+			ax2 = plt.subplot(gs[2])
+			ax2.plot(time,book['reconstruction'].sum().real)
+			ax2.set_xlabel(r'Time [s]')
+			ax2.set_ylabel(r'Amplitude [uV]')
 
-	ax0 = plt.subplot(gs[0])
-	ax0.imshow(maps,aspect='auto' , origin='lower' , extent=[0.0,4.0 , 0.0,64.0])
-	ax0.set_xlabel(r'Time [s]')
-	ax0.set_ylabel(r'Frequency [Hz]')
+			fig.subplots_adjust(left=0.1, right=0.9)
+			cbar_ax = fig.add_axes([0.92, 0.5, 0.02, 0.4])
+			fig.colorbar(m, cax=cbar_ax)
+
+			if config['flags']['saveSingleMaps'] == 1:
+				nameOfOutputFile = '../Jena-burstSupression/' + subject + '_' + str(ind1) + '.png'
+				plt.savefig(nameOfOutputFile , bbox_inches = 'tight')
+				nameOfOutputFile = '../Jena-burstSupression/' + subject + '_' + str(ind1) + '.pdf'
+				plt.savefig(nameOfOutputFile , bbox_inches = 'tight')
+				plt.close()
+			else:
+				plt.show()
+
+	maps = maps / ind2
+
+	nameOfOutputFile = '../Jena-burstSupression/' + subject + '.mat'
+	savemat(nameOfOutputFile , results)
+
+	#book        = calculateMP(dictionary , signal , config)
+	#a_dict = {col_name : book[col_name].values for col_name in book.columns.values}
+	#savemat('../dupa.mat',a_dict)
 	
-	ax1 = plt.subplot(gs[1])
-	ax1.plot(time,signal)
+	#tmpBook = book
+	#tmpBook['amplitude']      = book['amplitude']
+	#tmpBook['freq']           = book['freq']
+	#tmpBook['sigma']          = book['sigma']
 
-	ax2 = plt.subplot(gs[2])
-	ax2.plot(time,book['reconstruction'].sum().real)
+	#tmpBook['envelope']       = np.array_str(book['envelope'],max_line_width=100000000)
+	#tmpBook['reconstruction'] = np.array_str(book['reconstruction'],max_line_width=100000000)
+	
+	#tmpBook.to_csv('../dupa.csv',header=False)
 
-	plt.tight_layout()
+	#(T,F,maps)  = calculateTFMap(book,time,config['samplingFrequency'])
 
+	if config['flags']['drawMeanMap'] == 1:
+		gs = gridspec.GridSpec(2,1,height_ratios=[3,1])
+		fig = plt.figure()
+
+		ax0 = plt.subplot(gs[0])
+		m   = ax0.imshow(maps,aspect='auto' , origin='lower' , extent=[0.0,4.0 , 0.0,64.0])
+		ax0.set_xlabel(r'Time [s]')
+		ax0.set_ylabel(r'Frequency [Hz]')
+		ax0.set_ylim(config['mapFreqRange'])
+			
+		ax1 = plt.subplot(gs[1])
+		for ind1 in arr[mask]:
+			signal = data[:,ind1]
+			ax1.plot(time,signal,'k')
+		ax1.plot(time,np.mean(data,1),'r')
+		ax1.set_xlabel(r'Time [s]')
+		ax1.set_ylabel(r'Amplitude [uV]')
+
+		fig.subplots_adjust(left=0.1, right=0.9)
+		cbar_ax = fig.add_axes([0.92, 0.5, 0.02, 0.4])
+		fig.colorbar(m, cax=cbar_ax)
+
+		if config['flags']['saveMeanMap'] == 1:
+			nameOfOutputFile = '../Jena-burstSupression/' + subject + '.png'
+			plt.savefig(nameOfOutputFile , bbox_inches = 'tight')
+			nameOfOutputFile = '../Jena-burstSupression/' + subject + '.pdf'
+			plt.savefig(nameOfOutputFile , bbox_inches = 'tight')
+			plt.close()
+		else:
+			plt.show()
 
 	#plt.figure()
 	#plt.imshow(maps,extent=[0, 1, 0, 1])
@@ -113,8 +201,6 @@ if __name__ == '__main__':
 	# plt.subplot(2,1,2)
 	# plt.plot(signal,'k')
 	# plt.plot(book['reconstruction'].real.sum() , 'r')
-
-	plt.show()
 
 	# plt.figure()
 	# plt.subplot(2,1,1)
