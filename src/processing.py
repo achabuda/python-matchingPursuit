@@ -89,10 +89,8 @@ def calculateMP(dictionary , signal , config):
 			sigma_0    = partialResults['sigma'][whereMax]
 			increase_0 = partialResults['increase'][whereMax]
 			decay_0    = partialResults['decay'][whereMax]
-
 			whereStart = partialResults['time'][whereMax][0]
 
-			#if (mi_0+sigma_0 < 511 and mi_0-sigma_0 > 0) or (mi_0+np.sqrt(1./2./increase_0) < 511 and mi_0-np.sqrt(1./2./increase)>0):
 			(freq,amplitude,sigma,increase,decay,mi,envelope,reconstruction,shapeTypeNew) = gradientSearch([whereStart,subMaxDOT[whereMax],mi_0,sigma_0,subMaxFreq[whereMax],increase_0,decay_0],[config['minS'],config['maxS']],signalRest,partialResults['shapeType'][whereMax],config['flags']['useAsymA'])
 
 			if np.abs(amplitude) > np.abs(bookElement['amplitude']):
@@ -105,13 +103,6 @@ def calculateMP(dictionary , signal , config):
 				# not needed yet:
 				# bookElement['mi']             = mi
 				# PoM(length(PoM))=abs(out_book(ii).amplitude);
-
-		# plt.figure()
-		# plt.subplot(2,1,1)
-		# plt.plot(signalRest.real)
-		# plt.subplot(2,1,2)
-		# plt.plot(bookElement['reconstruction'].real)
-		# plt.show()
 
 		minEnergyExplained = config['minEnergyExplained'] - config['density'] * (calculateSignalEnergy(bookElement['reconstruction']) / calculateSignalEnergy(signalRest))
 		signalRest         = signalRest - bookElement['reconstruction']
@@ -145,103 +136,99 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 	freqStart      = startParams[4]
 	increaseStart  = startParams[5]
 	decayStart     = startParams[6]
-	minS           = 0.75 * boundParams[0]
-	maxS           = 1.25 * boundParams[1]
-	minI           = 0.5/minS**2
-	maxI           = 0.5/maxS**2
-	minD           = 1.5 / minS
-	maxD           = 1.5 / maxS
+	# print (increaseStart,decayStart)
+	minS           = 0.50 * boundParams[0]
+	maxS           = 1.50 * boundParams[1]
+	maxI           = 0.5/minS**2
+	minI           = 0.5/maxS**2
+	maxD           = 1.5 / minS
+	minD           = 1.5 / maxS
 	time           = np.arange(0 , signal.shape[0])
 	timeShifted    = time - whereStart
 	cutOutput      = 0
-	shapeTypeNew   = shapeType
 
-	if shapeType == 1:
+	mainShapeType = int(shapeType / 10)
+	# subShapeType  = int(shapeType % 10)	# unnecessary
+
+	if mainShapeType == 1:
 		# case of standard gauss envelopes
-
-		#output = fmin(func=dic.minEnvGauss , x0=np.array([sigmaStart,miStart]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),shapeType) , disp=1 , xtol=epsilon , ftol=epsilon)
-		output = minimize(fun=dic.minEnvGauss , x0=np.array([sigmaStart,miStart]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),shapeType) , method='L-BFGS-B', bounds=[(minS,maxS),(0,signal.shape[0])] , tol=epsilon , options={'disp':0})
-
-		sigmaGauss      = output['x'][0]
-		miGauss         = output['x'][1]
-		increaseGauss   = 0
-		decayGauss      = 0
-		
-		envelopeGauss       = dic.gaussEnvelope(sigmaGauss,time,shapeType,cutOutput,miGauss)[0]
-		amplitudeGauss      = np.dot(signal , envelopeGauss*np.exp(-1j*freqStart*timeShifted))
+		tmpShapeType = 11
+		output       = minimize(fun=dic.bestEnvelope , x0=np.array([sigmaStart,miStart]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),tmpShapeType) , method='L-BFGS-B', bounds=[(minS,maxS),(0,signal.shape[0])] , tol=epsilon , options={'disp':0})
+		sigmaSym     = output['x'][0]
+		miSym        = output['x'][1]
+		increaseSym  = 0
+		decaySym     = 0
+		envelopeSym  = dic.genericEnvelope(sigmaSym,time,tmpShapeType,cutOutput,miSym)[0]
+		amplitudeSym = np.dot(signal , envelopeSym*np.exp(-1j*freqStart*timeShifted))
 
 		if forceAsymetry > 0:
-			#output       = fmin(func=dic.minEnvAsymetric , x0=np.array([0.5/sigmaStart**2,decayStart,miStart]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),shapeType) , disp=0 , xtol=epsilon , ftol=epsilon)
-			output       = minimize(fun=dic.minEnvAsymetric , x0=np.array([0.5/sigmaStart**2,decayStart,miStart]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),shapeType) , method='L-BFGS-B', bounds=[(minI,maxI),(minD,maxD),(0,signal.shape[0])] , tol=epsilon , options={'disp':0})
-			increaseAsym = output['x'][0]
-			decayAsym    = output['x'][1]
-			miAsym       = output['x'][2]
-
-			envelopeAsym  = dic.asymetricEnvelope(increaseAsym , decayAsym , miAsym , time , 1 , cutOutput)[0]
+			tmpShapeType  = 21
+			increaseStart = 0.5 / sigmaStart**2
+			decayStart    = 1.5 / sigmaStart
+			output        = minimize(fun=dic.bestEnvelope , x0=np.array([miStart,increaseStart,decayStart]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),tmpShapeType) , method='L-BFGS-B', bounds=[(0,signal.shape[0]),(minI,maxI),(minD,maxD)] , tol=epsilon , options={'disp':0})
+			miAsym        = output['x'][0]
+			increaseAsym  = output['x'][1]
+			decayAsym     = output['x'][2]
+			sigmaAsym     = (2*decayAsym) / 3.
+			envelopeAsym  = dic.genericEnvelope(sigmaAsym,time,tmpShapeType,cutOutput,miAsym,increaseAsym,decayAsym)[0]
 			amplitudeAsym = np.dot(signal , envelopeAsym*np.exp(-1j*freqStart*timeShifted))
 		else:
 			amplitudeAsym = 0
 
-		if (np.abs(amplitudeAsym) > np.abs(amplitudeGauss)) or forceAsymetry == 2:
-			amplitude     = amplitudeAsym
-			envelope      = envelopeAsym
-			mi            = miAsym
-			increase      = increaseAsym
-			decay         = decayAsym
-			sigma         = np.sqrt(1./2./increase)
-			func2optimize = 1
-			shapeTypeNew  = 3
+		# print 'Amplitude for sym={}, asym={}'.format(np.abs(amplitudeSym) , np.abs(amplitudeAsym))
+		if (np.abs(amplitudeAsym) > np.abs(amplitudeSym)):
+			amplitude      = amplitudeAsym
+			envelope       = envelopeAsym
+			mi             = miAsym
+			increase       = increaseAsym
+			decay          = decayAsym
+			sigma          = sigmaAsym
+			finalShapeType = 21 			# AsymA, in fact
 		else:
-			amplitude     = amplitudeGauss
-			envelope      = envelopeGauss
-			mi            = miGauss
-			increase      = increaseGauss
-			decay         = decayGauss
-			sigma         = sigmaGauss
-			func2optimize = 0
+			amplitude      = amplitudeSym
+			envelope       = envelopeSym
+			mi             = miSym
+			increase       = increaseSym
+			decay          = decaySym
+			sigma          = sigmaSym
+			finalShapeType = 11 			# Standard Gauss, in fact
 
-		#newFreq = fmin(func=dic.bestFreq , x0=freqStart , args=(signal*envelope,timeShifted) ,disp=0,xtol=epsilon,ftol=epsilon)[0]
-		output  = minimize(fun=dic.bestFreq , x0=freqStart , args=(signal*envelope,timeShifted) , method='L-BFGS-B' , tol=epsilon , options={'disp':0})
-		newFreq = output['x'][0]
-
-		amplitudeTmp    = np.dot(signal , envelope*np.exp(-1j*newFreq*timeShifted))
+		output = minimize(fun=dic.bestFreq , x0=freqStart , args=(signal*envelope,timeShifted) , method='L-BFGS-B' , tol=epsilon , options={'disp':0})
+		newFreq      = output['x'][0]
+		amplitudeTmp = np.dot(signal , envelope*np.exp(-1j*newFreq*timeShifted))
 
 		if np.abs(amplitude) < np.abs(amplitudeTmp):
 			amplitude      = amplitudeTmp
 			freq           = newFreq
 			reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		else:
-			reconstruction  = amplitude * envelope * np.exp(1j*freqStart*timeShifted)
-			return (freqStart,amplitude,sigma,increase,decay,mi,envelope,reconstruction,shapeTypeNew)
+			reconstruction = amplitude * envelope * np.exp(1j*freqStart*timeShifted)
+			return (freqStart,amplitude,sigma,increase,decay,mi,envelope,reconstruction,finalShapeType)
 
 		amplitudeActual = np.abs(amplitudeStart)
 
 		while (np.abs(amplitude) - amplitudeActual)/amplitudeActual > epsilon:
 		 	amplitudeActual = np.abs(amplitude)
 
-		 	if func2optimize == 0:
-		 		#output   = fmin(func=dic.minEnvGauss , x0=np.array([sigma,mi]) , args=(time,signal*np.exp(-1j*freq*timeShifted),shapeType) ,disp=0,xtol=epsilon,ftol=epsilon)
-		 		output = minimize(fun=dic.minEnvGauss , x0=np.array([sigma,mi]) , args=(time,signal*np.exp(-1j*freq*timeShifted),shapeType) , method='L-BFGS-B', bounds=[(minS,maxS),(0,signal.shape[0])] , tol=epsilon , options={'disp':0})
+		 	if finalShapeType == 11:
+		 		output   = minimize(fun=dic.bestEnvelope , x0=np.array([sigma,mi]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),finalShapeType) , method='L-BFGS-B', bounds=[(minS,maxS),(0,signal.shape[0])] , tol=epsilon , options={'disp':0})
 		 		sigma    = output['x'][0]
 		 		mi       = output['x'][1]
 		 		increase = 0
 		 		decay    = 0
-		 		envelope = dic.gaussEnvelope(sigma,time,shapeType,cutOutput,mi)[0]
+		 		envelope = dic.genericEnvelope(sigma,time,finalShapeType,cutOutput,mi)[0]
 		 	else:
-		 		#output   = fmin(func=dic.minEnvAsymetric , x0=np.array([increase,decay,mi]) , args=(time,signal*np.exp(-1j*freq*timeShifted),shapeType) ,disp=0,xtol=epsilon,ftol=epsilon)
-				output   = minimize(fun=dic.minEnvAsymetric , x0=np.array([increase,decay,mi]) , args=(time,signal*np.exp(-1j*freq*timeShifted),shapeType) , method='L-BFGS-B', bounds=[(minI,maxI),(minD,maxD),(0,signal.shape[0])] , tol=epsilon , options={'disp':0})
-				increase = output['x'][0]
-				decay    = output['x'][1]
-				mi       = output['x'][2]
-				envelope = dic.asymetricEnvelope(increase,decay,mi,time,1,cutOutput)[0]
+				output   = minimize(fun=dic.bestEnvelope , x0=np.array([mi,increase,decay]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),finalShapeType) , method='L-BFGS-B', bounds=[(0,signal.shape[0]),(minI,maxI),(minD,maxD)] , tol=epsilon , options={'disp':0})
+				mi       = output['x'][0]
+				increase = output['x'][1]
+				decay    = output['x'][2]
+				sigma    = np.sqrt(1./2./increase)
+				envelope = dic.genericEnvelope(sigma,time,finalShapeType,cutOutput,mi,increase,decay)[0]
 
-			amplitude = np.dot(signal , envelope*np.exp(-1j*freq*timeShifted))
-
-		 	#newFreq         = fmin(func=dic.bestFreq , x0=freq , args=(signal*envelope,timeShifted) ,disp=0,xtol=epsilon,ftol=epsilon)[0]
-		 	output  = minimize(fun=dic.bestFreq , x0=freq , args=(signal*envelope,timeShifted) , method='L-BFGS-B' , tol=epsilon , options={'disp':0})
-			newFreq = output['x'][0]
-
-		 	amplitudeTmp    = np.dot(signal , envelope*np.exp(-1j*newFreq*timeShifted))
+			amplitude    = np.dot(signal , envelope*np.exp(-1j*freq*timeShifted))
+		 	output       = minimize(fun=dic.bestFreq , x0=freq , args=(signal*envelope,timeShifted) , method='L-BFGS-B' , tol=epsilon , options={'disp':0})
+			newFreq      = output['x'][0]
+		 	amplitudeTmp = np.dot(signal , envelope*np.exp(-1j*newFreq*timeShifted))
 
 		 	if np.abs(amplitude) < np.abs(amplitudeTmp):
 		 		freq           = newFreq
@@ -249,27 +236,26 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 		 		reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		 	else:
 		 		reconstruction  = amplitude * envelope * np.exp(1j*freq*timeShifted)
-		 		return (freq,amplitude,sigma,increase,decay,mi,envelope,reconstruction,shapeTypeNew)
+		 		return (freq,amplitude,sigma,increase,decay,mi,envelope,reconstruction,finalShapeType)
 
-	elif shapeType == 3:
+	elif mainShapeType == 2:
 		# case of asymA envelopes (basic type of asymetry)
 
 		sigma       = sigmaStart   # not going to change
 		subTypeTest = []
 		envelopes   = []
 		outputs     = []
-		types2test  = [1,2,4]
+		subTypes2test  = [1,2,4]
 
-		for subShapeType in types2test:
-			#output    = fmin(func=dic.minEnvAsymetric , x0=np.array([increaseStart,decayStart,miStart]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),subShapeType) , disp=0 , xtol=epsilon , ftol=epsilon)
-			output = minimize(fun=dic.minEnvAsymetric , x0=np.array([increaseStart,decayStart,miStart]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),subShapeType) , method='L-BFGS-B', bounds=[(minI,maxI),(minD,maxD),(0,signal.shape[0])] , tol=epsilon , options={'disp':0})
+		for tt in subTypes2test:
+			shapeType2test = 10 * mainShapeType + tt
+			output = minimize(fun=dic.bestEnvelope , x0=np.array([miStart,increaseStart,decayStart]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),shapeType2test) , method='L-BFGS-B', bounds=[(0,signal.shape[0]),(minI,maxI),(minD,maxD)] , tol=epsilon , options={'disp':0})
 			outputs.append(output['x'])
-			envelopes.append(dic.asymetricEnvelope(output['x'][0],output['x'][1],output['x'][2],time,subShapeType,cutOutput)[0])
+			envelopes.append(dic.genericEnvelope(np.sqrt(1./2./output['x'][1]),time,shapeType2test,cutOutput,output['x'][0],output['x'][1],output['x'][2])[0])
 			amplitude = np.dot(signal , envelopes[-1] * np.exp(-1j*freqStart*timeShifted))
 			subTypeTest.append(amplitude)
 		subTypeTest = np.array(subTypeTest , dtype='complex')
-
-		ind = subTypeTest.argmax()
+		ind         = subTypeTest.argmax()
 
 		envelope  = envelopes[ind]
 		amplitude = subTypeTest[ind]
@@ -278,40 +264,37 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 		decay     = output[1]
 		mi        = output[2]
 
-		finalShapeType = types2test[ind]
+		finalShapeType = 10 * mainShapeType + subTypes2test[ind]
 		
 		## -- FROM HERE -- ##
-
-		#freq           = fmin(func=dic.bestFreq , x0=freqStart , args=(signal*envelope,timeShifted) ,disp=0,xtol=epsilon,ftol=epsilon)[0]
-		output  = minimize(fun=dic.bestFreq , x0=freqStart , args=(signal*envelope,timeShifted) , method='L-BFGS-B' , tol=epsilon , options={'disp':0})
-		freq = output['x'][0]
-		amplitudeTmp   = np.dot(signal , envelope*np.exp(-1j*freq*timeShifted))
+		output = minimize(fun=dic.bestFreq , x0=freqStart , args=(signal*envelope,timeShifted) , method='L-BFGS-B' , tol=epsilon , options={'disp':0})
+		newFreq      = output['x'][0]
+		amplitudeTmp = np.dot(signal , envelope*np.exp(-1j*newFreq*timeShifted))
 
 		if np.abs(amplitude) < np.abs(amplitudeTmp):
 			amplitude      = amplitudeTmp
+			freq           = newFreq
 			reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		else:
-			# print 'returning before while loop'
 			reconstruction = amplitude * envelope * np.exp(1j*freqStart*timeShifted)
-			return (freqStart,amplitude,sigma,increase,decay,mi,envelope,reconstruction,shapeTypeNew)
+			return (freqStart,amplitude,sigma,increase,decay,mi,envelope,reconstruction,finalShapeType)
 
 		amplitudeActual = np.abs(amplitudeStart)
-		while (np.abs(amplitude) - amplitudeActual)/amplitudeActual > epsilon:
 
+		while (np.abs(amplitude) - amplitudeActual)/amplitudeActual > epsilon:
 		 	amplitudeActual = np.abs(amplitude)
 
-		 	#output   = fmin(func=dic.minEnvAsymetric , x0=np.array([increase,decay,mi]) , args=(time,signal*np.exp(-1j*freq*timeShifted),finalShapeType) , disp=0 , xtol=epsilon , ftol=epsilon)
-			output = minimize(fun=dic.minEnvAsymetric , x0=np.array([increase,decay,mi]) , args=(time,signal*np.exp(-1j*freq*timeShifted),subShapeType) , method='L-BFGS-B', bounds=[(minI,maxI),(minD,maxD),(0,signal.shape[0])] , tol=epsilon , options={'disp':0})
-			increase = output['x'][0]
-			decay    = output['x'][1]
-			mi       = output['x'][2]
-			envelope = dic.asymetricEnvelope(increase,decay,mi,time,finalShapeType,cutOutput)[0]
+			output   = minimize(fun=dic.bestEnvelope , x0=np.array([mi,increase,decay]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),finalShapeType) , method='L-BFGS-B', bounds=[(0,signal.shape[0]),(minI,maxI),(minD,maxD)] , tol=epsilon , options={'disp':0})
+			mi       = output['x'][0]
+			increase = output['x'][1]
+			decay    = output['x'][2]
+			sigma    = np.sqrt(1./2./increase)
+			envelope = dic.genericEnvelope(sigma,time,finalShapeType,cutOutput,mi,increase,decay)[0]
 
-			amplitude = np.dot(signal , envelope*np.exp(-1j*freq*timeShifted))
-		 	#newFreq   = fmin(func=dic.bestFreq , x0=freq , args=(signal*envelope,timeShifted) ,disp=0,xtol=epsilon,ftol=epsilon)[0]
-		 	output  = minimize(fun=dic.bestFreq , x0=freq , args=(signal*envelope,timeShifted) , method='L-BFGS-B' , tol=epsilon , options={'disp':0})
-			newFreq = output['x'][0]
-		 	amplitudeTmp    = np.dot(signal , envelope*np.exp(-1j*newFreq*timeShifted))
+			amplitude    = np.dot(signal , envelope*np.exp(-1j*freq*timeShifted))
+		 	output       = minimize(fun=dic.bestFreq , x0=freq , args=(signal*envelope,timeShifted) , method='L-BFGS-B' , tol=epsilon , options={'disp':0})
+			newFreq      = output['x'][0]
+		 	amplitudeTmp = np.dot(signal , envelope*np.exp(-1j*newFreq*timeShifted))
 
 		 	if np.abs(amplitude) < np.abs(amplitudeTmp):
 		 		freq           = newFreq
@@ -319,26 +302,27 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 		 		reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		 	else:
 		 		reconstruction  = amplitude * envelope * np.exp(1j*freq*timeShifted)
-		 		return (freqStart,amplitude,sigma,increase,decay,mi,envelope,reconstruction,shapeTypeNew)
+		 		return (freq,amplitude,sigma,increase,decay,mi,envelope,reconstruction,finalShapeType)
+
 
 	## -- TO HERE -- ##
 
-	else:
-		timeShifted    = time - whereStart
-		freq           = freqStart
-		amplitude      = amplitudeStart
-		sigma          = sigmaStart
-		mi             = miStart
+	# else:
+	# 	timeShifted    = time - whereStart
+	# 	freq           = freqStart
+	# 	amplitude      = amplitudeStart
+	# 	sigma          = sigmaStart
+	# 	mi             = miStart
 
-		if shapeType == 2:
-			envelope = dic.gaussEnvelope(sigma,time,shapeType,0,miStart)[0]
-		elif shapeType == 3:
-			increase = 0.5 / (sigma**2)
-			decay    = 1.5 / sigma
-			envelope = dic.asymetricEnvelope(increase , decay , miStart , time , 1 , 0)[0]
-		reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
+	# 	if shapeType == 2:
+	# 		envelope = dic.gaussEnvelope(sigma,time,shapeType,0,miStart)[0]
+	# 	elif shapeType == 3:
+	# 		increase = 0.5 / (sigma**2)
+	# 		decay    = 1.5 / sigma
+	# 		envelope = dic.asymetricEnvelope(increase , decay , miStart , time , 1 , 0)[0]
+	# 	reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
 
-	return (freq,amplitude,sigma,increase,decay,mi,envelope,reconstruction,shapeTypeNew)
+	return (freq,amplitude,sigma,increase,decay,mi,envelope,reconstruction,finalShapeType)
 
 
 def recalculateDotProducts(dictionary , partialResults , signalRest , minNFFT , signalLength , iteration):
@@ -351,8 +335,6 @@ def recalculateDotProducts(dictionary , partialResults , signalRest , minNFFT , 
 	if iteration > 0:
 		innerIterator = 0
 
-	#dupa = 0
-
 	for index, atom in dictionary.iterrows():
 		tmpEnergyStep = atom['step']
 		tmpTimeCourse = atom['timeCourse']
@@ -360,9 +342,6 @@ def recalculateDotProducts(dictionary , partialResults , signalRest , minNFFT , 
 		tmpSigma      = atom['sigma']
 
 		for ind1 in np.arange(0, signalLength+tmpEnergyStep , tmpEnergyStep):
-
-			#dupa += 1
-
 			tmpWhereStart = np.array([tmpMi-ind1 , 0]).max()
 			tmpWhereStop  = np.array([tmpTimeCourse.shape[0] , tmpMi + signalLength - ind1]).min()
 
@@ -393,14 +372,6 @@ def recalculateDotProducts(dictionary , partialResults , signalRest , minNFFT , 
 			freqencies = np.arange(0 , nfft/2.)/nfft
 			DOT        = np.fft.fft(signal2fft , nfft)
 			ind        = np.abs(DOT[0:freqencies.shape[0]]).argmax()
-
-			#if dupa == 263:
-			#	print '#########'
-			#	print tmpTimeCourse[envelopeRange2go][0:10]
-			#	print '#########'
-				#plt.figure()
-				#plt.plot(signal2fft.real)
-				#plt.show()
 
 			subMaxDOT.append(DOT[ind])
 			subMaxFreq.append(2*np.pi*freqencies[ind])

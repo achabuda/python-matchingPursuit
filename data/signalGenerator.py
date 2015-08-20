@@ -33,7 +33,7 @@ def generateTestSignal(gaborParams , sinusParams , asymetricWaveformsAParams , n
 	asymetricWaveformsA - numpy array of  None
 	noiseRatio  - float (0-1)
 	'''
-	time            = np.arange(0,1000)
+	time            = np.arange(0,numberOfSamples)
 	signal          = np.squeeze(np.zeros((numberOfSamples,1)))
 
 	ind1 = 0

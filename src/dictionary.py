@@ -23,6 +23,7 @@ University of Warsaw, July 06, 2015
 '''
 from __future__ import division
 from scipy.optimize import fmin
+#from math import floor
 import numpy  as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -50,7 +51,7 @@ def generateDictionary(time , config):
 def appendToDictionary(dictionary , density , envelope , mi , sigma , increase , decay , shapeType):
 	dictionaryElement = {}
 	dictionaryElement['timeCourse'] = envelope
-	if shapeType != 3:
+	if shapeType != 21:
 		dictionaryElement['step']   = np.array([minPosEnerg(envelope , density) , 1]).max()
 	else:
 		dictionaryElement['step']   = dictionary[-1]['step']
@@ -66,105 +67,124 @@ def appendToDictionary(dictionary , density , envelope , mi , sigma , increase ,
 
 	return dictionary
 
-def generateRectangularEnvelopes(dictionary , time , config):
-	shapeType  = 2
-	minS       = config['minS']
-	maxS       = config['maxS']
-	density    = config['density']
-	flags      = config['flags']
-
-	sigmaStart = (minS + maxS)/2
-	gc          = gaussEnvelope(sigmaStart , time , 2 , 0)[0]
-	sigmaStop  = fmin(func=minSigEnerg , x0=sigmaStart, args=(gc,density,time,2) , disp=0)[0]
-
-	sigmaActual = minS
-	sigmaParity = sigmaStop / sigmaStart
-	if sigmaParity < 1:
-		sigmaParity = 1 / sigmaParity
-
-	threshold = maxS * np.sqrt(sigmaParity)
-
-	while sigmaActual < threshold:
-		(envelope , srodek) = gaussEnvelope(sigmaActual , time , shapeType)
-		increase = 0
-		decay    = 0
-		dictionary = appendToDictionary(dictionary , density , envelope , srodek , sigmaActual , increase , decay , shapeType)
-		sigmaActual = sigmaActual * sigmaParity
-
-	return dictionary
-
 def generateBasicStructures(time , config):
 	dictionary = []
-	minS       = config['minS']
-	maxS       = config['maxS']
-	density    = config['density']
-	flags      = config['flags']
 
-	sigmaStart = (minS + maxS)/2
-	gc         = gaussEnvelope(sigmaStart , time , 1 , 0)[0]
-	sigmaStop  = fmin(func=minSigEnerg , x0=sigmaStart, args=(gc,density,time,1) , disp=0)[0]
+	sigmaStart = (config['minS'] + config['maxS'])/2
+	gc         = genericEnvelope(sigmaStart , time , 11 , 0)[0]
+	# gc is a standard gaussian envelope in that case
+	sigmaStop  = fmin(func=minSigEnerg , x0=sigmaStart, args=(gc,config['density'],time,11) , disp=0)[0]
 
-	sigmaActual = minS
+	sigmaActual = config['minS']
 	sigmaParity = sigmaStop / sigmaStart
 	if sigmaParity < 1:
 		sigmaParity = 1 / sigmaParity
 
-	threshold = maxS * np.sqrt(sigmaParity)
+	threshold = config['maxS'] * np.sqrt(sigmaParity)
 
 	while sigmaActual < threshold:
-		shapeType = 1
-		(envelope , mi) = gaussEnvelope(sigmaActual , time , shapeType)
-		increase  = 0
-		decay     = 0
-		dictionary = appendToDictionary(dictionary , density , envelope , mi , sigmaActual , increase , decay , shapeType)
+		(envelope , mi , increase , decay) = genericEnvelope(sigmaActual , time , 11 , 1)
+		dictionary = appendToDictionary(dictionary , config['density'] , envelope , mi , sigmaActual , increase , decay , 11)
 
-		if flags['useAsymA']:
-			shapeType   = 3
-			increase    = 0.5 / (sigmaActual**2)
-			decay       = 1.5 / sigmaActual
-			expectation = mi
-			(envelope , mi) = asymetricEnvelope(increase , decay , expectation , time)
-			dictionary = appendToDictionary(dictionary , density , envelope , mi , sigmaActual , increase , decay , shapeType)
+		if config['flags']['useAsymA']:
+			(envelope , mi , increase , decay) = genericEnvelope(sigmaActual , time , 21 , 1 , mi)
+			dictionary      = appendToDictionary(dictionary , config['density'] , envelope , mi , sigmaActual , increase , decay , 21)
 
 		sigmaActual = sigmaActual * sigmaParity
 	return dictionary
 
-def gaussEnvelope(sigma , time , shapeType=1 , cutOutput=1 , *argv):
-	'''
-	shapeType:int
-	1 - standard gaussian shape
-	2 - flatten on top
-	'''
-	if len(argv) == 0 or len(argv)>1:
+def generateRectangularEnvelopes(dictionary , time , config):
+
+	sigmaStart = (config['minS'] + config['maxS'])/2
+	gc         = gaussEnvelope(sigmaStart , time , 31 , 0)[0]
+	# gc is of rectA type in that case
+	sigmaStop  = fmin(func=minSigEnerg , x0=sigmaStart, args=(gc,config['density'],time,31) , disp=0)[0]
+
+	sigmaActual = config['minS']
+	sigmaParity = sigmaStop / sigmaStart
+	if sigmaParity < 1:
+		sigmaParity = 1 / sigmaParity
+
+	threshold = config['maxS'] * np.sqrt(sigmaParity)
+
+	while sigmaActual < threshold:
+		(envelope , mi , increase , decay) = genericEnvelope(sigmaActual , time , 31 , 1)
+		dictionary = appendToDictionary(dictionary , config['density'] , envelope , mi , sigmaActual , increase , decay , shapeType)
+		sigmaActual = sigmaActual * sigmaParity
+
+	return dictionary
+
+
+def genericEnvelope(sigma , time , shapeType , cutOutput , *argv):
+	if len(argv) == 0:
 		mi = time[-1]/2
-	else:
+		increase = 0.5 / (sigma**2)
+		decay    = 1.5 / sigma
+	elif len(argv) == 1:
 		mi = argv[0]
-	
-	x  = (time - mi) / (sigma)
+		increase = 0.5 / (sigma**2)
+		decay    = 1.5 / sigma
+	elif len(argv) == 3:
+		mi       = argv[0]
+		increase = argv[1]
+		decay    = argv[2]
 
+	mainShapeType = int(shapeType / 10)
+	subShapeType  = int(shapeType % 10)
+
+	if mainShapeType == 1 or mainShapeType == 3:
+		(envelope , mi , increase , decay) = symetricEnvelope(sigma , mi , time , subShapeType , cutOutput)
+	elif mainShapeType == 2:
+		(envelope , mi , increase , decay) = asymetricEnvelope(increase , decay , mi , time , subShapeType , cutOutput)
+	return (envelope , mi , increase , decay)
+
+def symetricEnvelope(sigma , mi , time , subShapeType , cutOutput , *argv):
+	'''
+	subShapeType:int
+	1 - standard gaussian envelope
+	2 - envelope of type rectA (flatten on top - power of 8)
+	3 - envelope of type rectB (flatten on top - power of 16)
+	4 - envelope of type rectC (flatten on top - power of 32)
+
+	cutOutput:int
+	0 - return raw envelope, ie. size of the signal
+	1 - cut based on eps
+	'''
 	eps = 1e-4
+	x   = (time - mi) / (sigma)
 
-	if shapeType == 1:
-		y = np.exp(-1 * x**2 /2)
-	elif shapeType == 2:
-		y = np.exp(-7 * x**8 /8)
+	if len(argv) == 0 and subShapeType == 1:
+		alpha = -0.5
+	elif len(argv) == 0 and subShapeType != 1:
+		alpha = -0.125
+	elif len(argv) == 1:
+		alpha = argv[0]
 
-	if (len(argv) == 0 or len(argv)>1) and cutOutput == 1:
+	if subShapeType == 1:
+		y = np.exp(alpha * x**2)
+	elif subShapeType == 2:
+		y = np.exp(alpha * x**8)
+	elif subShapeType == 3:
+		y = np.exp(alpha * x**16)
+	elif subShapeType == 4:
+		y = np.exp(alpha * x**32)
+
+	if cutOutput == 1:
 		ind        = np.where(y>eps)[0]
 		whereFrom = ind[0]
 		whereTo   = ind[-1]
 		mi        = (whereFrom + whereTo)/2.0 - whereFrom + 1
-	
+
 	envelope  = y / np.linalg.norm(y)
-
 	if cutOutput == 1:
-		envelope = envelope[whereFrom:whereTo]
+		envelope  = envelope[whereFrom:whereTo]
 
-	return (envelope , mi)
+	return (envelope , mi , 0 , 0)
+	# increase and decay of a symetric shape should always be 0.
 
-def asymetricEnvelope(increase , decay , mi , time , shapeType=1 , cutOutput=1):
+def asymetricEnvelope(increase , decay , mi , time , subShapeType , cutOutput):
 	'''
-	shapeType:int
+	subShapeType:int
 	1 - envelope of type asymA (power of 2 for increasing slope)
 	2 - envelope of type asymB (power of 4 for increasing slope)
 	3 - envelope of type asymC (power of 8 for increasing slope)
@@ -178,13 +198,14 @@ def asymetricEnvelope(increase , decay , mi , time , shapeType=1 , cutOutput=1):
 	'''
 	eps = 1e-4
 	tmp = time - mi
-	if shapeType == 1:
+
+	if subShapeType == 1:
 		y = np.exp(-increase*(tmp**2) / (1 + decay * tmp * (np.arctan(1e16*tmp)+np.pi/2)/np.pi))
-	elif shapeType == 2:
+	elif subShapeType == 2:
 		y = np.exp(-increase*(tmp**4) / (1 + decay * tmp * (np.arctan(1e16*tmp)+np.pi/2)/np.pi))
-	elif shapeType == 3:
+	elif subShapeType == 3:
 		y = np.exp(-increase*(tmp**8) / (1 + decay * tmp * (np.arctan(1e16*tmp)+np.pi/2)/np.pi))
-	elif shapeType == 4:
+	elif subShapeType == 4:
 		y = np.exp(-increase*(tmp**8) / (1 + decay * (tmp**5) * (np.arctan(1e16*tmp)+np.pi/2)/np.pi))
 
 	if cutOutput == 1:
@@ -194,16 +215,16 @@ def asymetricEnvelope(increase , decay , mi , time , shapeType=1 , cutOutput=1):
 		mi         = mi + 1 - whereFrom
 	
 	envelope   = y / np.linalg.norm(y)
-
 	if cutOutput == 1:
-		envelope = envelope[whereFrom:whereTo]
-	return (envelope , mi)
+		envelope  = envelope[whereFrom:whereTo]
+
+	return (envelope , mi , increase , decay)
 
 def findWidth(envelope , samplingFrequency):
 	return np.where(envelope > 0.5 * envelope.max())[0].shape[0] / samplingFrequency
 
 def minSigEnerg(testSigma , testEnvelope , density , time , shapeType):
-	gx = gaussEnvelope(testSigma , time , shapeType , 0)[0]
+	gx = genericEnvelope(testSigma , time , shapeType , 0)[0]
 	return np.abs(1 - density - np.dot(gx , testEnvelope))
 
 def minPosEnerg(testEnvelope , density):
@@ -211,12 +232,14 @@ def minPosEnerg(testEnvelope , density):
 	where  = xcorr.argmin()
 	return np.abs(testEnvelope.size - where -1)
 
-def minEnvGauss(x,time,signal,shapeType):
-	envelope  = gaussEnvelope(x[0],time,shapeType,0,x[1])[0]
-	return -1 * np.abs(np.dot(signal , envelope))
+def bestEnvelope(x,time,signal,shapeType):
+	mainShapeType = int(shapeType / 10)
 
-def minEnvAsymetric(x,time,signal,shapeType):
-	envelope  = asymetricEnvelope(x[0],x[1],x[2],time,shapeType,0)[0]
+	if mainShapeType == 1:
+		envelope = genericEnvelope(x[0] , time , shapeType , 0 , x[1])[0]
+	elif mainShapeType == 2:
+		envelope = genericEnvelope(0 , time , shapeType , 0 , x[0] , x[1] , x[2])[0]
+		# sigma is not used in this case, so 0 is passed to the function
 	return -1 * np.abs(np.dot(signal , envelope))
 	
 def bestFreq(freq , signal , time):
