@@ -148,9 +148,11 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 	cutOutput      = 0
 
 	mainShapeType = int(shapeType / 10)
-	# subShapeType  = int(shapeType % 10)	# unnecessary
+	subShapeType  = int(shapeType % 10)
 
-	if mainShapeType == 1:
+	print shapeType
+
+	if mainShapeType == 1 and subShapeType == 1:
 		# case of standard gauss envelopes
 		tmpShapeType = 11
 		output       = minimize(fun=dic.bestEnvelope , x0=np.array([sigmaStart,miStart]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),tmpShapeType) , method='L-BFGS-B', bounds=[(minS,maxS),(0,signal.shape[0])] , tol=epsilon , options={'disp':0})
@@ -307,6 +309,7 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 ## -- TO HERE -- ##
 
 	elif mainShapeType == 3:
+		print 'Yup!'
 		# case of rectA envelopes (special symetric shapes)
 		typeTest    = []
 		envelopes   = []

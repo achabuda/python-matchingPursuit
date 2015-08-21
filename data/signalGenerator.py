@@ -24,6 +24,7 @@ University of Warsaw, July 06, 2015
 
 import numpy as np
 import scipy.stats as scp
+import matplotlib.pyplot as plt
 
 from src.dictionary import tukey
 
@@ -79,13 +80,13 @@ def generateTestSignal(gaborParams , sinusParams , asymetricWaveformsAParams , r
 	if rectangularWaveformsAParams is not None:
 		for rect in rectangularWaveformsAParams:
 			amplitude = rect[0]
-			freq      = rect[1] * 2 * np.pi
+			freq      = rect[1] #* 2 * np.pi
 			pos       = rect[2]
 			sigma     = rect[3]
 			r         = rect[4]
 			envelope  = tukey(sigma, r)
 			tmp       = np.squeeze(np.zeros((numberOfSamples,1)))
-			tmp[pos:pos+sigma] = amplitude * envelope * np.cos(freq * x)
+			tmp[pos:pos+sigma] = amplitude * envelope * np.cos(freq * np.arange(0,sigma))
 			
 			signal += tmp
 			ind1   += 1
@@ -157,20 +158,26 @@ def masterValues():
 	amplitude3      = 10
 	freq1           = 5.0
 	freq2           = 10.0
-	freq3           = 15.0
+	freq3           = 5.0
 	pos1            = 2.0
 	pos2            = 1000
 	pos3            = 1500
-	sigma           = 500
-	width           = 0.5
+	sigma1          = 0.5
+	sigma2          = 500
+	sigma3          = 300
 	asymetry        = 0.45
-	rectangularity  = 0.10
+	rectangularity  = 0.25
 
-	gaborParams     = np.array([[numberOfSamples,samplingFreq,amplitude1,pos1,width,freq1,0]])
-	asymetricParams = np.array([[amplitude2,freq2,pos2,sigma,asymetry]])
-	rectParams      = np.array([[amplitude3,freq3,pos3,sigma,rectangularity]])
-	sinusParams     = np.array([[2.0,5.0,0.0]])
+	# tmp = amplitude3 * tukey(sigma3 , rectangularity) * np.cos(10*np.arange(0,sigma3))
+	# plt.figure()
+	# plt.plot(tmp)
+	# plt.show()
+
+	gaborParams     = np.array([[numberOfSamples,samplingFreq,amplitude1,pos1,sigma1,freq1,0]])
+	asymetricParams = np.array([[amplitude2,freq2,pos2,sigma2,asymetry]])
+	rectParams      = np.array([[amplitude3,freq3,pos3,sigma3,rectangularity]])
+	#sinusParams     = np.array([[2.0,5.0,0.0]])
+	sinusParams     = None
 	
 	noiseRatio      = 0.0
-	#return(gaborParams,None,None,None,noiseRatio,samplingFreq,numberOfSamples)
 	return(gaborParams , sinusParams , asymetricParams , rectParams , noiseRatio , samplingFreq , numberOfSamples)

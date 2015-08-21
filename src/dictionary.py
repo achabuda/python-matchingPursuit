@@ -94,11 +94,11 @@ def generateBasicStructures(time , config):
 	return dictionary
 
 def generateRectangularEnvelopes(dictionary , time , config):
-	shapeType = 31
+	shapeType = 32
 	sigmaStart = (config['minS'] + config['maxS'])/2
 	gc         = genericEnvelope(sigmaStart , time , shapeType , 0)[0]
 	# gc is of rectA type in that case
-	sigmaStop  = fmin(func=minSigEnerg , x0=sigmaStart, args=(gc,config['density'],time,31) , disp=0)[0]
+	sigmaStop  = fmin(func=minSigEnerg , x0=sigmaStart, args=(gc,config['density'],time,shapeType) , disp=0)[0]
 
 	sigmaActual = config['minS']
 	sigmaParity = sigmaStop / sigmaStart
@@ -108,7 +108,7 @@ def generateRectangularEnvelopes(dictionary , time , config):
 	threshold = config['maxS'] * np.sqrt(sigmaParity)
 
 	while sigmaActual < threshold:
-		(envelope , mi , increase , decay) = genericEnvelope(sigmaActual , time , 31 , 1)
+		(envelope , mi , increase , decay) = genericEnvelope(sigmaActual , time , shapeType , 1)
 		dictionary = appendToDictionary(dictionary , config['density'] , envelope , mi , sigmaActual , increase , decay , shapeType)
 		sigmaActual = sigmaActual * sigmaParity
 

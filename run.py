@@ -192,14 +192,14 @@ if __name__ == '__main__':
 	# config for a dictionary
 	flags = {}
 	flags['useAsymA'] = 1
-	flags['useRectA'] = 0
+	flags['useRectA'] = 1
 	
 	config = {}
 	config['flags']                            = flags
 	config['minS']                             = 32
 	config['maxS']                             = 1000
 	config['density']                          = 0.01
-	config['maxNumberOfIterations']            = 3
+	config['maxNumberOfIterations']            = 4
 	config['minEnergyExplained']               = 0.99
 	config['samplingFrequency']                = samplingFrequency
 	config['minNFFT']                          = 256 # 2*samplingFrequency
@@ -211,18 +211,19 @@ if __name__ == '__main__':
 	plt.figure()
 	plt.subplot(5,1,1)
 	plt.plot(time,signal,'k')
-
-	plt.subplot(5,1,2)
 	plt.plot(time,sum(book['reconstruction']).real , 'r')
 
-	plt.subplot(5,1,3)
+	plt.subplot(5,1,2)
 	plt.plot(time,book['reconstruction'][0].real , 'r')
 
-	plt.subplot(5,1,4)
+	plt.subplot(5,1,3)
 	plt.plot(time,book['reconstruction'][1].real , 'r')
 
-	plt.subplot(5,1,5)
+	plt.subplot(5,1,4)
 	plt.plot(time,book['reconstruction'][2].real , 'r')
+
+	plt.subplot(5,1,5)
+	plt.plot(time,book['reconstruction'][3].real , 'r')
 	
 	plt.show()
 
