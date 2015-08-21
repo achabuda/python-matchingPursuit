@@ -192,7 +192,7 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 			decay          = decaySym
 			sigma          = sigmaSym
 			finalShapeType = 11 			# Standard Gauss, in fact
-
+# FROM HERE
 		output = minimize(fun=dic.bestFreq , x0=freqStart , args=(signal*envelope,timeShifted) , method='L-BFGS-B' , tol=epsilon , options={'disp':0})
 		newFreq      = output['x'][0]
 		amplitudeTmp = np.dot(signal , envelope*np.exp(-1j*newFreq*timeShifted))
@@ -211,14 +211,14 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 		 	amplitudeActual = np.abs(amplitude)
 
 		 	if finalShapeType == 11:
-		 		output   = minimize(fun=dic.bestEnvelope , x0=np.array([sigma,mi]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),finalShapeType) , method='L-BFGS-B', bounds=[(minS,maxS),(0,signal.shape[0])] , tol=epsilon , options={'disp':0})
+		 		output   = minimize(fun=dic.bestEnvelope , x0=np.array([sigma,mi]) , args=(time,signal*np.exp(-1j*freq*timeShifted),finalShapeType) , method='L-BFGS-B', bounds=[(minS,maxS),(0,signal.shape[0])] , tol=epsilon , options={'disp':0})
 		 		sigma    = output['x'][0]
 		 		mi       = output['x'][1]
 		 		increase = 0
 		 		decay    = 0
 		 		envelope = dic.genericEnvelope(sigma,time,finalShapeType,cutOutput,mi)[0]
 		 	else:
-				output   = minimize(fun=dic.bestEnvelope , x0=np.array([mi,increase,decay]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),finalShapeType) , method='L-BFGS-B', bounds=[(0,signal.shape[0]),(minI,maxI),(minD,maxD)] , tol=epsilon , options={'disp':0})
+				output   = minimize(fun=dic.bestEnvelope , x0=np.array([mi,increase,decay]) , args=(time,signal*np.exp(-1j*freq*timeShifted),finalShapeType) , method='L-BFGS-B', bounds=[(0,signal.shape[0]),(minI,maxI),(minD,maxD)] , tol=epsilon , options={'disp':0})
 				mi       = output['x'][0]
 				increase = output['x'][1]
 				decay    = output['x'][2]
@@ -237,11 +237,11 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 		 	else:
 		 		reconstruction  = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		 		return (freq,amplitude,sigma,increase,decay,mi,envelope,reconstruction,finalShapeType)
+# TO HERE
 
 	elif mainShapeType == 2:
 		# case of asymA envelopes (basic type of asymetry)
 
-		sigma       = sigmaStart   # not going to change
 		subTypeTest = []
 		envelopes   = []
 		outputs     = []
@@ -260,13 +260,14 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 		envelope  = envelopes[ind]
 		amplitude = subTypeTest[ind]
 		output    = outputs[ind]
-		increase  = output[0]
-		decay     = output[1]
-		mi        = output[2]
+		mi        = output[0]
+		increase  = output[1]
+		decay     = output[2]
+		sigma     = np.sqrt(1./2./increase)
 
 		finalShapeType = 10 * mainShapeType + subTypes2test[ind]
 		
-		## -- FROM HERE -- ##
+## -- FROM HERE -- ##
 		output = minimize(fun=dic.bestFreq , x0=freqStart , args=(signal*envelope,timeShifted) , method='L-BFGS-B' , tol=epsilon , options={'disp':0})
 		newFreq      = output['x'][0]
 		amplitudeTmp = np.dot(signal , envelope*np.exp(-1j*newFreq*timeShifted))
@@ -284,7 +285,7 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 		while (np.abs(amplitude) - amplitudeActual)/amplitudeActual > epsilon:
 		 	amplitudeActual = np.abs(amplitude)
 
-			output   = minimize(fun=dic.bestEnvelope , x0=np.array([mi,increase,decay]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),finalShapeType) , method='L-BFGS-B', bounds=[(0,signal.shape[0]),(minI,maxI),(minD,maxD)] , tol=epsilon , options={'disp':0})
+			output   = minimize(fun=dic.bestEnvelope , x0=np.array([mi,increase,decay]) , args=(time,signal*np.exp(-1j*freq*timeShifted),finalShapeType) , method='L-BFGS-B', bounds=[(0,signal.shape[0]),(minI,maxI),(minD,maxD)] , tol=epsilon , options={'disp':0})
 			mi       = output['x'][0]
 			increase = output['x'][1]
 			decay    = output['x'][2]
@@ -303,25 +304,90 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 		 	else:
 		 		reconstruction  = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		 		return (freq,amplitude,sigma,increase,decay,mi,envelope,reconstruction,finalShapeType)
+## -- TO HERE -- ##
 
+	elif mainShapeType == 3:
+		# case of rectA envelopes (special symetric shapes)
+		typeTest    = []
+		envelopes   = []
+		outputs     = []
+		types2test  = [12,13,14,21,22,24]
 
-	## -- TO HERE -- ##
+		for shapeType2test in types2test:
+			main = int(shapeType2test / 10)
+			if main == 1:
+				output = minimize(fun=dic.bestEnvelope , x0=np.array([sigmaStart,miStart]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),shapeType2test) , method='L-BFGS-B', bounds=[(minS,maxS),(0,signal.shape[0])] , tol=epsilon , options={'disp':0})
+				output['x'] = [output['x'][1] , 0.0 , 0.0 , output['x'][0]]	# mi,increase,decay,sigma
+				envelopes.append(dic.genericEnvelope(output['x'][0],time,shapeType2test,cutOutput,output['x'][1])[0])
+			elif main == 2:
+				output = minimize(fun=dic.bestEnvelope , x0=np.array([miStart,increaseStart,decayStart]) , args=(time,signal*np.exp(-1j*freqStart*timeShifted),shapeType2test) , method='L-BFGS-B', bounds=[(0,signal.shape[0]),(minI,maxI),(minD,maxD)] , tol=epsilon , options={'disp':0})
+				output['x'] = [output['x'][0] , output['x'][1] , output['x'][2] , np.sqrt(1./2./output['x'][1])] # mi,increase,decay,sigma
+				envelopes.append(dic.genericEnvelope(0,time,shapeType2test,cutOutput,output['x'][0],output['x'][1],output['x'][2])[0])
+			outputs.append(output['x'])
+			amplitude = np.dot(signal , envelopes[-1] * np.exp(-1j*freqStart*timeShifted))
+			subTypeTest.append(amplitude)
+		subTypeTest = np.array(subTypeTest , dtype='complex')
+		ind         = subTypeTest.argmax()
+		
+		envelope  = envelopes[ind]
+		amplitude = subTypeTest[ind]
+		output    = outputs[ind]
+		mi        = output[0]
+		increase  = output[1]
+		decay     = output[2]
+		sigma     = output[3]
 
-	# else:
-	# 	timeShifted    = time - whereStart
-	# 	freq           = freqStart
-	# 	amplitude      = amplitudeStart
-	# 	sigma          = sigmaStart
-	# 	mi             = miStart
+		finalShapeType = types2test[ind]
+		mainShapeType  = int(finalShapeType / 10)
 
-	# 	if shapeType == 2:
-	# 		envelope = dic.gaussEnvelope(sigma,time,shapeType,0,miStart)[0]
-	# 	elif shapeType == 3:
-	# 		increase = 0.5 / (sigma**2)
-	# 		decay    = 1.5 / sigma
-	# 		envelope = dic.asymetricEnvelope(increase , decay , miStart , time , 1 , 0)[0]
-	# 	reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
+## -- FROM HERE -- ##
+		output = minimize(fun=dic.bestFreq , x0=freqStart , args=(signal*envelope,timeShifted) , method='L-BFGS-B' , tol=epsilon , options={'disp':0})
+		newFreq      = output['x'][0]
+		amplitudeTmp = np.dot(signal , envelope*np.exp(-1j*newFreq*timeShifted))
 
+		if np.abs(amplitude) < np.abs(amplitudeTmp):
+			amplitude      = amplitudeTmp
+			freq           = newFreq
+			# reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
+		else:
+			reconstruction = amplitude * envelope * np.exp(1j*freqStart*timeShifted)
+			return (freqStart,amplitude,sigma,increase,decay,mi,envelope,reconstruction,finalShapeType)
+
+		amplitudeActual = np.abs(amplitudeStart)
+
+		while (np.abs(amplitude) - amplitudeActual)/amplitudeActual > epsilon:
+		 	amplitudeActual = np.abs(amplitude)
+
+		 	if mainShapeType == 1:
+		 		output   = minimize(fun=dic.bestEnvelope , x0=np.array([sigma,mi]) , args=(time,signal*np.exp(-1j*freq*timeShifted),shapeType2test) , method='L-BFGS-B', bounds=[(minS,maxS),(0,signal.shape[0])] , tol=epsilon , options={'disp':0})
+				sigma    = output['x'][0]
+				mi       = output['x'][1]
+				increase = 0
+		 		decay    = 0
+		 		envelope = dic.genericEnvelope(sigma,time,finalShapeType,cutOutput,mi)[0]
+		 	elif mainShapeType == 2:
+		 		output   = minimize(fun=dic.bestEnvelope , x0=np.array([mi,increase,decay]) , args=(time,signal*np.exp(-1j*freq*timeShifted),shapeType2test) , method='L-BFGS-B', bounds=[(0,signal.shape[0]),(minI,maxI),(minD,maxD)] , tol=epsilon , options={'disp':0})
+		 		mi       = output['x'][0]
+				increase = output['x'][1]
+				decay    = output['x'][2]
+				sigma    = np.sqrt(1./2./increase)
+				envelope = dic.genericEnvelope(sigma,time,finalShapeType,cutOutput,mi,increase,decay)[0]
+
+			amplitude    = np.dot(signal , envelope*np.exp(-1j*freq*timeShifted))
+		 	output       = minimize(fun=dic.bestFreq , x0=freq , args=(signal*envelope,timeShifted) , method='L-BFGS-B' , tol=epsilon , options={'disp':0})
+			newFreq      = output['x'][0]
+		 	amplitudeTmp = np.dot(signal , envelope*np.exp(-1j*newFreq*timeShifted))
+
+		 	if np.abs(amplitude) < np.abs(amplitudeTmp):
+		 		freq           = newFreq
+		 		amplitude      = amplitudeTmp
+		 		# reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
+		 	else:
+		 		reconstruction  = amplitude * envelope * np.exp(1j*freq*timeShifted)
+		 		return (freq,amplitude,sigma,increase,decay,mi,envelope,reconstruction,finalShapeType)
+## -- TO HERE -- ##
+
+	reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
 	return (freq,amplitude,sigma,increase,decay,mi,envelope,reconstruction,finalShapeType)
 
 
