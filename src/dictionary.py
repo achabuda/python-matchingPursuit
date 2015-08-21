@@ -94,9 +94,9 @@ def generateBasicStructures(time , config):
 	return dictionary
 
 def generateRectangularEnvelopes(dictionary , time , config):
-
+	shapeType = 31
 	sigmaStart = (config['minS'] + config['maxS'])/2
-	gc         = gaussEnvelope(sigmaStart , time , 31 , 0)[0]
+	gc         = genericEnvelope(sigmaStart , time , shapeType , 0)[0]
 	# gc is of rectA type in that case
 	sigmaStop  = fmin(func=minSigEnerg , x0=sigmaStart, args=(gc,config['density'],time,31) , disp=0)[0]
 
