@@ -28,6 +28,7 @@ import numpy             as np
 import matplotlib.pyplot as plt
 
 from scipy.signal import resample
+from dictionary   import tukey
 
 
 def plotIter(book,signal,time,number):
@@ -97,38 +98,3 @@ def halfWidthGauss(z):
 	t     = np.arange(1,z.shape[0])
 
 	return mz * np.exp(-1*(t-mzi)**2 / 2 / (sigma**2))
-
-def tukey(M, alpha=0.5, sym=True):
-    '''
-    We shoud just use scipy.signal.tukey from scipy 0.17+
-    This is copied from there, sorry...
-    '''
-    if M < 1:
-        return np.array([])
-    if M == 1:
-        return np.ones(1, 'd')
-
-    if alpha <= 0:
-        return np.ones(M, 'd')
-    elif alpha >= 1.0:
-        return hann(M, sym=sym)
-
-    odd = M % 2
-    if not sym and not odd:
-        M = M + 1
-
-    n = np.arange(0, M)
-    width = int(np.floor(alpha*(M-1)/2.0))
-    n1 = n[0:width+1]
-    n2 = n[width+1:M-width-1]
-    n3 = n[M-width-1:]
-
-    w1 = 0.5 * (1 + np.cos(np.pi * (-1 + 2.0*n1/alpha/(M-1))))
-    w2 = np.ones(n2.shape)
-    w3 = 0.5 * (1 + np.cos(np.pi * (-2.0/alpha + 1 + 2.0*n3/alpha/(M-1))))
-
-    w = np.concatenate((w1, w2, w3))
-
-    if not sym and not odd:
-        w = w[:-1]
-    return w

@@ -25,13 +25,16 @@ University of Warsaw, July 06, 2015
 import numpy as np
 import scipy.stats as scp
 
+from src.dictionary import tukey
 
-def generateTestSignal(gaborParams , sinusParams , asymetricWaveformsAParams , numberOfSamples , samplingFrequency , noiseRatio , silenceFlag = 1):
+
+def generateTestSignal(gaborParams , sinusParams , asymetricWaveformsAParams , rectangularWaveformsAParams , numberOfSamples , samplingFrequency , noiseRatio , silenceFlag = 1):
 	'''
-	gaborParams         - numpy array (as for gaborFunction) or None
-	sinusParams         - numpy array of amplitude-frequency-phase trios or None
-	asymetricWaveformsA - numpy array of  None
-	noiseRatio  - float (0-1)
+	gaborParams                 - numpy array (as for gaborFunction) or None
+	sinusParams                 - numpy array of amplitude-frequency-phase trios or None
+	asymetricWaveformsA         - numpy array of  ...
+	rectangularWaveformsAParams - ...
+	noiseRatio                  - float (0 - 1)
 	'''
 	time            = np.arange(0,numberOfSamples)
 	signal          = np.squeeze(np.zeros((numberOfSamples,1)))
@@ -72,6 +75,23 @@ def generateTestSignal(gaborParams , sinusParams , asymetricWaveformsAParams , n
 	if silenceFlag == 0:
 		print '{} asymmetrical waveforms generated'.format(ind1)
 
+	ind1 = 0
+	if rectangularWaveformsAParams is not None:
+		for rect in rectangularWaveformsAParams:
+			amplitude = rect[0]
+			freq      = rect[1] * 2 * np.pi
+			pos       = rect[2]
+			sigma     = rect[3]
+			r         = rect[4]
+			envelope  = tukey(sigma, r)
+			tmp       = np.squeeze(np.zeros((numberOfSamples,1)))
+			tmp[pos:pos+sigma] = amplitude * envelope * np.cos(freq * x)
+			
+			signal += tmp
+			ind1   += 1
+	if silenceFlag == 0:
+		print '{} asymmetrical waveforms generated'.format(ind1)
+
 	return (signal , time)
 
 def gaborFunction(params):
@@ -96,7 +116,7 @@ def gaborFunction(params):
 	signal          = np.array(amplitude * np.exp(-np.pi*((time-position)/width)**2) * np.cos(frequency*(time-position)+phase))
 	return (signal , time)
 
-def defaultValues():
+def simpleValues():
 	numberOfSamples = 1000
 	samplingFreq    = 250.0
 	amplitude       = 12.0
@@ -110,7 +130,7 @@ def defaultValues():
 	gaborParams = np.array([[numberOfSamples,samplingFreq,amplitude,position1,width,frequency1,phase],[numberOfSamples,samplingFreq,amplitude,position2,width,frequency2,phase]])
 	sinusParams = np.array([[5.0,5.0,0.0]])
 	noiseRatio  = 0.0
-	return (gaborParams , sinusParams , None , noiseRatio , samplingFreq , numberOfSamples)
+	return (gaborParams , sinusParams , None , None , noiseRatio , samplingFreq , numberOfSamples)
 
 def advancedValues():
 	numberOfSamples = 1000
@@ -125,9 +145,32 @@ def advancedValues():
 	asymetry        = 0.45
 
 	asymetricParams = np.array([[amplitude1,freq1,pos1,sigma,asymetry],[amplitude2,freq2,pos2,sigma,asymetry]])
-	#asymetricParams = np.array([[amplitude1,freq1,pos1,sigma,asymetry]])
 	sinusParams     = np.array([[2.0,5.0,0.0]])
-	#sinusParams = None
 	noiseRatio      = 0.0
-	return(None , sinusParams , asymetricParams , noiseRatio , samplingFreq , numberOfSamples)
+	return(None , sinusParams , asymetricParams , None , noiseRatio , samplingFreq , numberOfSamples)
 
+def masterValues():
+	numberOfSamples = 2000
+	samplingFreq    = 250.0
+	amplitude1      = 15
+	amplitude2      = 20
+	amplitude3      = 10
+	freq1           = 5.0
+	freq2           = 10.0
+	freq3           = 15.0
+	pos1            = 2.0
+	pos2            = 1000
+	pos3            = 1500
+	sigma           = 500
+	width           = 0.5
+	asymetry        = 0.45
+	rectangularity  = 0.10
+
+	gaborParams     = np.array([[numberOfSamples,samplingFreq,amplitude1,pos1,width,freq1,0]])
+	asymetricParams = np.array([[amplitude2,freq2,pos2,sigma,asymetry]])
+	rectParams      = np.array([[amplitude3,freq3,pos3,sigma,rectangularity]])
+	sinusParams     = np.array([[2.0,5.0,0.0]])
+	
+	noiseRatio      = 0.0
+	#return(gaborParams,None,None,None,noiseRatio,samplingFreq,numberOfSamples)
+	return(gaborParams , sinusParams , asymetricParams , rectParams , noiseRatio , samplingFreq , numberOfSamples)

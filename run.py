@@ -23,7 +23,7 @@ University of Warsaw, July 06, 2015
 '''
 
 from src.dictionary       import generateDictionary
-from data.signalGenerator import generateTestSignal , defaultValues , advancedValues
+from data.signalGenerator import generateTestSignal , simpleValues , advancedValues , masterValues
 from src.processing       import calculateMP
 from src.drawing          import calculateTFMap
 
@@ -177,11 +177,11 @@ if __name__ == '__main__':
 	
 	# create a synthetic signal
 	
-	# (gaborParams , sinusParams , asymetricParams , noiseRatio , samplingFrequency , numberOfSamples) = defaultValues()
+	# (gaborParams , sinusParams , asymetricParams , noiseRatio , samplingFrequency , numberOfSamples) = simpleValues()
 	# (signal1,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,numberOfSamples,samplingFrequency,noiseRatio)
 
-	(gaborParams , sinusParams , asymetricParams , noiseRatio , samplingFrequency , numberOfSamples) = advancedValues()
-	(signal,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,numberOfSamples,samplingFrequency,noiseRatio)
+	(gaborParams , sinusParams , asymetricParams , rectParams , noiseRatio , samplingFrequency , numberOfSamples) = masterValues()
+	(signal,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,rectParams,numberOfSamples,samplingFrequency,noiseRatio)
 
 	# quick saving to matlab
 	#tmp = {}
