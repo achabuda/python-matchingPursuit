@@ -116,6 +116,17 @@ def generateRectangularEnvelopes(dictionary , time , config):
 
 
 def genericEnvelope(sigma , time , shapeType , cutOutput , *argv):
+	
+	mainShapeType = int(shapeType / 10)
+	subShapeType  = int(shapeType % 10)
+
+	if mainShapeType == 1:
+			alpha = -0.5
+	elif mainShapeType == 2:
+		alpha = 0
+	elif mainShapeType == 3:
+		alpha = -0.125
+
 	if len(argv) == 0:
 		mi = time[-1]/2
 		increase = 0.5 / (sigma**2)
@@ -124,18 +135,20 @@ def genericEnvelope(sigma , time , shapeType , cutOutput , *argv):
 		mi = argv[0]
 		increase = 0.5 / (sigma**2)
 		decay    = 1.5 / sigma
+	elif len(argv) == 2:
+		mi    = argv[0]
+		alpha = argv[1]
 	elif len(argv) == 3:
 		mi       = argv[0]
 		increase = argv[1]
 		decay    = argv[2]
 
-	mainShapeType = int(shapeType / 10)
-	subShapeType  = int(shapeType % 10)
-
-	if mainShapeType == 1 or mainShapeType == 3:
+	if mainShapeType == 1:
 		(envelope , mi , increase , decay) = symetricEnvelope(sigma , mi , time , subShapeType , cutOutput)
 	elif mainShapeType == 2:
 		(envelope , mi , increase , decay) = asymetricEnvelope(increase , decay , mi , time , subShapeType , cutOutput)
+	elif mainShapeType == 3:
+		(envelope , mi , increase , decay) = symetricEnvelope(sigma , mi , time , subShapeType , cutOutput , alpha)
 	return (envelope , mi , increase , decay)
 
 def symetricEnvelope(sigma , mi , time , subShapeType , cutOutput , *argv):
@@ -270,12 +283,15 @@ def minPosEnerg(testEnvelope , density):
 
 def bestEnvelope(x,time,signal,shapeType):
 	mainShapeType = int(shapeType / 10)
+	subShapeType  = int(shapeType % 10)
 
 	if mainShapeType == 1:
 		envelope = genericEnvelope(x[0] , time , shapeType , 0 , x[1])[0]
 	elif mainShapeType == 2:
 		envelope = genericEnvelope(0 , time , shapeType , 0 , x[0] , x[1] , x[2])[0]
 		# sigma is not used in this case, so 0 is passed to the function
+	elif mainShapeType == 3:
+		envelope = genericEnvelope(x[0] , time , shapeType , 0 , x[1] , x[2])[0]
 	return -1 * np.abs(np.dot(signal , envelope))
 	
 def bestFreq(freq , signal , time):

@@ -226,32 +226,3 @@ if __name__ == '__main__':
 	plt.plot(time,book['reconstruction'][3].real , 'r')
 	
 	plt.show()
-
-
-	#plt.figure()
-	#plt.imshow(maps,extent=[0, 1, 0, 1])
-
-	# plt.subplot(2,1,2)
-	# plt.plot(time , book['reconstruction'][13].real)
-	# plt.show()
-
-	# plt.subplot(5,1,3)
-	# try:
-	# 	plt.plot(time , book['reconstruction'][1].real)
-	# except KeyError:
-	# 	pass
-
-	# plt.subplot(5,1,4)
-	# try:
-	# 	plt.plot(time , book['reconstruction'][2].real)
-	# except KeyError:
-	# 	pass
-
-	# plt.subplot(5,1,5)
-	# try:
-	# 	plt.plot(time , book['reconstruction'][3].real)
-	# except KeyError:
-	# 	pass
-	
-	# plt.show()
-

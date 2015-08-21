@@ -168,16 +168,10 @@ def masterValues():
 	asymetry        = 0.45
 	rectangularity  = 0.25
 
-	# tmp = amplitude3 * tukey(sigma3 , rectangularity) * np.cos(10*np.arange(0,sigma3))
-	# plt.figure()
-	# plt.plot(tmp)
-	# plt.show()
-
 	gaborParams     = np.array([[numberOfSamples,samplingFreq,amplitude1,pos1,sigma1,freq1,0]])
 	asymetricParams = np.array([[amplitude2,freq2,pos2,sigma2,asymetry]])
 	rectParams      = np.array([[amplitude3,freq3,pos3,sigma3,rectangularity]])
-	#sinusParams     = np.array([[2.0,5.0,0.0]])
-	sinusParams     = None
+	sinusParams     = np.array([[2.0,5.0,0.0]])
 	
 	noiseRatio      = 0.0
 	return(gaborParams , sinusParams , asymetricParams , rectParams , noiseRatio , samplingFreq , numberOfSamples)
