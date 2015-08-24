@@ -61,11 +61,11 @@ if __name__ == '__main__':
 	config['minNFFT']                          = 256 # 2*samplingFrequency
 	config['flags']['useGradientOptimization'] = 1
 	# config for display
-	config['flags']['drawMeanMap']    = 0
-	config['flags']['saveMeanMap']    = 0
+	config['flags']['drawMeanMap']    = 1
+	config['flags']['saveMeanMap']    = 1
 
-	config['flags']['drawSingleMaps'] = 0
-	config['flags']['saveSingleMaps'] = 0
+	config['flags']['drawSingleMaps'] = 1
+	config['flags']['saveSingleMaps'] = 1
 	
 	config['mapFreqRange']    = [0.0 , 16.0]
 	config['mapStructFreqs']  = [0.0 , 64.0]
@@ -79,7 +79,7 @@ if __name__ == '__main__':
 	# mask[80] = 0
 
 	ind2 = 0
-	for ind1 in arr[mask]:
+	for ind1 in arr[mask]: #np.arange(0,1):
 		ind2 += 1
 		print 'Calculation for {} trial:'.format(ind1)
 	 	signal      = data[:,ind1]
@@ -93,10 +93,9 @@ if __name__ == '__main__':
 	 		maps = np.zeros(TFmap.shape,dtype='complex')
 	 	maps += TFmap
 	 	
-	 	results[nameOfStruct]['mapM'] = TFmap
+	 	results[nameOfStruct]['mapM'] = -1 * TFmap
 	 	results[nameOfStruct]['mapT'] = time
 	 	results[nameOfStruct]['mapF'] = F
-
 
 	 	if config['flags']['drawSingleMaps'] == 1:
 	 		gs = gridspec.GridSpec(3,1,height_ratios=[3,1,1])

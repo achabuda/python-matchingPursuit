@@ -82,7 +82,8 @@ def calculateTFMap(book,time,samplingFrequency,mapType,*argv):
 			if mapType == 0:
 				envelope = np.abs(atom['envelope']) * np.abs(atom['amplitude'])
 			elif mapType == 1:
-				envelope = atom['reconstruction']
+				envelope = atom['reconstruction'][:]
+
 			envelope = resample(envelope , timeFinal.shape[0])
 
 			timeFreqMap += np.outer(z , envelope)
