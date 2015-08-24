@@ -39,7 +39,12 @@ def plotIter(book,signal,time,number):
 	plt.plot(time,book['reconstruction'][number].real)
 	plt.show()
 
-def calculateTFMap(book,time,samplingFrequency,*argv):
+def calculateTFMap(book,time,samplingFrequency,mapType,*argv):
+	'''
+	mapType:int
+	- 0 - realvalued amplitude t-f map
+	- 1 - comlex amplitude t-f map 
+	'''
 	if len(argv) == 2:
 		mapStructFreqs  = argv[0]
 		mapStructWidths = argv[1]
@@ -56,13 +61,16 @@ def calculateTFMap(book,time,samplingFrequency,*argv):
 		timeFinal = (time[-1] - time[0]) / samplingFrequency * np.linspace(0,1,mapTsize)
 
 	frequenciesFinal = samplingFrequency / 2 * np.linspace(0,1,mapFsize)
-	timeFreqMap      = np.zeros([frequenciesFinal.shape[0] , timeFinal.shape[0]])
+	timeFreqMap      = np.zeros([frequenciesFinal.shape[0] , timeFinal.shape[0]] , dtype='complex')
 
 	smoothingWindow = tukey(time.shape[0] , 0.1)
 
 	for index, atom in book.iterrows():
 		if (atom['freq'] > mapStructFreqs[0] and atom['freq'] < mapStructFreqs[1]) and (atom['width'] > mapStructWidths[0] and atom['width'] < mapStructWidths[1]):
-			timeCourse = atom['reconstruction'][:].real
+			if mapType == 0:
+				timeCourse = atom['reconstruction'][:].real
+			elif mapType == 1:
+				timeCourse = atom['reconstruction'][:]
 			signal2fft = timeCourse * smoothingWindow
 
 			zz = np.fft.fft(signal2fft)
@@ -71,7 +79,10 @@ def calculateTFMap(book,time,samplingFrequency,*argv):
 			z  = resample(z, frequenciesFinal.shape[0])
 			z  = z / z.max()
 
-			envelope = np.abs(atom['envelope']) * np.abs(atom['amplitude'])
+			if mapType == 0:
+				envelope = np.abs(atom['envelope']) * np.abs(atom['amplitude'])
+			elif mapType == 1:
+				envelope = atom['reconstruction']
 			envelope = resample(envelope , timeFinal.shape[0])
 
 			timeFreqMap += np.outer(z , envelope)

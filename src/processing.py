@@ -151,8 +151,6 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 	mainShapeType = int(shapeType / 10)
 	subShapeType  = int(shapeType % 10)
 
-	print shapeType
-
 	if mainShapeType == 1 and subShapeType == 1:
 		# case of standard gauss envelopes
 		tmpShapeType = 11
