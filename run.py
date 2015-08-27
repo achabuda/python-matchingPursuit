@@ -55,7 +55,7 @@ if __name__ == '__main__':
 	config['maxS']    = 128
 	config['density'] = 0.001
 	# config for Matching Pursuit calculations
-	config['maxNumberOfIterations']            = 5
+	config['maxNumberOfIterations']            = 40
 	config['minEnergyExplained']               = 0.9999
 	config['samplingFrequency']                = samplingFrequency
 	config['minNFFT']                          = 256 # 2*samplingFrequency
@@ -67,8 +67,8 @@ if __name__ == '__main__':
 	config['flags']['drawSingleMaps'] = 0
 	config['flags']['saveSingleMaps'] = 0
 	
-	config['mapFreqRange']    = [0.0 , 16.0]
-	config['mapStructFreqs']  = [0.0 , 64.0]
+	config['mapFreqRange']    = [0.0 , 20.0]
+	config['mapStructFreqs']  = [0.0 , 20.0]
 	config['mapStructSigmas'] = [0.0 , 4.0]
 
 	dictionary = generateDictionary(time , config)
@@ -79,7 +79,7 @@ if __name__ == '__main__':
 	# mask[80] = 0
 
 	ind2 = 0
-	for ind1 in np.arange(0,1): #arr[mask]:
+	for ind1 in arr: #np.arange(0,1): #arr[mask]:
 		ind2 += 1
 		print 'Calculation for {} trial:'.format(ind1)
 	 	signal      = data[:,ind1]
@@ -93,7 +93,7 @@ if __name__ == '__main__':
 	 		maps = np.zeros(TFmap.shape,dtype='complex')
 	 	maps += TFmap
 
-	 	results[nameOfStruct]['mapM'] = -1 * TFmap
+	 	results[nameOfStruct]['mapM'] = TFmap
 	 	results[nameOfStruct]['mapT'] = time
 	 	results[nameOfStruct]['mapF'] = F
 
@@ -133,7 +133,7 @@ if __name__ == '__main__':
 
 	maps = maps / ind2
 
-	nameOfOutputFile = '../Jena-burstSupression/THIS_' + subject + '.mat'
+	nameOfOutputFile = '../Jena-burstSupression/THIS_ASYMETRIC_' + subject + '.mat'
 	savemat(nameOfOutputFile , results)
 
 	if config['flags']['drawMeanMap'] == 1:
@@ -170,58 +170,3 @@ if __name__ == '__main__':
 	####################################################
 	####################################################
 	############# END OF JENA ##########################
-
-	#####################################################################
-	###### SIMULATIONS ##################################################
-	
-	# create a synthetic signal
-	
-	# (gaborParams , sinusParams , asymetricParams , rectParams , noiseRatio , samplingFrequency , numberOfSamples) = simpleValues()
-	# (signal1,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,rectParams,numberOfSamples,samplingFrequency,noiseRatio)
-
-	# (gaborParams , sinusParams , asymetricParams , rectParams , noiseRatio , samplingFrequency , numberOfSamples) = masterValues()
-	# (signal,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,rectParams,numberOfSamples,samplingFrequency,noiseRatio)
-
-	# quick saving to matlab
-	#tmp = {}
-	#tmp['signal'] = signal
-	#tmp['czas']   = time
-	#savemat('../syg_asym.mat' , tmp)
-
-	# config for a dictionary
-	# flags = {}
-	# flags['useAsymA'] = 1
-	# flags['useRectA'] = 1
-	
-	# config = {}
-	# config['flags']                            = flags
-	# config['minS']                             = 32
-	# config['maxS']                             = 1000
-	# config['density']                          = 0.01
-	# config['maxNumberOfIterations']            = 4
-	# config['minEnergyExplained']               = 0.99
-	# config['samplingFrequency']                = samplingFrequency
-	# config['minNFFT']                          = 256 # 2*samplingFrequency
-	# config['flags']['useGradientOptimization'] = 1
-	
-	# dictionary = generateDictionary(time , config)
-	# book       = calculateMP(dictionary , signal , config)
-
-	# plt.figure()
-	# plt.subplot(5,1,1)
-	# plt.plot(time,signal,'k')
-	# plt.plot(time,sum(book['reconstruction']).real , 'r')
-
-	# plt.subplot(5,1,2)
-	# plt.plot(time,book['reconstruction'][0].real , 'r')
-
-	# plt.subplot(5,1,3)
-	# plt.plot(time,book['reconstruction'][1].real , 'r')
-
-	# plt.subplot(5,1,4)
-	# plt.plot(time,book['reconstruction'][2].real , 'r')
-
-	# plt.subplot(5,1,5)
-	# plt.plot(time,book['reconstruction'][3].real , 'r')
-	
-	# plt.show()

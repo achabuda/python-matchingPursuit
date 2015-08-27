@@ -53,7 +53,7 @@ def calculateTFMap(book,time,samplingFrequency,mapType,*argv):
 		mapStructWidths = argv[1]
 	else:
 		mapStructFreqs  = [0.0 , samplingFrequency/2.0]
-		mapStructWidths = [0.0 , time.shape[0]/samplingFrequency]
+		mapStructWidths = [0.0 , 2 * time.shape[0]/samplingFrequency]
 
 	mapFsize = 1000
 	mapTsize = np.array([2000 , time.shape[0]]).min()
@@ -68,14 +68,17 @@ def calculateTFMap(book,time,samplingFrequency,mapType,*argv):
 	if mapType == 0:
 		timeFreqMap = np.zeros([frequenciesFinal.shape[0] , timeFinal.shape[0]])
 	elif mapType == 1:
-		realMapPart = np.zeros([frequenciesFinal.shape[0] , timeFinal.shape[0]])
-		imagMapPart = np.zeros([frequenciesFinal.shape[0] , timeFinal.shape[0]])
+		# realMapPart = np.zeros([frequenciesFinal.shape[0] , timeFinal.shape[0]])
+		# imagMapPart = np.zeros([frequenciesFinal.shape[0] , timeFinal.shape[0]])
+		# timeFreqMap = np.zeros([frequenciesFinal.shape[0] , timeFinal.shape[0]] , dtype='complex')
+
 		timeFreqMap = np.zeros([frequenciesFinal.shape[0] , timeFinal.shape[0]] , dtype='complex')
 
 	smoothingWindow = tukey(time.shape[0] , 0.1)
 
 	for index, atom in book.iterrows():
-		if (atom['freq'] > mapStructFreqs[0] and atom['freq'] < mapStructFreqs[1]) and (atom['width'] > mapStructWidths[0] and atom['width'] < mapStructWidths[1]):
+
+		if (atom['freq'] >= mapStructFreqs[0] and atom['freq'] <= mapStructFreqs[1]) and (atom['width'] >= mapStructWidths[0] and atom['width'] <= mapStructWidths[1]):
 			if mapType == 0:
 				timeCourse = atom['reconstruction'][:].real
 				signal2fft = timeCourse * smoothingWindow
@@ -83,13 +86,13 @@ def calculateTFMap(book,time,samplingFrequency,mapType,*argv):
 				zz = np.fft.fft(signal2fft)
 				z  = np.abs( zz[0 : np.floor(zz.shape[0]/2+1)] )
 				z  = halfWidthGauss(z)
-				
+
 				if z.shape[0] > frequenciesFinal.shape[0]:
 					z  = resample(z, frequenciesFinal.shape[0])
 				else:
 					x = np.arange(0, z.shape[0])
 					f = interpolate.interp1d(x, z)
-					z = f( np.arange(0, z.shape[0]-1 , (z.shape[0]-1)/1000) )
+					z = f( np.arange(0, z.shape[0]-1 , (z.shape[0]-1)/frequenciesFinal.shape[0]) )
 
 				z  = z / z.max()
 
@@ -99,21 +102,82 @@ def calculateTFMap(book,time,samplingFrequency,mapType,*argv):
 				timeFreqMap += np.outer(z , envelope)
 
 			elif mapType == 1:
-				realTimeCourse = atom['reconstruction'][:].real
-				imagTimeCourse = atom['reconstruction'][:].imag
+				# realTimeCourse  = atom['reconstruction'][:].real
+				# imagTimeCourse  = atom['reconstruction'][:].imag
+				totalTimeCourse = atom['reconstruction'][:]
 				
-				#plt.figure()
-				#plt.subplot(2,1,1)
+				# plt.figure()
+				# plt.subplot(2,1,1)
 				# plt.plot(realTimeCourse)
-				# plt.plot(np.abs(atom['envelope']) * np.abs(atom['amplitude']) , 'k')
+				# #plt.plot(np.abs(atom['envelope']) * np.abs(atom['amplitude']) , 'k')
 				# plt.subplot(2,1,2)
 				# plt.plot(imagTimeCourse)
-				# plt.plot(np.abs(atom['envelope']) * np.abs(atom['amplitude']) , 'k')
+				# #plt.plot(np.abs(atom['envelope']) * np.abs(atom['amplitude']) , 'k')
 				# plt.show()
 				
 				# ---- #
 
-				signal2fft = realTimeCourse * smoothingWindow
+				# signal2fft = realTimeCourse * smoothingWindow
+				# zz = np.fft.fft(signal2fft)
+				# z  = np.abs( zz[0 : np.floor(zz.shape[0]/2+1)] )
+				# z  = halfWidthGauss(z)
+
+				# if z.shape[0] > frequenciesFinal.shape[0]:
+				# 	z  = resample(z, frequenciesFinal.shape[0])
+				# else:
+				# 	x = np.arange(0, z.shape[0])
+				# 	f = interpolate.interp1d(x, z)
+				# 	z = f( np.arange(0, z.shape[0]-1 , (z.shape[0]-1)/frequenciesFinal.shape[0]) )
+
+				# z  = z / z.max()
+				# # envelope = atom['envelope'] * atom['amplitude']
+				# # envelope = envelope.real
+				# # envelope = resample(envelope , timeFinal.shape[0])
+				# realMapPart += np.outer(z , realTimeCourse)
+
+				# print 'for real:'
+				# print (z.max() , realTimeCourse.max() , realMapPart.max())
+
+
+				# # plt.figure()
+				# # plt.subplot(3,1,1)
+				# # plt.plot(z)
+				# # plt.subplot(3,1,2)
+				# # plt.plot(signal2fft)
+				# # plt.subplot(3,1,3)
+				# # plt.imshow(realMapPart , aspect='auto' , origin='lower' , extent=[0.0,4.0 , 0.0,64.0])
+				# # plt.show()
+
+				# # ---- #
+				# signal2fft = imagTimeCourse * smoothingWindow
+				# zz = np.fft.fft(signal2fft)
+				# z  = np.abs( zz[0 : np.floor(zz.shape[0]/2+1)] )
+				# z  = halfWidthGauss(z)
+				
+				# if z.shape[0] > frequenciesFinal.shape[0]:
+				# 	z  = resample(z, frequenciesFinal.shape[0])
+				# else:
+				# 	x = np.arange(0, z.shape[0])
+				# 	f = interpolate.interp1d(x, z)
+				# 	z = f( np.arange(0, z.shape[0]-1 , (z.shape[0]-1)/frequenciesFinal.shape[0]) )
+				
+				# z  = z / z.max()
+				# # envelope = atom['envelope'] * atom['amplitude']
+				# # envelope = envelope.imag
+				# # envelope = resample(envelope , timeFinal.shape[0])
+				# imagMapPart += np.outer(z , imagTimeCourse)
+
+				# print 'for imag:'
+				# print (z.max() , imagTimeCourse.max() , imagMapPart.max())
+
+				# ---- #
+				# timeFreqMap += realMapPart + 1j * imagMapPart
+				# print 'for all:'
+				# print timeFreqMap.max()
+
+
+				# ---- #
+				signal2fft = totalTimeCourse * smoothingWindow
 				zz = np.fft.fft(signal2fft)
 				z  = np.abs( zz[0 : np.floor(zz.shape[0]/2+1)] )
 				z  = halfWidthGauss(z)
@@ -123,37 +187,16 @@ def calculateTFMap(book,time,samplingFrequency,mapType,*argv):
 				else:
 					x = np.arange(0, z.shape[0])
 					f = interpolate.interp1d(x, z)
-					z = f( np.arange(0, z.shape[0]-1 , (z.shape[0]-1)/1000) )
+					z = f( np.arange(0, z.shape[0]-1 , (z.shape[0]-1)/frequenciesFinal.shape[0]) )
 
 				z  = z / z.max()
+				# envelope = atom['envelope'] * atom['amplitude']
+				# envelope = envelope.real
+				# envelope = resample(envelope , timeFinal.shape[0])
+				timeFreqMap += np.outer(z , totalTimeCourse)
 
-				envelope = atom['envelope'] * atom['amplitude']
-				envelope = envelope.real
-				envelope = resample(envelope , timeFinal.shape[0])
+				# print timeFreqMap.max()
 
-				realMapPart += np.outer(z , envelope)
-
-				# ---- #
-				signal2fft = imagTimeCourse * smoothingWindow
-				zz = np.fft.fft(signal2fft)
-				z  = np.abs( zz[0 : np.floor(zz.shape[0]/2+1)] )
-				z  = halfWidthGauss(z)
-				
-				if z.shape[0] > frequenciesFinal.shape[0]:
-					z  = resample(z, frequenciesFinal.shape[0])
-				else:
-					x = np.arange(0, z.shape[0])
-					f = interpolate.interp1d(x, z)
-					z = f( np.arange(0, z.shape[0]-1 , (z.shape[0]-1)/1000) )
-				
-				z  = z / z.max()
-				envelope = atom['envelope'] * atom['amplitude']
-				envelope = envelope.imag
-				envelope = resample(envelope , timeFinal.shape[0])
-				imagMapPart += np.outer(z , envelope)
-
-				# ---- #
-				timeFreqMap += realMapPart + 1j * imagMapPart
 
 	return (timeFinal , frequenciesFinal , timeFreqMap)
 
