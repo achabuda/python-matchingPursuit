@@ -55,17 +55,17 @@ if __name__ == '__main__':
 	config['maxS']    = 128
 	config['density'] = 0.001
 	# config for Matching Pursuit calculations
-	config['maxNumberOfIterations']            = 25
+	config['maxNumberOfIterations']            = 5
 	config['minEnergyExplained']               = 0.9999
 	config['samplingFrequency']                = samplingFrequency
 	config['minNFFT']                          = 256 # 2*samplingFrequency
 	config['flags']['useGradientOptimization'] = 1
 	# config for display
-	config['flags']['drawMeanMap']    = 1
-	config['flags']['saveMeanMap']    = 1
+	config['flags']['drawMeanMap']    = 0
+	config['flags']['saveMeanMap']    = 0
 
-	config['flags']['drawSingleMaps'] = 1
-	config['flags']['saveSingleMaps'] = 1
+	config['flags']['drawSingleMaps'] = 0
+	config['flags']['saveSingleMaps'] = 0
 	
 	config['mapFreqRange']    = [0.0 , 16.0]
 	config['mapStructFreqs']  = [0.0 , 64.0]
@@ -79,7 +79,7 @@ if __name__ == '__main__':
 	# mask[80] = 0
 
 	ind2 = 0
-	for ind1 in arr[mask]: #np.arange(0,1):
+	for ind1 in np.arange(0,1): #arr[mask]:
 		ind2 += 1
 		print 'Calculation for {} trial:'.format(ind1)
 	 	signal      = data[:,ind1]
@@ -92,7 +92,7 @@ if __name__ == '__main__':
 	 	if ind2 == 1:
 	 		maps = np.zeros(TFmap.shape,dtype='complex')
 	 	maps += TFmap
-	 	
+
 	 	results[nameOfStruct]['mapM'] = -1 * TFmap
 	 	results[nameOfStruct]['mapT'] = time
 	 	results[nameOfStruct]['mapF'] = F
@@ -125,15 +125,15 @@ if __name__ == '__main__':
 			if config['flags']['saveSingleMaps'] == 1:
 				nameOfOutputFile = '../Jena-burstSupression/' + subject + '_' + str(ind1) + '.png'
 				plt.savefig(nameOfOutputFile , bbox_inches = 'tight')
-				nameOfOutputFile = '../Jena-burstSupression/' + subject + '_' + str(ind1) + '.pdf'
-				plt.savefig(nameOfOutputFile , bbox_inches = 'tight')
+				# nameOfOutputFile = '../Jena-burstSupression/' + subject + '_' + str(ind1) + '.pdf'
+				# plt.savefig(nameOfOutputFile , bbox_inches = 'tight')
 				plt.close()
 			else:
 				plt.show()
 
 	maps = maps / ind2
 
-	nameOfOutputFile = '../Jena-burstSupression/' + subject + '.mat'
+	nameOfOutputFile = '../Jena-burstSupression/THIS_' + subject + '.mat'
 	savemat(nameOfOutputFile , results)
 
 	if config['flags']['drawMeanMap'] == 1:
@@ -161,8 +161,8 @@ if __name__ == '__main__':
 		if config['flags']['saveMeanMap'] == 1:
 			nameOfOutputFile = '../Jena-burstSupression/' + subject + '.png'
 			plt.savefig(nameOfOutputFile , bbox_inches = 'tight')
-			nameOfOutputFile = '../Jena-burstSupression/' + subject + '.pdf'
-			plt.savefig(nameOfOutputFile , bbox_inches = 'tight')
+			# nameOfOutputFile = '../Jena-burstSupression/' + subject + '.pdf'
+			# plt.savefig(nameOfOutputFile , bbox_inches = 'tight')
 			plt.close()
 		else:
 			plt.show()
@@ -176,8 +176,8 @@ if __name__ == '__main__':
 	
 	# create a synthetic signal
 	
-	# (gaborParams , sinusParams , asymetricParams , noiseRatio , samplingFrequency , numberOfSamples) = simpleValues()
-	# (signal1,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,numberOfSamples,samplingFrequency,noiseRatio)
+	# (gaborParams , sinusParams , asymetricParams , rectParams , noiseRatio , samplingFrequency , numberOfSamples) = simpleValues()
+	# (signal1,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,rectParams,numberOfSamples,samplingFrequency,noiseRatio)
 
 	# (gaborParams , sinusParams , asymetricParams , rectParams , noiseRatio , samplingFrequency , numberOfSamples) = masterValues()
 	# (signal,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,rectParams,numberOfSamples,samplingFrequency,noiseRatio)

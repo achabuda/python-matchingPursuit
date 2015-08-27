@@ -343,8 +343,6 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 		finalShapeType = types2test[ind]
 		mainShapeType  = int(finalShapeType / 10)
 
-		print 'type={}, alpha={}.'.format( finalShapeType , alpha )
-
 ## -- FROM HERE -- ##
 		output = minimize(fun=dic.bestFreq , x0=freqStart , args=(signal*envelope,timeShifted) , method='L-BFGS-B' , tol=epsilon , options={'disp':0})
 		newFreq      = output['x'][0]

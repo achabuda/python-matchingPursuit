@@ -26,8 +26,11 @@ from __future__ import division
 
 import numpy             as np
 import matplotlib.pyplot as plt
+import pandas            as pd
 
 from scipy.signal import resample
+from scipy        import interpolate
+
 from dictionary   import tukey
 
 
@@ -61,7 +64,13 @@ def calculateTFMap(book,time,samplingFrequency,mapType,*argv):
 		timeFinal = (time[-1] - time[0]) / samplingFrequency * np.linspace(0,1,mapTsize)
 
 	frequenciesFinal = samplingFrequency / 2 * np.linspace(0,1,mapFsize)
-	timeFreqMap      = np.zeros([frequenciesFinal.shape[0] , timeFinal.shape[0]] , dtype='complex')
+
+	if mapType == 0:
+		timeFreqMap = np.zeros([frequenciesFinal.shape[0] , timeFinal.shape[0]])
+	elif mapType == 1:
+		realMapPart = np.zeros([frequenciesFinal.shape[0] , timeFinal.shape[0]])
+		imagMapPart = np.zeros([frequenciesFinal.shape[0] , timeFinal.shape[0]])
+		timeFreqMap = np.zeros([frequenciesFinal.shape[0] , timeFinal.shape[0]] , dtype='complex')
 
 	smoothingWindow = tukey(time.shape[0] , 0.1)
 
@@ -69,24 +78,82 @@ def calculateTFMap(book,time,samplingFrequency,mapType,*argv):
 		if (atom['freq'] > mapStructFreqs[0] and atom['freq'] < mapStructFreqs[1]) and (atom['width'] > mapStructWidths[0] and atom['width'] < mapStructWidths[1]):
 			if mapType == 0:
 				timeCourse = atom['reconstruction'][:].real
-			elif mapType == 1:
-				timeCourse = atom['reconstruction'][:]
-			signal2fft = timeCourse * smoothingWindow
+				signal2fft = timeCourse * smoothingWindow
 
-			zz = np.fft.fft(signal2fft)
-			z  = np.abs( zz[0 : np.floor(zz.shape[0]/2+1)] )
-			z  = halfWidthGauss(z)
-			z  = resample(z, frequenciesFinal.shape[0])
-			z  = z / z.max()
+				zz = np.fft.fft(signal2fft)
+				z  = np.abs( zz[0 : np.floor(zz.shape[0]/2+1)] )
+				z  = halfWidthGauss(z)
+				
+				if z.shape[0] > frequenciesFinal.shape[0]:
+					z  = resample(z, frequenciesFinal.shape[0])
+				else:
+					x = np.arange(0, z.shape[0])
+					f = interpolate.interp1d(x, z)
+					z = f( np.arange(0, z.shape[0]-1 , (z.shape[0]-1)/1000) )
 
-			if mapType == 0:
+				z  = z / z.max()
+
 				envelope = np.abs(atom['envelope']) * np.abs(atom['amplitude'])
+				envelope = resample(envelope , timeFinal.shape[0])
+
+				timeFreqMap += np.outer(z , envelope)
+
 			elif mapType == 1:
-				envelope = atom['reconstruction'][:]
+				realTimeCourse = atom['reconstruction'][:].real
+				imagTimeCourse = atom['reconstruction'][:].imag
+				
+				#plt.figure()
+				#plt.subplot(2,1,1)
+				# plt.plot(realTimeCourse)
+				# plt.plot(np.abs(atom['envelope']) * np.abs(atom['amplitude']) , 'k')
+				# plt.subplot(2,1,2)
+				# plt.plot(imagTimeCourse)
+				# plt.plot(np.abs(atom['envelope']) * np.abs(atom['amplitude']) , 'k')
+				# plt.show()
+				
+				# ---- #
 
-			envelope = resample(envelope , timeFinal.shape[0])
+				signal2fft = realTimeCourse * smoothingWindow
+				zz = np.fft.fft(signal2fft)
+				z  = np.abs( zz[0 : np.floor(zz.shape[0]/2+1)] )
+				z  = halfWidthGauss(z)
 
-			timeFreqMap += np.outer(z , envelope)
+				if z.shape[0] > frequenciesFinal.shape[0]:
+					z  = resample(z, frequenciesFinal.shape[0])
+				else:
+					x = np.arange(0, z.shape[0])
+					f = interpolate.interp1d(x, z)
+					z = f( np.arange(0, z.shape[0]-1 , (z.shape[0]-1)/1000) )
+
+				z  = z / z.max()
+
+				envelope = atom['envelope'] * atom['amplitude']
+				envelope = envelope.real
+				envelope = resample(envelope , timeFinal.shape[0])
+
+				realMapPart += np.outer(z , envelope)
+
+				# ---- #
+				signal2fft = imagTimeCourse * smoothingWindow
+				zz = np.fft.fft(signal2fft)
+				z  = np.abs( zz[0 : np.floor(zz.shape[0]/2+1)] )
+				z  = halfWidthGauss(z)
+				
+				if z.shape[0] > frequenciesFinal.shape[0]:
+					z  = resample(z, frequenciesFinal.shape[0])
+				else:
+					x = np.arange(0, z.shape[0])
+					f = interpolate.interp1d(x, z)
+					z = f( np.arange(0, z.shape[0]-1 , (z.shape[0]-1)/1000) )
+				
+				z  = z / z.max()
+				envelope = atom['envelope'] * atom['amplitude']
+				envelope = envelope.imag
+				envelope = resample(envelope , timeFinal.shape[0])
+				imagMapPart += np.outer(z , envelope)
+
+				# ---- #
+				timeFreqMap += realMapPart + 1j * imagMapPart
 
 	return (timeFinal , frequenciesFinal , timeFreqMap)
 

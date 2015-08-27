@@ -296,3 +296,10 @@ def bestEnvelope(x,time,signal,shapeType):
 	
 def bestFreq(freq , signal , time):
 	return -1 * np.abs(np.dot(signal , np.exp(-1j*freq*time)))
+
+#def bestFreqWithPhase(freq , signal , time):
+#	AmplitudeSin = np.abs(np.dot(signal , np.sin(freq * time)))
+#	AmplitudeCos = np.abs(np.dot(signal , np.cos(freq * time)))
+
+
+
