@@ -53,9 +53,11 @@ if __name__ == '__main__':
 	flags = {}
 	flags['useAsymA'] = 1
 	flags['useRectA'] = 1
+	flags['useGradientOptimization']  = 1
 	
 	config = {}
 	config['flags']                            = flags
+	config['algorithm']                        = 'smp'
 	config['minS']                             = 32
 	config['maxS']                             = numberOfSamples
 	config['density']                          = 0.01
@@ -63,7 +65,6 @@ if __name__ == '__main__':
 	config['minEnergyExplained']               = 0.99
 	config['samplingFrequency']                = samplingFrequency
 	config['minNFFT']                          = 256 # 2*samplingFrequency
-	config['flags']['useGradientOptimization'] = 1
 
 # optional config for t-f map drawing
 	# config['mapFreqRange']    = [0.0 , samplingFrequency/2]

@@ -26,6 +26,7 @@ import numpy as np
 import scipy.stats as scp
 import matplotlib.pyplot as plt
 
+from scipy.io       import loadmat
 from src.dictionary import tukey
 
 
@@ -175,3 +176,23 @@ def masterValues():
 	
 	noiseRatio      = 0.0
 	return(gaborParams , sinusParams , asymetricParams , rectParams , noiseRatio , samplingFreq , numberOfSamples)
+
+
+def loadSyntheticSigmalFromEEGLABFile(nameOfFile):
+	structure = loadmat(nameOfFile)
+
+	data = structure['EEG']['data'][0][0]
+	data = data.transpose([2,0,1])
+
+	info = {}
+	info['samplingFreq']     =  structure['EEG']['srate'][0][0][0][0]
+	info['numberOfChannels'] =  structure['EEG']['nbchan'][0][0][0][0]
+	info['numberOfSamples']  =  structure['EEG']['pnts'][0][0][0][0]
+	info['numberOfSeconds']  =  structure['EEG']['pnts'][0][0][0][0] / info['samplingFreq']
+	info['numberOfTrials']   =  structure['EEG']['trials'][0][0][0][0]
+
+	# print structure['EEG']['chanlocs'][0][0][0,2]
+
+	time = np.arange(0 , info['numberOfSeconds'] , 1./info['samplingFreq'])
+
+	return (data , time , info)
