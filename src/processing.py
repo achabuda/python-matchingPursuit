@@ -384,7 +384,7 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 		typeTest    = []
 		envelopes   = []
 		outputs     = []
-		types2test  = [21,22,24,32,33,34]
+		types2test  = [21,22,24,32,33] # possibly 34 as well.
 
 		for shapeType2test in types2test:
 			main = int(shapeType2test / 10)
