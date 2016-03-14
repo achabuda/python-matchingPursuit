@@ -187,6 +187,7 @@ def makeOneIteration(dictionary , partialResults , signalRest , signalLength , c
 			bookElement['sigma']          = sigma
 			bookElement['envelope']       = envelope
 			bookElement['reconstruction'] = reconstruction
+			bookElement['shapeType']      = shapeTypeNew
 
 			# not needed yet:
 			# bookElement['mi'] = mi
@@ -197,7 +198,7 @@ def makeOneIteration(dictionary , partialResults , signalRest , signalLength , c
 	bookElement['freq']      = (config['samplingFrequency'] * bookElement['freq']) / (2 * np.pi)
 	bookElement['width']     = dic.findWidth(bookElement['envelope'] , config['samplingFrequency'])
 	bookElement['modulus']   = bookElement['amplitude']
-	bookElement['amplitude'] = np.max(bookElement['reconstruction'])
+	bookElement['amplitude'] = np.abs(np.max(bookElement['reconstruction']))
 
 	# print 'Width = {}, sigma = {}, sampling = {}.'.format(bookElement['width'] , bookElement['sigma'] , config['samplingFrequency'])
 
