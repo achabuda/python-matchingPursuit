@@ -92,7 +92,7 @@ def generateTestSignal(gaborParams , sinusParams , asymetricWaveformsAParams , r
 			signal += tmp
 			ind1   += 1
 	if silenceFlag == 0:
-		print '{} asymmetrical waveforms generated'.format(ind1)
+		print '{} rectangular waveforms generated'.format(ind1)
 
 	return (signal , time)
 
@@ -125,7 +125,7 @@ def simpleValues():
 	position1       = 3.0
 	position2       = 1.0
 	width           = 0.5
-	frequency1      = 10.0
+	frequency1      = 12.0
 	frequency2      = 15.0
 	phase           = 0.0
 

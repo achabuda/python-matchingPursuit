@@ -49,7 +49,8 @@ if __name__ == '__main__':
 	config['flags']                            = flags
 	config['algorithm']                        = 'mmp'
 	config['trials2calculate']                 = range(info['numberOfTrials'])
-	config['channels2calculate']               = range(info['numberOfChannels'])
+	# config['channels2calculate']               = range(info['numberOfChannels'])
+	config['channels2calculate']               = range(5)
 	config['minS']                             = 100
 	config['maxS']                             = info['numberOfSamples']
 	config['density']                          = 0.01

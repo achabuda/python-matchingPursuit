@@ -24,7 +24,7 @@ University of Warsaw, July 06, 2015
 
 import numpy as np
 import unittest
-from src.dictionary import gaussEnvelope, asymetricEnvelope, minSigEnerg
+from src.dictionary import minSigEnerg, genericEnvelope
 
 density  = 0.01
 time     = np.arange(0,1000)
@@ -37,65 +37,66 @@ class DictionaryTest(unittest.TestCase):
 		'''
 		Test standard gaussian envelope length
 		'''
-		envelope = gaussEnvelope(sigma , time , 1 , 0)[0]
+		envelope = genericEnvelope(sigma , time , 11 , 0)[0]
 		self.assertEqual(envelope.shape , time.shape)
 	def test_asymAEnvelope_1(self):
 		'''
 		Test asymetricA envelope length
 		'''
-		expectation = gaussEnvelope(sigma , time , 1 , 1)[1]
-		envelope    = asymetricEnvelope(increase , decay , expectation , time , 1 , 0)[0]
+		expectation = genericEnvelope(sigma , time , 11 , 1)[1]
+		envelope    = genericEnvelope(sigma , time , 21 , 0 , expectation , increase , decay)[0]
 		self.assertEqual(envelope.shape , time.shape)
 	def test_gaussEnvelope_2(self):
 		'''
 		Test standard gaussian envelope miu
 		'''
-		miu = gaussEnvelope(sigma , time , 1 , 0)[1]
+		miu = genericEnvelope(sigma , time , 11 , 1)[1]
 		self.assertEqual(miu , 429.5)
 	def test_asymAEnvelope_2(self):
 		'''
 		Test asymetricA envelope miu
 		'''
-		expectation = gaussEnvelope(sigma , time , 1 , 1)[1]
-		miu         = asymetricEnvelope(increase , decay , expectation , time , 1 , 0)[1]
+		expectation = genericEnvelope(sigma , time , 11 , 1)[1]
+		miu         = genericEnvelope(sigma , time , 21 , 0 , expectation , increase , decay)[1]
 		self.assertEqual(miu , 429.5)
 	def test_gaussEnvelope_3(self):
 		'''
 		Test standard gaussian envelope length after cutting
 		'''
-		envelope = gaussEnvelope(sigma , time , 1 , 1)[0]
+		envelope = genericEnvelope(sigma , time , 11 , 1)[0]
 		self.assertEqual(envelope.shape[0] , 857L)
 	def test_asymAEnvelope_3(self):
 		'''
 		Test asymetricA envelope length after cutting
 		'''
-		expectation = gaussEnvelope(sigma , time , 1 , 1)[1]
-		envelope    = asymetricEnvelope(increase , decay , expectation , time , 1 , 1)[0]
+		expectation = genericEnvelope(sigma , time , 11 , 1)[1]
+		envelope    = genericEnvelope(sigma , time , 21 , 1 , expectation , increase , decay)[0]
 		self.assertEqual(envelope.shape[0] , 998L)
 	def test_rectEnvelope_1(self):
 		'''
 		Test rectangular envelope length
 		'''
-		envelope = gaussEnvelope(sigma , time , 2 , 0)[0]
+		envelope = genericEnvelope(sigma , time , 31 , 0)[0]
 		self.assertEqual(envelope.shape , time.shape)
 	def test_rectEnvelope_2(self):
 		'''
-		Test rectangular envelope miu
+		Test rectangular (typeA) envelope miu
 		'''
-		miu = gaussEnvelope(sigma , time , 2 , 0)[1]
-		self.assertEqual(miu , 134.5)
+		#### !!!! ####
+		miu = genericEnvelope(sigma , time , 32 , 0)[1]
+		self.assertEqual(miu , 499.5)
 	def test_rectEnvelope_3(self):
 		'''
-		Test rectangular envelope length after cutting
+		Test rectangular (typeB) envelope length after cutting
 		'''
-		envelope = gaussEnvelope(sigma , time , 2 , 1)[0]
-		self.assertEqual(envelope.shape[0] , 267L)
+		envelope = genericEnvelope(sigma , time , 33 , 1)[0]
+		self.assertEqual(envelope.shape[0] , 261L)
 	def test_minSigEnerg_1(self):
 		'''
 		Test of common energy of two exact envelopes
 		'''
-		envelope = gaussEnvelope(sigma , time , 1 , 0)[0]
-		energy   = minSigEnerg(sigma , envelope , density , time , 1)
+		envelope = genericEnvelope(sigma , time , 11 , 0)[0]
+		energy   = minSigEnerg(sigma , envelope , density , time , 11)
 		energy   = float("{0:.2f}".format(energy))
 		self.assertEqual(energy , density)
 	def test_minSigEnerg_2(self):
@@ -103,7 +104,7 @@ class DictionaryTest(unittest.TestCase):
 		Test of common energy of two completely different envelopes
 		'''
 		envelope = np.zeros(time.shape)
-		energy   = minSigEnerg(sigma , envelope , density , time , 1)
+		energy   = minSigEnerg(sigma , envelope , density , time , 11)
 		energy   = float("{0:.2f}".format(energy))
 		self.assertEqual(energy , 1-density)
 

@@ -26,9 +26,10 @@ from __future__ import division
 import numpy as np
 import pandas as pd
 
-from scipy.signal   import hilbert
-from scipy.optimize import fmin, minimize
-from collections    import deque
+from scipy.signal      import hilbert
+from numpy.linalg      import norm
+from scipy.optimize    import fmin, minimize
+from collections       import deque
 
 import dictionary as dic
 
@@ -72,7 +73,11 @@ def calculateMP(dictionary , signal , config):
 		tmpBookElements   = []
 		bookElements      = []
 
-		amplitudesMatrix  = np.zeros([len(config['trials2calculate']),len(config['channels2calculate'])] , dtype='complex')
+		energiesMatrix   = np.zeros([len(config['trials2calculate']),len(config['channels2calculate'])])
+		amplitudesMatrix = np.zeros([len(config['trials2calculate']),len(config['channels2calculate'])])
+		
+		a = np.zeros([len(config['trials2calculate']) , len(config['channels2calculate'])])
+		e = np.zeros([len(config['trials2calculate']) , len(config['channels2calculate'])])
 
 		tmpSignals = np.zeros(signal.shape , dtype='complex')
 		for trialNumber in np.arange(0 , len(config['trials2calculate'])):
@@ -99,15 +104,33 @@ def calculateMP(dictionary , signal , config):
 					newSignalRests[trialNumber , channelNumber , :] = signalRest
 					tmpPartialResults.append(partialResults)
 					tmpBookElements.append(bookElement)
-					amplitudesMatrix[trialNumber,channelNumber]     = np.dot(np.squeeze(signal[trialNumber,channelNumber,:]) , bookElement['reconstruction'])
 				
 				newPartialResults.append(tmpPartialResults)
 				bookElements.append(tmpBookElements)
 				tmpPartialResults = []
 				tmpBookElements   = []
+			
+			
+			for trialNumber in np.arange(0 , len(config['trials2calculate'])):
+				for channelNumber in np.arange(0 , len(config['channels2calculate'])):
+					amplitudesMatrix[trialNumber,channelNumber] = np.real(np.squeeze(bookElements[trialNumber][channelNumber]['reconstruction'])).max()
+					energiesMatrix[trialNumber,channelNumber]   = np.real(np.dot(signal[trialNumber,channelNumber,:] , bookElements[trialNumber][channelNumber]['reconstruction']))
 
-			# ----- #
+					# print np.dot(signal[trialNumber,channelNumber,:] , bookElements[trialNumber][channelNumber]['reconstruction'])
 
+					# plt.figure()
+					# plt.plot(np.real(bookElements[trialNumber][channelNumber]['reconstruction']))
+					# plt.show()
+
+			for trialNumber in np.arange(0 , len(config['trials2calculate'])):
+				for channelNumber in np.arange(0 , len(config['channels2calculate'])):
+					a[trialNumber , channelNumber] = norm( np.sum(np.squeeze(amplitudesMatrix[:,channelNumber]) / norm(amplitudesMatrix , None , 1)) , None)
+					#e[trialNumber , channelNumber] = np.sum( norm( energiesMatrix , ord=None , axis=1) )
+					e[trialNumber , channelNumber] = np.sum(np.sum(energiesMatrix))
+					print 'a = {}'.format(a[trialNumber , channelNumber])
+					print 'e = {}'.format(e[trialNumber , channelNumber])
+
+			# crit = a**2 + e**2
 
 			# ----- #
 			

@@ -40,6 +40,10 @@ if __name__ == '__main__':
 	(gaborParams , sinusParams , asymetricParams , rectParams , noiseRatio , samplingFrequency , numberOfSamples) = simpleValues()
 	(signal,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,rectParams,numberOfSamples,samplingFrequency,noiseRatio)
 
+	# with open('dupa_test' , 'wb') as f:
+	signal.astype('float32')
+	signal.tofile('dupa.raw')
+
 	# (gaborParams , sinusParams , asymetricParams , rectParams , noiseRatio , samplingFrequency , numberOfSamples) = masterValues()
 	# (signal,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,rectParams,numberOfSamples,samplingFrequency,noiseRatio)
 
@@ -51,8 +55,8 @@ if __name__ == '__main__':
 
 # config for a dictionary and MP
 	flags = {}
-	flags['useAsymA'] = 1
-	flags['useRectA'] = 1
+	flags['useAsymA'] = 0
+	flags['useRectA'] = 0
 	flags['useGradientOptimization']  = 1
 	
 	config = {}
@@ -72,6 +76,9 @@ if __name__ == '__main__':
 	# config['mapStructSigmas'] = [0.0 , 4.0]
 	
 	dictionary = generateDictionary(time , config)
+
+	print dictionary
+
 	book       = calculateMP(dictionary , signal , config)
 
 # plot resulting functions
