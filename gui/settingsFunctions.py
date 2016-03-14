@@ -22,16 +22,29 @@ e-mail: tomasz@spustek.pl
 University of Warsaw, July 06, 2015
 '''
 
-from gui.settingsFunctions import mainWindow
-from PyQt4 import QtGui
-import sys
+# libraries imports #
+import os
+import time
+from platform import system
+from functools import partial
+from PyQt4 import QtCore, QtGui
 
-def _pythonMatchingPursuit(params):
-    app = QtGui.QApplication(params)
-    myapp = mainWindow()
-    myapp.show()
-    return app.exec_()
+# gui imports #
+from settingsGraphics import mainWindowUI
 
-if __name__ == "__main__":
-    exit_code = _pythonMatchingPursuit(sys.argv)
-    sys.exit(exit_code)
+# modules imports #
+# from saveAndLoadModule import loadDefaultValues, setDefaultSettings, saveSettings, loadSettings
+# from processingModule  import processFile
+
+
+class mainWindow(QtGui.QMainWindow):
+
+    def __init__(self, parent=None):
+        
+        print '#################'
+        print 'Application start'
+        print 'Window creating...'
+        QtGui.QWidget.__init__(self, parent)
+        self.ui = mainWindowUI()
+        self.ui.setupUi(self)
+        print 'done'
