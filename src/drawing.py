@@ -94,7 +94,7 @@ def calculateTFMap(book,time,samplingFrequency,mapType,*argv):
 
 				z  = z / z.max()
 
-				envelope = np.abs(atom['envelope']) * np.abs(atom['amplitude'])
+				envelope = np.abs(atom['envelope']) * np.abs(atom['modulus'])
 				envelope = resample(envelope , timeFinal.shape[0])
 
 				timeFreqMap += np.outer(z , envelope)
