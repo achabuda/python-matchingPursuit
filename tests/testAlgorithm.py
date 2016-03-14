@@ -36,8 +36,8 @@ amplThreshold = 0.10
 (gaborParams , sinusParams , asymetricParams , rectParams , noiseRatio , samplingFrequency , numberOfSamples) = simpleValues()
 (signal,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,rectParams,numberOfSamples,samplingFrequency,noiseRatio)
 
-# print gaborParams
-# print '---'
+print gaborParams[0]
+print '---'
 # print sinusParams
 # print '---'
 
@@ -53,7 +53,7 @@ config['algorithm']                        = 'smp'
 config['minS']                             = 32
 config['maxS']                             = numberOfSamples
 config['density']                          = 0.01
-config['maxNumberOfIterations']            = 3
+config['maxNumberOfIterations']            = 4
 config['minEnergyExplained']               = 0.99
 config['samplingFrequency']                = samplingFrequency
 config['minNFFT']                          = 2 * samplingFrequency
@@ -64,6 +64,13 @@ book       = calculateMP(dictionary , signal , config)
 # print book
 
 class AlgorithmTest(unittest.TestCase):
+	def test_simpleFirstIteration_atomType(self):
+		'''
+		Test for the very first iteration of the algorithm
+		working on simple synthetic signal. AtomType check.
+		It should be sinusoid, ie 11.
+		'''
+		self.assertEqual(book['shapeType'][0] , 11)
 	def test_simpleFirstIteration_frequency(self):
 		'''
 		Test for the very first iteration of the algorithm
@@ -76,3 +83,61 @@ class AlgorithmTest(unittest.TestCase):
 		working on simple synthetic signal. Amplitude check.
 		'''
 		self.assertTrue( (np.abs(book['amplitude'][0]) < sinusParams[0][0]*(1+amplThreshold)) and (np.abs(book['amplitude'][0]) > sinusParams[0][0]*(1-amplThreshold)) )
+	def test_simpleSecondIteration_atomType(self):
+		'''
+		Test for the second iteration of the algorithm
+		working on simple synthetic signal. AtomType check.
+		It should be Gabor function, ie 11.
+		It should be the second Gabor function present in
+		the gaborParams set.
+		'''
+		self.assertEqual(book['shapeType'][1] , 11)
+	def test_simpleSecondIteration_frequency(self):
+		'''
+		Test for the second iteration of the algorithm
+		working on simple synthetic signal. Frequency check.
+		It should be the second Gabor function present in
+		the gaborParams set.
+		'''
+		self.assertTrue( (book['freq'][1] < gaborParams[1][5]*(1+freqThreshold)) and (book['freq'][1] > gaborParams[1][5]*(1-freqThreshold)) )
+	def test_simpleFirstIteration_amplitude(self):
+		'''
+		Test for the second iteration of the algorithm
+		working on simple synthetic signal. Amplitude check.
+		It should be the second Gabor function present in
+		the gaborParams set.
+		'''
+		self.assertTrue( (np.abs(book['amplitude'][1]) < gaborParams[1][2]*(1+amplThreshold)) and (np.abs(book['amplitude'][1]) > gaborParams[1][2]*(1-amplThreshold)) )
+	def test_simpleThirdIteration_atomType(self):
+		'''
+		Test for the third iteration of the algorithm
+		working on simple synthetic signal. AtomType check.
+		It should be Gabor function, ie 11.
+		It should be the first Gabor function present in
+		the gaborParams set.
+		'''
+		self.assertEqual(book['shapeType'][2] , 11)
+	def test_simpleThirdIteration_frequency(self):
+		'''
+		Test for the third iteration of the algorithm
+		working on simple synthetic signal. Frequency check.
+		It should be the first Gabor function present in
+		the gaborParams set.
+		'''
+		self.assertTrue( (book['freq'][2] < gaborParams[0][5]*(1+freqThreshold)) and (book['freq'][2] > gaborParams[0][5]*(1-freqThreshold)) )
+	def test_simpleThirdIteration_amplitude(self):
+		'''
+		Test for the third iteration of the algorithm
+		working on simple synthetic signal. Amplitude check.
+		It should be the first Gabor function present in
+		the gaborParams set.
+		'''
+		self.assertTrue( (np.abs(book['amplitude'][2]) < gaborParams[0][2]*(1+amplThreshold)) and (np.abs(book['amplitude'][2]) > gaborParams[0][2]*(1-amplThreshold)) )
+
+	def test_simpleForthIteration_atomType(self):
+		'''
+		Test for the forth iteration of the algorithm
+		working on simple synthetic signal. In this case,
+		there should only be three iterations.
+		'''
+		self.assertEqual(len(book.index) , 3)
