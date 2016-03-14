@@ -60,7 +60,9 @@ def calculateMP(dictionary , signal , config):
 
 			energyExplained    = np.abs(1 - calculateSignalEnergy(signalRest) / signalEnergy)
 			minEnergyExplained = config['minEnergyExplained'] - config['density'] * (calculateSignalEnergy(bookElement['reconstruction']) / calculateSignalEnergy(signalRest))
-			print 'Iteration {} done, energy explained: {}.'.format(iteration , energyExplained)
+			
+			if config['flags']['displayInfo'] != 0:
+				print 'Iteration {} done, energy explained: {}.'.format(iteration , energyExplained)
 			
 			if energyExplained > minEnergyExplained:
 				return pd.DataFrame(book)
@@ -192,8 +194,11 @@ def makeOneIteration(dictionary , partialResults , signalRest , signalLength , c
 
 	signalRest         = signalRest - bookElement['reconstruction']
 
-	bookElement['freq']  = (config['samplingFrequency'] * bookElement['freq']) / (2 * np.pi)
-	bookElement['width'] = dic.findWidth(bookElement['envelope'] , config['samplingFrequency'])
+	bookElement['freq']      = (config['samplingFrequency'] * bookElement['freq']) / (2 * np.pi)
+	bookElement['width']     = dic.findWidth(bookElement['envelope'] , config['samplingFrequency'])
+	bookElement['modulus']   = bookElement['amplitude']
+	bookElement['amplitude'] = np.max(bookElement['reconstruction'])
+
 	# print 'Width = {}, sigma = {}, sampling = {}.'.format(bookElement['width'] , bookElement['sigma'] , config['samplingFrequency'])
 
 	return (bookElement , partialResults , signalRest)

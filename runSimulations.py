@@ -57,6 +57,7 @@ if __name__ == '__main__':
 	flags['useAsymA'] = 0
 	flags['useRectA'] = 0
 	flags['useGradientOptimization']  = 1
+	flags['displayInfo'] = 1
 	
 	config = {}
 	config['flags']                            = flags
@@ -76,9 +77,8 @@ if __name__ == '__main__':
 	
 	dictionary = generateDictionary(time , config)
 
-	print dictionary
-
 	book       = calculateMP(dictionary , signal , config)
+	# print book
 
 # plot resulting functions
 	plt.figure()
