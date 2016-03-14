@@ -40,9 +40,8 @@ if __name__ == '__main__':
 	(gaborParams , sinusParams , asymetricParams , rectParams , noiseRatio , samplingFrequency , numberOfSamples) = simpleValues()
 	(signal,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,rectParams,numberOfSamples,samplingFrequency,noiseRatio)
 
-	# with open('dupa_test' , 'wb') as f:
-	signal.astype('float32')
-	signal.tofile('dupa.raw')
+	# signal.astype('float32')
+	# signal.tofile('dupa.raw')
 
 	# (gaborParams , sinusParams , asymetricParams , rectParams , noiseRatio , samplingFrequency , numberOfSamples) = masterValues()
 	# (signal,time) = generateTestSignal(gaborParams,sinusParams,asymetricParams,rectParams,numberOfSamples,samplingFrequency,noiseRatio)
