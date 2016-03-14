@@ -63,7 +63,6 @@ def generateTestSignal(gaborParams , sinusParams , asymetricWaveformsAParams , r
 	if asymetricWaveformsAParams is not None:
 		for asym in asymetricWaveformsAParams:
 			amplitude = asym[0]
-			# freq      = asym[1] * np.pi
 			freq      = (asym[1] / (0.5*samplingFrequency) ) * np.pi
 			pos       = asym[2]
 			sigma     = asym[3]
@@ -83,13 +82,14 @@ def generateTestSignal(gaborParams , sinusParams , asymetricWaveformsAParams , r
 	if rectangularWaveformsAParams is not None:
 		for rect in rectangularWaveformsAParams:
 			amplitude = rect[0]
-			freq      = rect[1] #* 2 * np.pi
+			freq      = (rect[1] / (0.5*samplingFrequency) ) * np.pi
 			pos       = rect[2]
 			sigma     = rect[3]
 			r         = rect[4]
 			envelope  = tukey(sigma, r)
 			tmp       = np.squeeze(np.zeros((numberOfSamples,1)))
-			tmp[pos:pos+sigma] = amplitude * envelope * np.cos(freq * np.arange(0,sigma))
+			tmp[pos:pos+sigma] = amplitude * envelope
+			tmp       = tmp * np.cos(freq * time)
 			
 			signal += tmp
 			ind1   += 1
@@ -161,7 +161,7 @@ def masterValues():
 	amplitude3      = 10
 	freq1           = 5.0
 	freq2           = 10.0
-	freq3           = 5.0
+	freq3           = 15.0
 	pos1            = 2.0
 	pos2            = 1000
 	pos3            = 1500

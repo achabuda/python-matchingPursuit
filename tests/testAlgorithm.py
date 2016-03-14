@@ -39,11 +39,9 @@ amplThreshold = 0.10
 (gaborParamsAdvanced , sinusParamsAdvanced , asymetricParamsAdvanced , rectParamsAdvanced , noiseRatio , samplingFrequency , numberOfSamples) = advancedValues()
 (advancedSignal,time) = generateTestSignal(gaborParamsAdvanced,sinusParamsAdvanced,asymetricParamsAdvanced,rectParamsAdvanced,numberOfSamples,samplingFrequency,noiseRatio)
 
+(gaborParamsMaster , sinusParamsMaster , asymetricParamsMaster , rectParamsMaster , noiseRatio , samplingFrequency , numberOfSamples) = masterValues()
+(masterSignal,time) = generateTestSignal(gaborParamsMaster,sinusParamsMaster,asymetricParamsMaster,rectParamsMaster,numberOfSamples,samplingFrequency,noiseRatio)
 
-# print gaborParams[0]
-# print '---'
-# print sinusParams
-# print '---'
 
 flags = {}
 flags['useAsymA'] = 0
@@ -70,22 +68,24 @@ flags['useAsymA'] = 1
 flags['useRectA'] = 0
 flags['useGradientOptimization']  = 1
 flags['displayInfo']              = 0
-
-config = {}
-config['flags']                            = flags
-config['algorithm']                        = 'smp'
-config['minS']                             = 32
-config['maxS']                             = numberOfSamples
-config['density']                          = 0.01
-config['maxNumberOfIterations']            = 4
-config['minEnergyExplained']               = 0.99
-config['samplingFrequency']                = samplingFrequency
-config['minNFFT']                          = 2 * samplingFrequency
+config['flags']   = flags
 
 advancedDictionary = generateDictionary(time , config)
 advancedBook       = calculateMP(advancedDictionary , advancedSignal , config)
 
-# print advancedBook
+flags = {}
+flags['useAsymA'] = 1
+flags['useRectA'] = 1
+flags['useGradientOptimization']  = 1
+flags['displayInfo']              = 0
+config['flags']   = flags
+
+masterDictionary = generateDictionary(time , config)
+masterBook       = calculateMP(masterDictionary , masterSignal , config)
+
+# print masterBook
+
+print 'Preparations done, proceeding to testing...'
 
 class AlgorithmTest(unittest.TestCase):
 	def test_simpleFirstIteration_atomType(self):
@@ -247,4 +247,101 @@ class AlgorithmTest(unittest.TestCase):
 		working on simple synthetic signal. In this case,
 		there should only be three iterations.
 		'''
-		self.assertEqual(len(book.index) , 3)
+		self.assertEqual(len(advancedBook.index) , 3)
+
+	# -------------------------------------------------------------------- #
+	# ------ advanced ends here ------------------------------------------ #
+
+	def test_masterFirstIteration_atomType(self):
+		'''
+		Test for the very first iteration of the algorithm
+		working on complicated case of a synthetic signal.
+		AtomType check.
+		It should be a symetric, rectangular envelope, 32 in this case.
+		'''
+		self.assertEqual(masterBook['shapeType'][0] , 32)
+	def test_masterFirstIteration_frequency(self):
+		'''
+		Test for the very first iteration of the algorithm
+		working on advanced synthetic signal. Frequency check.
+		'''
+		self.assertTrue( (masterBook['freq'][0] < rectParamsMaster[0][1]*(1+freqThreshold)) and (masterBook['freq'][0] > rectParamsMaster[0][1]*(1-freqThreshold)) )
+	def test_masterFirstIteration_amplitude(self):
+		'''
+		Test for the very first iteration of the algorithm
+		working on advanced synthetic signal. Amplitude check.
+		'''
+		self.assertTrue( (masterBook['amplitude'][0] < rectParamsMaster[0][0]*(1+amplThreshold)) and (masterBook['amplitude'][0] > rectParamsMaster[0][0]*(1-amplThreshold)) )
+	def test_masterSecondIteration_atomType(self):
+		'''
+		Test for the second iteration of the algorithm
+		working on complicated case of a synthetic signal.
+		AtomType check.
+		It should be asymetric envelope, 21 in this case.
+		'''
+		self.assertEqual(masterBook['shapeType'][1] , 21)
+	def test_masterSecondIteration_frequency(self):
+		'''
+		Test for the second iteration of the algorithm
+		working on advanced synthetic signal. Frequency check.
+		'''
+		self.assertTrue( (masterBook['freq'][1] < asymetricParamsMaster[0][1]*(1+freqThreshold)) and (masterBook['freq'][1] > asymetricParamsMaster[0][1]*(1-freqThreshold)) )
+	def test_masterSecondIteration_amplitude(self):
+		'''
+		Test for the second iteration of the algorithm
+		working on advanced synthetic signal. Amplitude check.
+		'''
+		self.assertTrue( (masterBook['amplitude'][1] < asymetricParamsMaster[0][0]*(1+amplThreshold)) and (masterBook['amplitude'][1] > asymetricParamsMaster[0][0]*(1-amplThreshold)) )
+	def test_masterThirdIteration_atomType(self):
+		'''
+		Test for the third iteration of the algorithm
+		working on complicated case of a synthetic signal.
+		AtomType check.
+		It should represent a Gabor function present in
+		gaborParamsMaster, but after previous iterations,
+		it will most likely be represented by slightly asymetric
+		function, ie shape type should be 21.
+		'''
+		self.assertEqual(masterBook['shapeType'][2] , 21)
+	def test_masterThirdIteration_frequency(self):
+		'''
+		Test for the third iteration of the algorithm
+		working on advanced synthetic signal. Frequency check.
+		'''
+		self.assertTrue( (masterBook['freq'][2] < gaborParamsMaster[0][5]*(1+freqThreshold)) and (masterBook['freq'][2] > gaborParamsMaster[0][5]*(1-freqThreshold)) )
+	def test_masterThirdIteration_amplitude(self):
+		'''
+		Test for the third iteration of the algorithm
+		working on advanced synthetic signal. Amplitude check.
+		'''
+		self.assertTrue( (masterBook['amplitude'][2] < gaborParamsMaster[0][2]*(1+amplThreshold)) and (masterBook['amplitude'][2] > gaborParamsMaster[0][2]*(1-amplThreshold)) )
+	def test_masterFourthIteration_atomType(self):
+		'''
+		Test for the fourth iteration of the algorithm
+		working on complicated case of a synthetic signal.
+		AtomType check.
+		It should represent a sinusoid function present in
+		sinusParamsMaster, but after previous iterations,
+		it will most likely be represented by another asymetric
+		function, ie shape type should be 21.
+		'''
+		self.assertEqual(masterBook['shapeType'][3] , 21)
+	def test_masterThirdIteration_frequency(self):
+		'''
+		Test for the fourth iteration of the algorithm
+		working on advanced synthetic signal. Frequency check.
+		'''
+		self.assertTrue( (masterBook['freq'][3] < sinusParamsMaster[0][1]*(1+freqThreshold)) and (masterBook['freq'][3] > sinusParamsMaster[0][1]*(1-freqThreshold)) )
+	def test_masterThirdIteration_amplitude(self):
+		'''
+		Test for the fourth iteration of the algorithm
+		working on advanced synthetic signal. Amplitude check.
+		'''
+		self.assertTrue( (masterBook['amplitude'][3] < sinusParamsMaster[0][0]*(1+amplThreshold)) and (masterBook['amplitude'][3] > sinusParamsMaster[0][0]*(1-amplThreshold)) )
+	def test_masterFifthIteration(self):
+		'''
+		Test for the forth iteration of the algorithm
+		working on simple synthetic signal. In this case,
+		there should only be three iterations.
+		'''
+		self.assertEqual(len(masterBook.index) , 4)
