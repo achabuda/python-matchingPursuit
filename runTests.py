@@ -24,6 +24,7 @@ University of Warsaw, July 06, 2015
 
 import unittest
 from tests.testDictionary import DictionaryTest
+from tests.testAlgorithm  import AlgorithmTest
 
 def main():
     unittest.main()
