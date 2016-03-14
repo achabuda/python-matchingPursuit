@@ -63,14 +63,16 @@ def generateTestSignal(gaborParams , sinusParams , asymetricWaveformsAParams , r
 	if asymetricWaveformsAParams is not None:
 		for asym in asymetricWaveformsAParams:
 			amplitude = asym[0]
-			freq      = asym[1] * 2 * np.pi
+			# freq      = asym[1] * np.pi
+			freq      = (asym[1] / (0.5*samplingFrequency) ) * np.pi
 			pos       = asym[2]
 			sigma     = asym[3]
 			asymetry  = asym[4]
 			x         = np.linspace(scp.lognorm.ppf(0.0001, asymetry),scp.lognorm.ppf(0.9999, asymetry), sigma)
 			envelope  = scp.lognorm.pdf(x, asymetry)
 			tmp       = np.squeeze(np.zeros((numberOfSamples,1)))
-			tmp[pos:pos+sigma] = amplitude * envelope * np.cos(freq * x)
+			tmp[pos:pos+sigma] = amplitude * envelope 
+			tmp       = tmp * np.cos(freq * time)
 			
 			signal += tmp
 			ind1   += 1
@@ -101,7 +103,7 @@ def gaborFunction(params):
 	params:numpy Array containing:
 	numberOfSamples in [samples]
 	samplingFreq    in [Hz]
-	samplingFreq    in [Hz]
+	atomFreq        in [Hz]
 	width           in [s]
 	position        in [s]
 	amplitude       in [au]
@@ -139,8 +141,8 @@ def advancedValues():
 	samplingFreq    = 250.0
 	amplitude1      = 12
 	amplitude2      = 20
-	freq1           = 5.0
-	freq2           = 10.0
+	freq1           = 10.0
+	freq2           = 20.0
 	pos1            = 250
 	pos2            = 500
 	sigma           = 500
