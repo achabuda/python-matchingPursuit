@@ -67,74 +67,52 @@ def calculateMP(dictionary , signal , config):
 			if energyExplained > minEnergyExplained:
 				return pd.DataFrame(book)
 	
-	elif config['algorithm'] == 'mmp':
-		tmpPartialResults = []
-		oldPartialResults = []
-		newPartialResults = []
-		
-		tmpBookElements   = []
-		bookElements      = []
 
-		energiesMatrix   = np.zeros([len(config['trials2calculate']),len(config['channels2calculate'])])
-		amplitudesMatrix = np.zeros([len(config['trials2calculate']),len(config['channels2calculate'])])
-		
-		a = np.zeros([len(config['trials2calculate']) , len(config['channels2calculate'])])
-		e = np.zeros([len(config['trials2calculate']) , len(config['channels2calculate'])])
+	elif config['algorithm'] == 'mmp':
+		partialResultsFinal = []
 
 		tmpSignals = np.zeros(signal.shape , dtype='complex')
 		for trialNumber in np.arange(0 , len(config['trials2calculate'])):
 			for channelNumber in np.arange(0 , len(config['channels2calculate'])):
 				tmpSignals[trialNumber , channelNumber , :] = hilbert(np.squeeze(signal[trialNumber , channelNumber , :]))
-		signal = tmpSignals
-
-		# print signal.shape
-
-		oldSignalRests = signal
-		newSignalRests = np.zeros(oldSignalRests.shape , dtype='complex')
-		signalLength   = signal.shape[2]
+		signal       = tmpSignals
+		signalRest   = signal
+		signalLength = signal.shape[2]
 
 		# print 'signalLength = {}'.format(signalLength)
 		
 		for iteration in np.arange(0 , config['maxNumberOfIterations']):
+			partialResultsAll = []
+			atomFitnessAll    = []
 			for trialNumber in np.arange(0 , len(config['trials2calculate'])):
+				partialResultsTmp = []
+				atomFitnessTmp    = []
 				for channelNumber in np.arange(0 , len(config['channels2calculate'])):
-					if iteration == 0:
-						partialResults = []
-					else:
-						partialResults = oldPartialResults[trialNumber][channelNumber]
-					(bookElement , partialResults , signalRest) = makeOneIteration(dictionary , partialResults , oldSignalRests[trialNumber , channelNumber , :] , signalLength , config , iteration)
-					newSignalRests[trialNumber , channelNumber , :] = signalRest
-					tmpPartialResults.append(partialResults)
-					tmpBookElements.append(bookElement)
+					(partialResults , atomFitness , numberOfAtoms) = calcFitnessForAllAtoms(dictionary , [] , signalRest[trialNumber , channelNumber , :] , signalLength , config , iteration)
+					partialResultsTmp.append(partialResults)
+					atomFitnessTmp.append(atomFitness)
+				partialResultsAll.append(partialResultsTmp)
+				atomFitnessAll.append(atomFitnessTmp)
+
+			a = np.zeros(numberOfAtoms , dtype='complex')
+			e = np.zeros(numberOfAtoms , dtype='complex')
+			for atomNumber in np.arange(0 , numberOfAtoms):
+				A = np.zeros([len(config['trials2calculate']),len(config['channels2calculate'])] , dtype='complex')
 				
-				newPartialResults.append(tmpPartialResults)
-				bookElements.append(tmpBookElements)
-				tmpPartialResults = []
-				tmpBookElements   = []
+				for trialNumber in np.arange(0 , len(config['trials2calculate'])):
+					for channelNumber in np.arange(0 , len(config['channels2calculate'])):
+						A[trialNumber,channelNumber] = atomFitnessAll[trialNumber][channelNumber][atomNumber][0]['amplitude']
+				
+				for trialNumber in np.arange(0 , len(config['trials2calculate'])):
+					a[atomNumber] += norm( A[trialNumber,:]/norm(A,None,1)[trialNumber] , None)
+					e[atomNumber] += norm( A[trialNumber,:] , None)
 			
-			
-			for trialNumber in np.arange(0 , len(config['trials2calculate'])):
-				for channelNumber in np.arange(0 , len(config['channels2calculate'])):
-					amplitudesMatrix[trialNumber,channelNumber] = np.real(np.squeeze(bookElements[trialNumber][channelNumber]['reconstruction'])).max()
-					energiesMatrix[trialNumber,channelNumber]   = np.real(np.dot(signal[trialNumber,channelNumber,:] , bookElements[trialNumber][channelNumber]['reconstruction']))
+			# for trialNumber in np.arange(0 , len(config['trials2calculate'])):
+			# 	a += norm( amplitudes[trialNumber,:]/norm(amplitudes,None,1)[trialNumber] , None )
+			# 	# e += 
 
-					# print np.dot(signal[trialNumber,channelNumber,:] , bookElements[trialNumber][channelNumber]['reconstruction'])
-
-					# plt.figure()
-					# plt.plot(np.real(bookElements[trialNumber][channelNumber]['reconstruction']))
-					# plt.show()
-
-			for trialNumber in np.arange(0 , len(config['trials2calculate'])):
-				for channelNumber in np.arange(0 , len(config['channels2calculate'])):
-					a[trialNumber , channelNumber] = norm( np.sum(np.squeeze(amplitudesMatrix[:,channelNumber]) / norm(amplitudesMatrix , None , 1)) , None)
-					#e[trialNumber , channelNumber] = np.sum( norm( energiesMatrix , ord=None , axis=1) )
-					e[trialNumber , channelNumber] = np.sum(np.sum(energiesMatrix))
-					print 'a = {}'.format(a[trialNumber , channelNumber])
-					print 'e = {}'.format(e[trialNumber , channelNumber])
-
-			# crit = a**2 + e**2
-
-			# ----- #
+			print a
+			print '---'
 			
 
 
@@ -143,6 +121,40 @@ def calculateMP(dictionary , signal , config):
 
 	return pd.DataFrame(book)
 
+def calcFitnessForAllAtoms(dictionary , partialResults , signalRest , signalLength , config , iteration):
+	(partialResults , subMaxDOT , subMaxFreq) = recalculateDotProducts(dictionary , partialResults , signalRest , config['minNFFT'] , signalLength , iteration)
+
+	atomFitness = []
+
+	for (index, partialResult) in partialResults.iterrows():
+		time = np.arange(0, partialResult['time'].shape[0] )
+
+		bookElement = {}
+		bookElement['time']           = partialResult['time']
+		bookElement['freq']           = subMaxFreq[index]
+		bookElement['amplitude']      = subMaxDOT[index]
+		bookElement['sigma']          = partialResult['sigma']
+		bookElement['shapeType']      = partialResult['shapeType']
+
+		bookElement['envelope']       = np.zeros((signalLength))
+	
+		if isinstance(bookElement['time'], (np.ndarray, np.generic)):
+			envelopeBeginIndex = bookElement['time'][0]
+			envelopeEndIndex   = bookElement['time'][-1]+1
+		else:
+			# in case of older pandas library:
+			envelopeBeginIndex = bookElement['time'].values[0]
+			envelopeEndIndex   = bookElement['time'].values[-1]+1
+	
+		bookElement['envelope'][envelopeBeginIndex:envelopeEndIndex] = partialResult['timeCourse']
+		bookElement['reconstruction'] = np.zeros(signalLength,dtype='complex')
+		bookElement['reconstruction'][envelopeBeginIndex:envelopeEndIndex] = bookElement['amplitude']*partialResult['timeCourse']*np.exp(1j*bookElement['freq']*time)
+
+		atomSignalRest = signalRest - bookElement['reconstruction']
+		atomFitness.append((bookElement , atomSignalRest))
+
+	return (partialResults , atomFitness , index)
+	
 def makeOneIteration(dictionary , partialResults , signalRest , signalLength , config , iteration):
 	(partialResults , subMaxDOT , subMaxFreq) = recalculateDotProducts(dictionary , partialResults , signalRest , config['minNFFT'] , signalLength , iteration)
 
@@ -189,11 +201,7 @@ def makeOneIteration(dictionary , partialResults , signalRest , signalLength , c
 			bookElement['reconstruction'] = reconstruction
 			bookElement['shapeType']      = shapeTypeNew
 
-			# not needed yet:
-			# bookElement['mi'] = mi
-			# PoM(length(PoM))=abs(out_book(ii).amplitude);
-
-	signalRest         = signalRest - bookElement['reconstruction']
+	signalRest = signalRest - bookElement['reconstruction']
 
 	bookElement['freq']      = (config['samplingFrequency'] * bookElement['freq']) / (2 * np.pi)
 	bookElement['width']     = dic.findWidth(bookElement['envelope'] , config['samplingFrequency'])
