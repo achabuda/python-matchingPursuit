@@ -88,7 +88,7 @@ class mainWindowUI(object):
         self.groupBoxAlgorithm.setObjectName(_fromUtf8("groupBoxAlgorithm"))        
 
         self.groupBoxDictionary = QtGui.QGroupBox(self.centralwidget)
-        self.groupBoxDictionary.setGeometry(QtCore.QRect(495,10,0,370))
+        self.groupBoxDictionary.setGeometry(QtCore.QRect(305,10,0,370))
         self.groupBoxDictionary.setObjectName(_fromUtf8("groupBoxDictionary"))
 
         self.groupBoxBooks = QtGui.QGroupBox(self.centralwidget)

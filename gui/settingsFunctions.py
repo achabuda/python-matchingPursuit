@@ -94,8 +94,8 @@ class mainWindow(QtGui.QMainWindow):
         self.animationGroupBoxAlgorithm.setDuration(1000)
 
         self.animationGroupBoxDictionary = QtCore.QPropertyAnimation(self.ui.groupBoxDictionary, "geometry")
-        self.animationGroupBoxDataInfo.setEasingCurve(QtCore.QEasingCurve.OutExpo)
-        self.animationGroupBoxDataInfo.setDuration(1000)
+        self.animationGroupBoxDictionary.setEasingCurve(QtCore.QEasingCurve.OutExpo)
+        self.animationGroupBoxDictionary.setDuration(1000)
 
         self.animationGroupBoxErrors = QtCore.QPropertyAnimation(self.ui.groupBoxErrors, "size")
         self.animationGroupBoxErrors.setEasingCurve(QtCore.QEasingCurve.OutExpo)
@@ -117,7 +117,7 @@ class mainWindow(QtGui.QMainWindow):
             self.animationGroupBoxAlgorithm.setEndValue(QtCore.QSize(0,220))
             self.animationGroupBoxErrors.setEndValue(QtCore.QSize(580,60))
             #self.animationGroupBoxDictionary.setEndValue(QtCore.QRect(305,10,0,370))
-            self.animationGroupBoxDictionary.setEndValue(QtCore.QRect(495,10,0,370))
+            self.animationGroupBoxDictionary.setEndValue(QtCore.QRect(305,10,0,370))
             self.setMinimumSize(QtCore.QSize(600, 450))
             self.flags['groupBoxDataResized'] = 0
 
