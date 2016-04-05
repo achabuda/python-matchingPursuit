@@ -54,9 +54,9 @@ class mainWindowUI(object):
 
         mainWindow.setObjectName(_fromUtf8("mainWindow"))
         mainWindow.setEnabled(True)
-        mainWindow.resize(600, 400)
-        mainWindow.setMinimumSize(QtCore.QSize(600, 400))
-        mainWindow.setMaximumSize(QtCore.QSize(600, 400))
+        mainWindow.resize(600, 450)
+        mainWindow.setMinimumSize(QtCore.QSize(600, 450))
+        mainWindow.setMaximumSize(QtCore.QSize(600, 450))
         # icon = QtGui.QIcon()
         # 
         # if system() == 'Windows':
@@ -76,7 +76,7 @@ class mainWindowUI(object):
 
 # GROUPBOXES:
         self.groupBoxData = QtGui.QGroupBox(self.centralwidget)
-        self.groupBoxData.setGeometry(QtCore.QRect(10,10,280,320))
+        self.groupBoxData.setGeometry(QtCore.QRect(10,10,280,370))
         self.groupBoxData.setObjectName(_fromUtf8("groupBoxData"))
 
         self.groupBoxDataInfo = QtGui.QGroupBox(self.centralwidget)
@@ -84,19 +84,19 @@ class mainWindowUI(object):
         self.groupBoxDataInfo.setObjectName(_fromUtf8("groupBoxDataInfo"))
 
         self.groupBoxAlgorithm = QtGui.QGroupBox(self.centralwidget)
-        self.groupBoxAlgorithm.setGeometry(QtCore.QRect(305,160,0,170))
+        self.groupBoxAlgorithm.setGeometry(QtCore.QRect(305,160,0,220))
         self.groupBoxAlgorithm.setObjectName(_fromUtf8("groupBoxAlgorithm"))        
 
         self.groupBoxDictionary = QtGui.QGroupBox(self.centralwidget)
-        self.groupBoxDictionary.setGeometry(QtCore.QRect(305,10,0,320))
+        self.groupBoxDictionary.setGeometry(QtCore.QRect(495,10,0,370))
         self.groupBoxDictionary.setObjectName(_fromUtf8("groupBoxDictionary"))
 
         self.groupBoxBooks = QtGui.QGroupBox(self.centralwidget)
-        self.groupBoxBooks.setGeometry(QtCore.QRect(310,10,280,320))
+        self.groupBoxBooks.setGeometry(QtCore.QRect(310,10,280,370))
         self.groupBoxBooks.setObjectName(_fromUtf8("groupBoxBooks"))
 
         self.groupBoxErrors = QtGui.QGroupBox(self.centralwidget)
-        self.groupBoxErrors.setGeometry(QtCore.QRect(10,330,580,60))
+        self.groupBoxErrors.setGeometry(QtCore.QRect(10,380,580,60))
         self.groupBoxErrors.setObjectName(_fromUtf8("groupBoxErrors"))
 
 # GROUPBOX - DATA
@@ -194,57 +194,74 @@ class mainWindowUI(object):
         configGrid = QtGui.QGridLayout()
         self.groupBoxAlgorithm.setLayout(configGrid)
 
+        self.lbl_channels2calc = QtGui.QLabel(self.groupBoxAlgorithm)
+        self.lbl_channels2calc.setObjectName(_fromUtf8("lbl_channels2calc"))
+        configGrid.addWidget(self.lbl_channels2calc,0,0)
+
+        self.led_channels2calc = QtGui.QLineEdit(self.groupBoxAlgorithm)
+        self.led_channels2calc.setObjectName(_fromUtf8("led_channels2calc"))
+        configGrid.addWidget(self.led_channels2calc,0,1)
+
+        self.lbl_trials2calc = QtGui.QLabel(self.groupBoxAlgorithm)
+        self.lbl_trials2calc.setObjectName(_fromUtf8("lbl_trials2calc"))
+        configGrid.addWidget(self.lbl_trials2calc,1,0)
+
+        self.led_trials2calc = QtGui.QLineEdit(self.groupBoxAlgorithm)
+        self.led_trials2calc.setObjectName(_fromUtf8("led_trials2calc"))
+        configGrid.addWidget(self.led_trials2calc,1,1)
+
+
         self.lbl_algorithmType = QtGui.QLabel(self.groupBoxAlgorithm)
         self.lbl_algorithmType.setObjectName(_fromUtf8("lbl_algorithmType"))
-        configGrid.addWidget(self.lbl_algorithmType,0,0)
+        configGrid.addWidget(self.lbl_algorithmType,2,0)
 
         self.cmb_algorithmType = QtGui.QComboBox(self.groupBoxAlgorithm)
         self.cmb_algorithmType.setObjectName(_fromUtf8("cmb_algorithmType"))
-        configGrid.addWidget(self.cmb_algorithmType,0,1)
+        configGrid.addWidget(self.cmb_algorithmType,2,1)
 
         self.lbl_useGradient = QtGui.QLabel(self.groupBoxAlgorithm)
         self.lbl_useGradient.setObjectName(_fromUtf8("lbl_useGradient"))
-        configGrid.addWidget(self.lbl_useGradient,1,0)
+        configGrid.addWidget(self.lbl_useGradient,3,0)
 
         self.chb_useGradient = QtGui.QCheckBox(self.groupBoxAlgorithm)
         self.chb_useGradient.setTristate(0)
         self.chb_useGradient.setObjectName(_fromUtf8("chb_useGradient"))
-        configGrid.addWidget(self.chb_useGradient,1,1)
+        configGrid.addWidget(self.chb_useGradient,3,1)
 
         self.lbl_iterationsLimit = QtGui.QLabel(self.groupBoxAlgorithm)
         self.lbl_iterationsLimit.setObjectName(_fromUtf8("lbl_iterationsLimit"))
-        configGrid.addWidget(self.lbl_iterationsLimit,2,0)
+        configGrid.addWidget(self.lbl_iterationsLimit,4,0)
 
         self.led_iterationsLimit = QtGui.QLineEdit(self.groupBoxAlgorithm)
         self.led_iterationsLimit.setObjectName(_fromUtf8("led_iterationsLimit"))
-        configGrid.addWidget(self.led_iterationsLimit,2,1)
+        configGrid.addWidget(self.led_iterationsLimit,4,1)
 
         self.lbl_energyLimit = QtGui.QLabel(self.groupBoxAlgorithm)
         self.lbl_energyLimit.setObjectName(_fromUtf8("lbl_energyLimit"))
-        configGrid.addWidget(self.lbl_energyLimit,3,0)
+        configGrid.addWidget(self.lbl_energyLimit,5,0)
 
         self.led_energyLimit = QtGui.QLineEdit(self.groupBoxAlgorithm)
         self.led_energyLimit.setObjectName(_fromUtf8("led_energyLimit"))
-        configGrid.addWidget(self.led_energyLimit,3,1)
+        configGrid.addWidget(self.led_energyLimit,5,1)
 
         self.lbl_nfft = QtGui.QLabel(self.groupBoxAlgorithm)
         self.lbl_nfft.setObjectName(_fromUtf8("lbl_nfft"))
-        configGrid.addWidget(self.lbl_nfft,4,0)
+        configGrid.addWidget(self.lbl_nfft,6,0)
 
         self.led_nfft = QtGui.QLineEdit(self.groupBoxAlgorithm)
         self.led_nfft.setObjectName(_fromUtf8("led_nfft"))
-        configGrid.addWidget(self.led_nfft,4,1)
+        configGrid.addWidget(self.led_nfft,6,1)
 
         self.lbl_displayInfo = QtGui.QLabel(self.groupBoxAlgorithm)
         self.lbl_displayInfo.setObjectName(_fromUtf8("lbl_displayInfo"))
-        configGrid.addWidget(self.lbl_displayInfo,5,0)
+        configGrid.addWidget(self.lbl_displayInfo,7,0)
 
         self.chb_displayInfo = QtGui.QCheckBox(self.groupBoxAlgorithm)
         self.chb_displayInfo.setTristate(0)
         self.chb_displayInfo.setObjectName(_fromUtf8("chb_displayInfo"))
-        configGrid.addWidget(self.chb_displayInfo,5,1)
+        configGrid.addWidget(self.chb_displayInfo,7,1)
 
-        configGrid.setRowStretch(6,1)
+        configGrid.setRowStretch(8,1)
 
 
 
@@ -411,6 +428,8 @@ class mainWindowUI(object):
         self.lbl_samples.setText(_translate("mainWindow", "# of samples:", None))
         self.lbl_channels.setText(_translate("mainWindow", "# of channels:", None))
         self.lbl_trials.setText(_translate("mainWindow", "# of trials:", None))
+        self.lbl_channels2calc.setText(_translate("mainWindow", "Channel range:", None))
+        self.lbl_trials2calc.setText(_translate("mainWindow", "Trial range:", None))
         self.lbl_algorithmType.setText(_translate("mainWindow", "Algorithm:", None))
         self.lbl_useGradient.setText(_translate("mainWindow", "Use gradient opt:", None))
         self.lbl_iterationsLimit.setText(_translate("mainWindow", "# of iterations:", None))
