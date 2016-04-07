@@ -404,8 +404,6 @@ class mainWindowUI(object):
         # self.lst_data.setViewMode(QtGui.QListView.IconMode)
         booksGrid.addWidget(self.lst_books,1,0,2,0)
 
-
-
 # SET ALL THINGS UP:
         mainWindow.setCentralWidget(self.centralwidget)
         self.retranslateUi(mainWindow)
@@ -451,17 +449,6 @@ class mainWindowUI(object):
         self.btn_saveSelectedBooks.setText(_translate("mainWindow", "Save selected", None))
         self.btn_openVisualisationTool.setText(_translate("mainWindow", "Visualise", None))
         self.btn_dictionarySave.setText(_translate("mainWindow", "Generate and Save", None))
-
-        # self.lbl_dictionaryFileName.setText(_translate("mainWindow", "", None))
-
-        self.algorithmTypes = {}
-        self.algorithmTypes['SMP']       = 0
-        self.algorithmTypes['MMP']       = 1
-        
-        keys = self.algorithmTypes.keys()
-        for position in keys:
-            self.cmb_algorithmType.addItem(position)
-        self.cmb_algorithmType.setCurrentIndex(1)
 
 ###################################################################################################################################################
 ###################################################################################################################################################
