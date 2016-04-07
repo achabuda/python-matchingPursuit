@@ -21,6 +21,7 @@ author: Tomasz Spustek
 e-mail: tomasz@spustek.pl
 University of Warsaw, July 06, 2015
 '''
+from __future__ import division
 
 import numpy as np
 from math     import log
@@ -32,30 +33,29 @@ def loadSigmalFromMatlabFile(nameOfFile):
 	dataInfo = {}
 
 	try:
-		dataInfo['trials']       = structure['trials'][0][0]
-		dataInfo['channels']     = structure['channels'][0][0]
-		dataInfo['samples']      = structure['samples'][0][0]
-		dataInfo['samplingFreq'] = structure['samplingFreq'][0][0]
-		dataMatrix               = structure['data']
+		dataInfo['numberOfTrials']   = structure['trials'][0][0]
+		dataInfo['numberOfChannels'] = structure['channels'][0][0]
+		dataInfo['numberOfSamples']  = structure['samples'][0][0]
+		dataInfo['samplingFreq']     = structure['samplingFreq'][0][0]
+		dataMatrix                   = structure['data']
 	except KeyError:
 		try:
 			dataMatrix = structure['data']
 			numbers    = np.array(dataMatrix.shape , dtype='int')
-			for ID in ['samples' , 'trials' , 'channels']:
+			for ID in ['numberOfSamples' , 'numberOfTrials' , 'numberOfChannels']:
 				dataInfo[ID]   = numbers.max()
 				where          = numbers.argmax()
 				numbers[where] = -1
-			dataInfo['samplingFreq'] = pow(2 , int(log(dataInfo['samples'], 2)))
+			dataInfo['samplingFreq'] = pow(2 , int(log(dataInfo['numberOfSamples'], 2)))
 		except KeyError:
 			return(np.array([]) , {} , 'err_1')
 
 	numbers = []
 	[numbers.append(int(el)) for el in dataMatrix.shape]
-	print '---'
 
 	indices = {}
 	ind     = 0
-	for ID in ['samples' , 'trials' , 'channels']:
+	for ID in ['numberOfSamples' , 'numberOfTrials' , 'numberOfChannels']:
 		where = []
 		[where.append(tmp) for tmp,el in enumerate(numbers) if el == dataInfo[ID]]
 		if len(where) > 1:
@@ -66,27 +66,11 @@ def loadSigmalFromMatlabFile(nameOfFile):
 		elif where == []:
 			return (np.array([]) , {} , 'err_2')
 
-	print indices
+	# print dataMatrix.shape
+	dataMatrix = np.transpose(dataMatrix , (indices['numberOfTrials'] , indices['numberOfChannels'] , indices['numberOfSamples']))
+	# print dataMatrix.shape
 
+	dataInfo['numberOfSeconds'] = dataInfo['numberOfSamples'] / dataInfo['samplingFreq']
+	dataInfo['time']            = np.arange(0 , dataInfo['numberOfSeconds'] , 1./dataInfo['samplingFreq'])
 	
 	return (dataMatrix , dataInfo , 'ok')
-
-
-
-	# print structure['data'].shape
-
-	# data = structure['data'][0][0]
-	# data = data.transpose([2,0,1])
-
-	# info = {}
-	# info['samplingFreq']     =  structure['EEG']['srate'][0][0][0][0]
-	# info['numberOfChannels'] =  structure['EEG']['nbchan'][0][0][0][0]
-	# info['numberOfSamples']  =  structure['EEG']['pnts'][0][0][0][0]
-	# info['numberOfSeconds']  =  structure['EEG']['pnts'][0][0][0][0] / info['samplingFreq']
-	# info['numberOfTrials']   =  structure['EEG']['trials'][0][0][0][0]
-
-	# # print structure['EEG']['chanlocs'][0][0][0,2]
-
-	# time = np.arange(0 , info['numberOfSeconds'] , 1./info['samplingFreq'])
-
-	# return (data , time , info)
