@@ -30,13 +30,12 @@ from functools import partial
 from os.path   import expanduser
 from PyQt4     import QtCore, QtGui
 
-
 # gui imports #
 from settingsGraphics import mainWindowUI
 
 # modules imports #
-import data.dataLoader as dl 
-
+import data.dataLoader as dl
+from src.utils import determineAlgorithmConfig , determineDictionaryConfig
 
 class mainWindow(QtGui.QMainWindow):
 
@@ -78,30 +77,45 @@ class mainWindow(QtGui.QMainWindow):
         self.flags['groupBoxDataResized'] = 0
 
     def setVariablesState(self , flag):
-        self.informationTextColor = QtCore.Qt.green
-        self.warrningTextColor    = QtCore.Qt.red
 
-        self.warnings = {}
-        self.warnings['openData_err_1'] = 'Field "data" was not found in the file '
-        self.warnings['openData_err_2'] = '"Channels" or "trials" did not match the shape of "data", in '
-        self.warnings['openData_err_3'] = 'Data matrix has more than three dimensions, in '
+        if flag == 0:
+            if system() == 'Windows':
+                # self.configFileName = os.path.expanduser("~") + '/_config/wordViewer_ng/configFile.txt'
+                self.lineEnding     = '\n'
+            else:
+                # self.configFileName = os.path.expanduser("~") + '/.config/wordViewer_ng/configFile.txt'
+                self.lineEnding     = '\r\n'
 
-        self.warrningDisplayTime = 5000     # in [ms]
+            self.informationTextColor = QtCore.Qt.green
+            self.warrningTextColor    = QtCore.Qt.red
 
-        self.dataMatrixes = {}
+            self.warnings = {}
+            self.warnings['openData_err_1'] = 'Field "data" was not found in the file '
+            self.warnings['openData_err_2'] = '"Channels" or "trials" did not match the shape of "data", in '
+            self.warnings['openData_err_3'] = 'Data matrix has more than three dimensions, in '
+
+            self.warrningDisplayTime = 7000     # in [ms]
+
+            self.dataMatrixes     = {}
+            self.dictionaryConfig = {}
 
     def setWidgetsState(self):
 
         self.ui.groupBoxErrors.setHidden(True)
 
-        self.algorithmTypes = {}
-        self.algorithmTypes['SMP']       = 0
-        self.algorithmTypes['MMP']       = 1
-        
-        keys = self.algorithmTypes.keys()
+        algorithmTypes = {'smp':0 , 'mmp':1}
+        keys = algorithmTypes.keys()
         for position in keys:
             self.ui.cmb_algorithmType.addItem(position)
         self.ui.cmb_algorithmType.setCurrentIndex(1)
+
+        unitTypes = {'[samples]':0 , '[sec]':1}
+        keys = unitTypes.keys()
+        for position in keys:
+            self.ui.cmb_minS.addItem(position)
+            self.ui.cmb_maxS.addItem(position)
+        self.ui.cmb_minS.setCurrentIndex(1)
+        self.ui.cmb_maxS.setCurrentIndex(1)
 
         self.ui.btn_calculate.setEnabled(False)
         self.ui.btn_saveSelectedBooks.setEnabled(False)
@@ -112,6 +126,31 @@ class mainWindow(QtGui.QMainWindow):
         self.timer = QtCore.QTimer()
         self.timer.setSingleShot(True)
         self.timer.timeout.connect(self.timerEvent)
+
+    def setAlgorithmControlls(self , config):
+        self.ui.led_iterationsLimit.setText(config['iterationsLimit'])
+        self.ui.led_energyLimit.setText(config['energyLimit'])
+        self.ui.led_nfft.setText(config['nfft'])
+
+        ind = self.ui.cmb_algorithmType.findText(config['algorithmType'])
+        self.ui.cmb_algorithmType.setCurrentIndex(ind)
+        
+        self.ui.led_trials2calc.setText(config['trials2calc'])
+        self.ui.led_channels2calc.setText(config['channels2calc'])
+        self.ui.chb_displayInfo.setChecked(config['displayInfo'])
+        self.ui.chb_useGradient.setChecked(config['useGradient'])
+
+    def setDictionaryControlls(self):
+
+        self.ui.led_dictonaryDensity.setText(self.dictionaryConfig['dictionaryDensity'])
+        ind = self.ui.cmb_minS.findText(self.dictionaryConfig['minS'][1])
+        self.ui.cmb_minS.setCurrentIndex(ind)
+        self.ui.led_minS.setText(self.dictionaryConfig['minS'][0])
+        ind = self.ui.cmb_maxS.findText(self.dictionaryConfig['maxS'][1])
+        self.ui.cmb_maxS.setCurrentIndex(ind)
+        self.ui.led_maxS.setText(self.dictionaryConfig['maxS'][0])
+        self.ui.chb_useRect.setChecked(self.dictionaryConfig['useRect'])
+        self.ui.chb_useAsym.setChecked(self.dictionaryConfig['useAsym'])
 
 
 # WIDGETS BEHAVIOUR
@@ -127,9 +166,7 @@ class mainWindow(QtGui.QMainWindow):
                 if filePath[-4:] == '.mat':
                     (dataMatrix , dataInfo , message) = dl.loadSigmalFromMatlabFile(filePath)
                     if message == 'ok':
-                        self.dataMatrixes[filePath] = (dataMatrix , dataInfo)
-                        # item = QListWidgetItem("Item %i" % i)
-                        # listWidget.addItem(item)
+                        self.addData(filePath , dataMatrix , dataInfo)
                     else:
                         warningCollector = warningCollector + self.warnings['openData_'+message] + filePath + '\n'
 
@@ -178,6 +215,19 @@ class mainWindow(QtGui.QMainWindow):
 
 ### PROCESSING EVENTS:
 ######################
+    def addData(self , filePath , dataMatrix , dataInfo):
+        algorithmConfig       = determineAlgorithmConfig(dataInfo)
+        self.dictionaryConfig = determineDictionaryConfig(self.dictionaryConfig , algorithmConfig['energyLimit'] , dataInfo)
+
+        self.dataMatrixes[filePath] = (dataMatrix , dataInfo , algorithmConfig)
+        
+        self.setAlgorithmControlls(algorithmConfig)
+        print self.dictionaryConfig
+        self.setDictionaryControlls()
+
+        # item = QListWidgetItem("Item %i" % i)
+        # listWidget.addItem(item)
+
     def timerEvent(self):
         self.warrning('off')
 
@@ -216,23 +266,23 @@ class mainWindow(QtGui.QMainWindow):
         self.animationGroupBoxErrors.setDuration(animationDuration)
 
         if self.flags['groupBoxDataResized'] == 0:
-            self.animationWindow.setEndValue(QtCore.QSize(1000,450))
+            self.animationWindow.setEndValue(QtCore.QSize(1000,self.ui.basicWindowSize[1]))
             self.animationGroupBoxBooks.setEndValue(QtCore.QRect(710,10,280,370))
             self.animationGroupBoxDataInfo.setEndValue(QtCore.QSize(180,140))
             self.animationGroupBoxAlgorithm.setEndValue(QtCore.QSize(180,220))
             self.animationGroupBoxErrors.setEndValue(QtCore.QSize(980,60))
             self.animationGroupBoxDictionary.setEndValue(QtCore.QRect(495,10,200,370))
-            self.setMaximumSize(QtCore.QSize(1000, 450))
+            self.setMaximumSize(QtCore.QSize(1000, self.ui.basicWindowSize[1]))
             self.flags['groupBoxDataResized'] = 1
         else:
-            self.animationWindow.setEndValue(QtCore.QSize(600,450))
+            self.animationWindow.setEndValue(QtCore.QSize(self.ui.basicWindowSize[0],self.ui.basicWindowSize[1]))
             self.animationGroupBoxBooks.setEndValue(QtCore.QRect(310,10,280,370))
             self.animationGroupBoxDataInfo.setEndValue(QtCore.QSize(0,140))
             self.animationGroupBoxAlgorithm.setEndValue(QtCore.QSize(0,220))
             self.animationGroupBoxErrors.setEndValue(QtCore.QSize(580,60))
             #self.animationGroupBoxDictionary.setEndValue(QtCore.QRect(305,10,0,370))
             self.animationGroupBoxDictionary.setEndValue(QtCore.QRect(305,10,0,370))
-            self.setMinimumSize(QtCore.QSize(600, 450))
+            self.setMinimumSize(QtCore.QSize(self.ui.basicWindowSize[0], self.ui.basicWindowSize[1]))
             self.flags['groupBoxDataResized'] = 0
 
         self.animation.addAnimation(self.animationWindow)

@@ -52,11 +52,13 @@ class mainWindowUI(object):
 
     def setupUi(self, mainWindow):
 
+        self.basicWindowSize = (600, 550)
+
         mainWindow.setObjectName(_fromUtf8("mainWindow"))
         mainWindow.setEnabled(True)
-        mainWindow.resize(600, 450)
-        mainWindow.setMinimumSize(QtCore.QSize(600, 450))
-        mainWindow.setMaximumSize(QtCore.QSize(600, 450))
+        mainWindow.resize(self.basicWindowSize[0] , self.basicWindowSize[1])
+        mainWindow.setMinimumSize(QtCore.QSize(self.basicWindowSize[0] , self.basicWindowSize[1]))
+        mainWindow.setMaximumSize(QtCore.QSize(self.basicWindowSize[0] , self.basicWindowSize[1]))
         # icon = QtGui.QIcon()
         # 
         # if system() == 'Windows':
@@ -96,7 +98,7 @@ class mainWindowUI(object):
         self.groupBoxBooks.setObjectName(_fromUtf8("groupBoxBooks"))
 
         self.groupBoxErrors = QtGui.QGroupBox(self.centralwidget)
-        self.groupBoxErrors.setGeometry(QtCore.QRect(10,380,580,60))
+        self.groupBoxErrors.setGeometry(QtCore.QRect(10,380,580,160))
         self.groupBoxErrors.setObjectName(_fromUtf8("groupBoxErrors"))
 
 # GROUPBOX - DATA
@@ -227,7 +229,7 @@ class mainWindowUI(object):
         configGrid.addWidget(self.lbl_useGradient,3,0)
 
         self.chb_useGradient = QtGui.QCheckBox(self.groupBoxAlgorithm)
-        self.chb_useGradient.setTristate(0)
+        self.chb_useGradient.setTristate(False)
         self.chb_useGradient.setObjectName(_fromUtf8("chb_useGradient"))
         configGrid.addWidget(self.chb_useGradient,3,1)
 
@@ -260,7 +262,7 @@ class mainWindowUI(object):
         configGrid.addWidget(self.lbl_displayInfo,7,0)
 
         self.chb_displayInfo = QtGui.QCheckBox(self.groupBoxAlgorithm)
-        self.chb_displayInfo.setTristate(0)
+        self.chb_displayInfo.setTristate(False)
         self.chb_displayInfo.setObjectName(_fromUtf8("chb_displayInfo"))
         configGrid.addWidget(self.chb_displayInfo,7,1)
 
@@ -457,8 +459,8 @@ class mainWindowUI(object):
         self.lbl_displayInfo.setText(_translate("mainWindow", "Display informations:", None))
         self.lbl_dictionaryH1.setText(_translate("mainWindow", "Generate a dictionary:", None))
         self.lbl_dictonaryDensity.setText(_translate("mainWindow", "Dictionary density:", None))
-        self.lbl_minS.setText(_translate("mainWindow", "Minimal width:", None))
-        self.lbl_maxS.setText(_translate("mainWindow", "Maximal width:", None))
+        self.lbl_minS.setText(_translate("mainWindow", "Min. width:", None))
+        self.lbl_maxS.setText(_translate("mainWindow", "Max. width:", None))
         self.lbl_useAsym.setText(_translate("mainWindow", "Include asymetrics:", None))
         self.lbl_useRect.setText(_translate("mainWindow", "Include rectangularities:", None))
         self.lbl_dictionaryH2.setText(_translate("mainWindow", "Or load dictionary from a file:", None))
