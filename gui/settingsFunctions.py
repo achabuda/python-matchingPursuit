@@ -78,9 +78,22 @@ class mainWindow(QtGui.QMainWindow):
         self.flags['groupBoxDataResized'] = 0
 
     def setVariablesState(self , flag):
-        pass
+        self.informationTextColor = QtCore.Qt.green
+        self.warrningTextColor    = QtCore.Qt.red
+
+        self.warnings = {}
+        self.warnings['openData_err_1'] = 'Field "data" was not found in the file '
+        self.warnings['openData_err_2'] = '"Channels" or "trials" did not match the shape of "data", in '
+        self.warnings['openData_err_3'] = 'Data matrix has more than three dimensions, in '
+
+        self.warrningDisplayTime = 5000     # in [ms]
+
+        self.dataMatrixes = {}
 
     def setWidgetsState(self):
+
+        self.ui.groupBoxErrors.setHidden(True)
+
         self.algorithmTypes = {}
         self.algorithmTypes['SMP']       = 0
         self.algorithmTypes['MMP']       = 1
@@ -96,35 +109,77 @@ class mainWindow(QtGui.QMainWindow):
         self.ui.btn_dictionarySave.setEnabled(False)
         self.ui.btn_removeData.setEnabled(False)
 
+        self.timer = QtCore.QTimer()
+        self.timer.setSingleShot(True)
+        self.timer.timeout.connect(self.timerEvent)
+
 
 # WIDGETS BEHAVIOUR
 ##################
     def selectDataFiles(self):
 
-        dialog = QtGui.QFileDialog.getOpenFileNames(self , 'Open data files' , expanduser('~') , 'Matlab files (*.mat);;Python files (*.pyc);;All Files (*)')
+        dialog = QtGui.QFileDialog.getOpenFileNames(self , 'Open data files' , expanduser('~') , 'Matlab files (*.mat);;Python pickles (*.p);;All Files (*)')
 
+        warningCollector = ''
         for filePath in dialog:
             if filePath != '':
-                if filePath[-3:] == 'mat':
-                    print '----'
+                self.displayInformation('Opening file '+ filePath + '. Please wait...' , 'new')
+                if filePath[-4:] == '.mat':
                     (dataMatrix , dataInfo , message) = dl.loadSigmalFromMatlabFile(filePath)
-                    print message
-                    print dataInfo
-                elif filePath[-3:] == 'pyc':
+                    if message == 'ok':
+                        self.dataMatrixes[filePath] = (dataMatrix , dataInfo)
+                        # item = QListWidgetItem("Item %i" % i)
+                        # listWidget.addItem(item)
+                    else:
+                        warningCollector = warningCollector + self.warnings['openData_'+message] + filePath + '\n'
+
+                elif filePath[-2:] == '.p':
                     pass
 
-            
-            # if self.errorMsg == '':
-            #     self.config['fileName'] = self.filePath
-            #     self.checkStartButtonStatus()
-            # else:
-            #     self.warrning('on')
-            #     defaults = loadDefaultValues()
-            #     self.config['fileName'] = defaults['fileName']
-            #     self.filePath = self.config['fileName']
-            #     self.ui.btn_start.setEnabled(False)
+        self.displayInformation('' , 'new')
+        if warningCollector != '':
+            self.warrning('on' , warningCollector)
 
-            # self.setFileNameLabel()
+    def displayInformation(self , text , flag='new'):
+        # possible flags: new, add, remove_last
+        palette = QtGui.QPalette()
+        if text == '':
+            self.ui.lbl_errors.setText('')
+            palette.setColor(QtGui.QPalette.Foreground, self.warrningTextColor)
+            self.ui.lbl_errors.setPalette(palette)
+            self.ui.groupBoxErrors.hide()
+        else:
+            palette.setColor(QtGui.QPalette.Foreground, self.informationTextColor)
+            self.ui.lbl_errors.setPalette(palette)
+            if flag == 'new':
+                self.ui.lbl_errors.setText(text)
+                self.ui.groupBoxErrors.show()
+            elif flag == 'add':
+                newtext = self.ui.lbl_errors.text() + ' ' + text
+                self.ui.lbl_errors.setText(newtext)
+            elif flag == 'remove_last':
+                t1 = self.ui.lbl_errors.text().find(' ')
+                newtext = self.ui.lbl_errors.text()[0:t1]
+                self.ui.lbl_errors.setText(newtext)
+        QtGui.QApplication.instance().processEvents()   # Important!
+
+    def warrning(self , flag='off' , errorMsg=''):
+        if flag == 'on':
+            palette = QtGui.QPalette()
+            self.ui.lbl_errors.setText(errorMsg)
+            palette.setColor(QtGui.QPalette.Foreground, self.warrningTextColor)
+            self.ui.lbl_errors.setPalette(palette)
+            self.ui.groupBoxErrors.show()
+            self.timer.singleShot(self.warrningDisplayTime , self.timerEvent)
+        elif flag == 'off':
+            self.ui.lbl_errors.setText('')
+            self.ui.groupBoxErrors.hide()
+        QtGui.QApplication.instance().processEvents()   # Important!
+
+### PROCESSING EVENTS:
+######################
+    def timerEvent(self):
+        self.warrning('off')
 
 
 # ANIMATIONS AND WINDOW RESIZING

@@ -100,8 +100,6 @@ def loadSigmalFromMatlabFile(nameOfFile):
 	numbers = []
 	[numbers.append(int(el)) for el in dataMatrix.shape]
 
-	# print dataInfo
-
 	if len(numbers) == 1:
 		dataInfo['numberOfTrials']   = 1
 		dataInfo['numberOfChannels'] = 1
@@ -151,15 +149,11 @@ def loadSigmalFromMatlabFile(nameOfFile):
 			elif where == []:
 				return (np.array([]) , {} , 'err_2')
 
-		# print dataMatrix.shape
 		dataMatrix = np.transpose(dataMatrix , (indices['numberOfTrials'] , indices['numberOfChannels'] , indices['numberOfSamples']))
-		# print dataMatrix.shape
 	else:
 		return(np.array([]) , {} , 'err_3')
 
 	dataInfo['numberOfSeconds'] = dataInfo['numberOfSamples'] / dataInfo['samplingFreq']
 	dataInfo['time']            = np.arange(0 , dataInfo['numberOfSeconds'] , 1./dataInfo['samplingFreq'])
-	
-	print dataMatrix.shape
 
 	return (dataMatrix , dataInfo , 'ok')

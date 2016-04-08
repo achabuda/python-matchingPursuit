@@ -46,7 +46,7 @@ class mainWindowUI(object):
 
     Class governing the graphical part of the default graphical user interface.
     It describes only parameters of used widgets, all operational functions
-    are placed in separate class - gui_functional.
+    are placed in separate class - settingsFunctions.py.
 
     '''
 
@@ -140,6 +140,9 @@ class mainWindowUI(object):
         dataGrid.addWidget(self.btn_settingsData,0,2)
 
         self.lst_data = QtGui.QListWidget(self.groupBoxData)
+        self.lst_data.setAcceptDrops(True)
+        # self.lst_data.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
+        # self.lst_data.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         # self.lst_data.setViewMode(QtGui.QListView.IconMode)
         dataGrid.addWidget(self.lst_data,1,0,2,0)
 
@@ -404,6 +407,24 @@ class mainWindowUI(object):
         # self.lst_data.setViewMode(QtGui.QListView.IconMode)
         booksGrid.addWidget(self.lst_books,1,0,2,0)
 
+# GROUPBOX - ERRORS
+        errorsGrid = QtGui.QGridLayout()
+        self.groupBoxErrors.setLayout(errorsGrid)
+
+        self.lbl_errors = QtGui.QLabel(self.groupBoxErrors)
+        self.lbl_errors.setEnabled(True)
+        self.lbl_errors.setAlignment(QtCore.Qt.AlignCenter)
+        font = QtGui.QFont()
+        font.setItalic(True)
+        self.lbl_errors.setFont(font)
+        palette = QtGui.QPalette()
+        palette.setColor(QtGui.QPalette.Foreground,QtCore.Qt.red)
+        self.lbl_errors.setPalette(palette)
+        self.lbl_errors.setObjectName(_fromUtf8("lbl_errors"))
+        errorsGrid.addWidget(self.lbl_errors,0,0)
+
+        errorsGrid.setRowStretch(1,1)
+
 # SET ALL THINGS UP:
         mainWindow.setCentralWidget(self.centralwidget)
         self.retranslateUi(mainWindow)
@@ -441,6 +462,7 @@ class mainWindowUI(object):
         self.lbl_useAsym.setText(_translate("mainWindow", "Include asymetrics:", None))
         self.lbl_useRect.setText(_translate("mainWindow", "Include rectangularities:", None))
         self.lbl_dictionaryH2.setText(_translate("mainWindow", "Or load dictionary from a file:", None))
+        self.lbl_errors.setText(_translate("mainWindow", "Some error", None))
 
         self.btn_addData.setText(_translate("mainWindow", "Add", None))
         self.btn_removeData.setText(_translate("mainWindow", "Remove", None))
@@ -453,6 +475,38 @@ class mainWindowUI(object):
 ###################################################################################################################################################
 ###################################################################################################################################################
 
+# class DragDropListWidget(QListWidget):
+#     def __init__(self, type, parent=None):
+#         super(DragDropListWidget, self).__init__(parent)
+#         self.setAcceptDrops(True)
+#         # self.setIconSize(QSize(72, 72))
+ 
+#     def dragEnterEvent(self, event):
+#         if event.mimeData().hasUrls():
+#             event.accept()
+#         else:
+#             event.ignore()
+ 
+#     def dragMoveEvent(self, event):
+#         if event.mimeData().hasUrls():
+#             event.setDropAction(Qt.CopyAction)
+#             event.accept()
+#         else:
+#             event.ignore()
+ 
+#     def dropEvent(self, event):
+#         if event.mimeData().hasUrls():
+#             event.setDropAction(Qt.CopyAction)
+#             event.accept()
+#             l = []
+#             for url in event.mimeData().urls():
+#                 l.append(str(url.toLocalFile()))
+#             self.emit(SIGNAL("dropped"), l)
+#         else:
+#             event.ignore()
+
+###################################################################################################################################################
+###################################################################################################################################################
 
 if __name__ == '__main__':
     print 'Using this class without it\'s functional part may be possible, but'
