@@ -25,9 +25,56 @@ from __future__ import division
 
 import numpy as np
 from math     import log
-from scipy.io import loadmat
+from scipy.io import loadmat, savemat
+
+import pickle
+
 
 def loadSigmalFromMatlabFile(nameOfFile):
+	'''
+	Function loads data from a Matlab .mat file. It is assumed that the signal is an EEG recording
+	or at least can be treaten like one and data are stored in at most 3 dimensional array.
+
+	File should contain a matrix called "data" and four numeric parameters:
+	"samplingFreq" - representing sampling frequency,
+	"channels" - number of channels present in the signal,
+	"trials" - number of trials/epochs present in the signal,
+	"samples" - number of sample points recorded.
+
+	If data matrix is not 3 dimensional, ie. only one channel or one trial was recorded, than
+	the corresponding parameters should be set to 1.
+
+	It is also possible to load a file containing only a "data" field. Other parameters
+	would be than estimated as described below:
+	- "samples" would be set as equal to the max(size(data)),
+	- "channels" would be set as equal to the min(size(data)),
+	- "trials" would be set as equal to the size of the third dimension od data,
+	- "samplingFreq" would be pow(2 , neares power of 2 smaller than "samples").
+
+    Parameters
+    -----------
+    nameOfFile : string
+        Path to the .mat file.
+    
+    Returns
+    --------
+    dataMatrix : np.array
+        Data matrix present in the file, transposed to match the shape of ("trials" x "channels" x "samples").
+    dataInfo : dict
+    	Data parameters as a standard python dictionary. Contains following fields:
+    	- numberOfSamples
+    	- numberOfSeconds
+    	- numberOfChannels
+    	- numberOfTrials
+    	- samplingFrequency
+    	- time - vector of time (needed for python-matchingPursuit programm) as a np.array
+    message : string
+    	Text providing information of how the loading procedure ended, as described below:
+    	- "ok"   - data was loaded without any error,
+    	- "err1" - field "data" was not present in the given file,
+    	- "err2" - numeric parameters, like "channels" for instance, did not match the shape of the "data",
+    	- "err3" - data matrix has more than three dimensions.
+	'''
 	structure = loadmat(unicode(nameOfFile))
 
 	dataInfo = {}
@@ -53,24 +100,66 @@ def loadSigmalFromMatlabFile(nameOfFile):
 	numbers = []
 	[numbers.append(int(el)) for el in dataMatrix.shape]
 
-	indices = {}
-	ind     = 0
-	for ID in ['numberOfSamples' , 'numberOfTrials' , 'numberOfChannels']:
-		where = []
-		[where.append(tmp) for tmp,el in enumerate(numbers) if el == dataInfo[ID]]
-		if len(where) > 1:
-			indices[ID] = where[ind]
-			ind += 1
-		elif len(where)==1:
-			indices[ID] = where[0]
-		elif where == []:
-			return (np.array([]) , {} , 'err_2')
+	# print dataInfo
 
-	# print dataMatrix.shape
-	dataMatrix = np.transpose(dataMatrix , (indices['numberOfTrials'] , indices['numberOfChannels'] , indices['numberOfSamples']))
-	# print dataMatrix.shape
+	if len(numbers) == 1:
+		dataInfo['numberOfTrials']   = 1
+		dataInfo['numberOfChannels'] = 1
+	elif len(numbers) == 2 and dataInfo['numberOfChannels']==1:
+		indices = {}
+		ind     = 0
+		for ID in ['numberOfSamples' , 'numberOfTrials']:
+			where = []
+			[where.append(tmp) for tmp,el in enumerate(numbers) if el == dataInfo[ID]]
+			if len(where) > 1:
+				indices[ID] = where[ind]
+				ind += 1
+			elif len(where)==1:
+				indices[ID] = where[0]
+			elif where == []:
+				return (np.array([]) , {} , 'err_2')
+		dataMatrix = np.transpose(dataMatrix , (indices['numberOfTrials'] , indices['numberOfSamples']))
+		dataMatrix = np.expand_dims(dataMatrix , 1)
+	elif len(numbers) == 2 and dataInfo['numberOfTrials']==1:
+		indices = {}
+		ind     = 0
+		for ID in ['numberOfSamples' , 'numberOfChannels']:
+			where = []
+			[where.append(tmp) for tmp,el in enumerate(numbers) if el == dataInfo[ID]]
+			if len(where) > 1:
+				indices[ID] = where[ind]
+				ind += 1
+			elif len(where)==1:
+				indices[ID] = where[0]
+			elif where == []:
+				return (np.array([]) , {} , 'err_2')
+		dataMatrix = np.transpose(dataMatrix , (indices['numberOfChannels'] , indices['numberOfSamples']))
+		dataMatrix = np.expand_dims(dataMatrix , 0)
+	elif len(numbers) == 2 and dataInfo['numberOfTrials']!=1 and dataInfo['numberOfChannels']!=1:
+		return(np.array([]) , {} , 'err_2')
+	elif len(numbers) == 3:
+		indices = {}
+		ind     = 0
+		for ID in ['numberOfSamples' , 'numberOfTrials' , 'numberOfChannels']:
+			where = []
+			[where.append(tmp) for tmp,el in enumerate(numbers) if el == dataInfo[ID]]
+			if len(where) > 1:
+				indices[ID] = where[ind]
+				ind += 1
+			elif len(where)==1:
+				indices[ID] = where[0]
+			elif where == []:
+				return (np.array([]) , {} , 'err_2')
+
+		# print dataMatrix.shape
+		dataMatrix = np.transpose(dataMatrix , (indices['numberOfTrials'] , indices['numberOfChannels'] , indices['numberOfSamples']))
+		# print dataMatrix.shape
+	else:
+		return(np.array([]) , {} , 'err_3')
 
 	dataInfo['numberOfSeconds'] = dataInfo['numberOfSamples'] / dataInfo['samplingFreq']
 	dataInfo['time']            = np.arange(0 , dataInfo['numberOfSeconds'] , 1./dataInfo['samplingFreq'])
 	
+	print dataMatrix.shape
+
 	return (dataMatrix , dataInfo , 'ok')
