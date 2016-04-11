@@ -127,6 +127,12 @@ class mainWindow(QtGui.QMainWindow):
         self.timer.setSingleShot(True)
         self.timer.timeout.connect(self.timerEvent)
 
+    def setDataInfoControlls(self , config):
+        self.ui.led_trials.setText(str(config['numberOfTrials']))
+        self.ui.led_channels.setText(str(config['numberOfChannels']))
+        self.ui.led_samples.setText(str(config['numberOfSamples']))
+        self.ui.led_samplingFrequency.setText(str(config['samplingFreq']))
+
     def setAlgorithmControlls(self , config):
         self.ui.led_iterationsLimit.setText(config['iterationsLimit'])
         self.ui.led_energyLimit.setText(config['energyLimit'])
@@ -221,8 +227,8 @@ class mainWindow(QtGui.QMainWindow):
 
         self.dataMatrixes[filePath] = (dataMatrix , dataInfo , algorithmConfig)
         
+        self.setDataInfoControlls(dataInfo)
         self.setAlgorithmControlls(algorithmConfig)
-        print self.dictionaryConfig
         self.setDictionaryControlls()
 
         # item = QListWidgetItem("Item %i" % i)
