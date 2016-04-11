@@ -56,7 +56,7 @@ class mainWindow(QtGui.QMainWindow):
         print '- done'
 
         print 'Setting widgets initial states...'
-        self.setWidgetsState()
+        self.setWidgetsInitialState()
         print '- done'
         
         print 'Signals and slots connecting...'
@@ -74,6 +74,8 @@ class mainWindow(QtGui.QMainWindow):
         self.ui.btn_settingsData.clicked.connect(self.resizeWindow)
         self.ui.btn_addData.clicked.connect(self.chooseDataFiles)
         self.ui.btn_removeData.clicked.connect(self.removeData)
+
+        self.ui.led_samplingFrequency.textChanged.connect(self.samplingFrequencyChanged)
 
     def initializeFlags(self):
         self.flags = {}
@@ -103,7 +105,7 @@ class mainWindow(QtGui.QMainWindow):
             self.dataMatrixes     = {}
             self.dictionaryConfig = {}
 
-    def setWidgetsState(self):
+    def setWidgetsInitialState(self):
         self.ui.groupBoxErrors.setHidden(True)
 
         algorithmTypes = {'smp':0 , 'mmp':1}
@@ -160,7 +162,6 @@ class mainWindow(QtGui.QMainWindow):
             self.ui.chb_displayInfo.setChecked(0)
             self.ui.chb_useGradient.setChecked(0)
 
-
     def setDictionaryControlls(self):
         self.ui.led_dictonaryDensity.setText(self.dictionaryConfig['dictionaryDensity'])
         ind = self.ui.cmb_minS.findText(self.dictionaryConfig['minS'][1])
@@ -171,6 +172,23 @@ class mainWindow(QtGui.QMainWindow):
         self.ui.led_maxS.setText(self.dictionaryConfig['maxS'][0])
         self.ui.chb_useRect.setChecked(self.dictionaryConfig['useRect'])
         self.ui.chb_useAsym.setChecked(self.dictionaryConfig['useAsym'])
+
+    def samplingFrequencyChanged(self):
+        text = self.ui.led_samplingFrequency.text()
+        try:
+            sf = float(text)
+        except ValueError:
+            self.ui.led_samplingFrequency.setText(text[0:-1])
+            if len(text[0:-1]) > 0:
+                msg = '"Sampling Frequency" field contained incorrect characters!'
+                self.warrning('on' , msg , 3000)
+
+        try:
+            dataId = str(self.ui.lst_data.currentItem().text())
+            self.dataMatrixes[dataId][1]['samplingFreq'] = sf
+        except KeyError:
+            print 'aaa'
+            pass    # this means data are just loaded, not modified
 
 
 # WIDGETS BEHAVIOUR
@@ -212,10 +230,9 @@ class mainWindow(QtGui.QMainWindow):
 
         self.changeButtonsAvailability()
 
-
     def selectData(self , dataInfo , algorithmConfig):
         try:
-            filePath = self.ui.lst_data.currentItem().text()
+            filePath = str(self.ui.lst_data.currentItem().text())
             self.setDataInfoControlls(self.dataMatrixes[filePath][1])
             self.setAlgorithmControlls(self.dataMatrixes[filePath][2])
         except AttributeError:
@@ -257,14 +274,16 @@ class mainWindow(QtGui.QMainWindow):
                 self.ui.lbl_errors.setText(newtext)
         QtGui.QApplication.instance().processEvents()   # Important!
 
-    def warrning(self , flag='off' , errorMsg=''):
+    def warrning(self , flag='off' , errorMsg='' , time=0):
+        if time == 0:
+            time = self.warrningDisplayTime
         if flag == 'on':
             palette = QtGui.QPalette()
             self.ui.lbl_errors.setText(errorMsg)
             palette.setColor(QtGui.QPalette.Foreground, self.warrningTextColor)
             self.ui.lbl_errors.setPalette(palette)
             self.ui.groupBoxErrors.show()
-            self.timer.singleShot(self.warrningDisplayTime , self.timerEvent)
+            self.timer.singleShot(time , self.timerEvent)
         elif flag == 'off':
             self.ui.lbl_errors.setText('')
             self.ui.groupBoxErrors.hide()
@@ -273,6 +292,8 @@ class mainWindow(QtGui.QMainWindow):
 ### PROCESSING EVENTS:
 ######################
     def addData(self , filePath , dataMatrix , dataInfo):
+        filePath = str(filePath)
+
         algorithmConfig       = determineAlgorithmConfig(dataInfo)
         self.dictionaryConfig = determineDictionaryConfig(self.dictionaryConfig , algorithmConfig['energyLimit'] , dataInfo)
 
