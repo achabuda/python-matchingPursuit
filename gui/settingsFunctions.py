@@ -70,8 +70,10 @@ class mainWindow(QtGui.QMainWindow):
 ###############
     def setConnections(self):
         self.ui.lst_data.currentItemChanged.connect(self.selectData)
+
         self.ui.btn_settingsData.clicked.connect(self.resizeWindow)
         self.ui.btn_addData.clicked.connect(self.chooseDataFiles)
+        self.ui.btn_removeData.clicked.connect(self.removeData)
 
     def initializeFlags(self):
         self.flags = {}
@@ -91,17 +93,17 @@ class mainWindow(QtGui.QMainWindow):
             self.warrningTextColor    = QtCore.Qt.red
 
             self.warnings = {}
+            self.warnings['wrongType']      = 'Wrong file type, in '
             self.warnings['openData_err_1'] = 'Field "data" was not found in the file '
-            self.warnings['openData_err_2'] = '"Channels" or "trials" did not match the shape of "data", in '
+            self.warnings['openData_err_2'] = 'Either "channels" or "trials" did not match the shape of "data", in '
             self.warnings['openData_err_3'] = 'Data matrix has more than three dimensions, in '
 
-            self.warrningDisplayTime = 7000     # in [ms]
+            self.warrningDisplayTime = 5000     # in [ms]
 
             self.dataMatrixes     = {}
             self.dictionaryConfig = {}
 
     def setWidgetsState(self):
-
         self.ui.groupBoxErrors.setHidden(True)
 
         algorithmTypes = {'smp':0 , 'mmp':1}
@@ -118,37 +120,48 @@ class mainWindow(QtGui.QMainWindow):
         self.ui.cmb_minS.setCurrentIndex(1)
         self.ui.cmb_maxS.setCurrentIndex(1)
 
-        self.ui.btn_calculate.setEnabled(False)
-        self.ui.btn_saveSelectedBooks.setEnabled(False)
-        self.ui.btn_openVisualisationTool.setEnabled(False)
-        self.ui.btn_dictionarySave.setEnabled(False)
-        self.ui.btn_removeData.setEnabled(False)
+        self.changeButtonsAvailability()
 
         self.timer = QtCore.QTimer()
         self.timer.setSingleShot(True)
         self.timer.timeout.connect(self.timerEvent)
 
-    def setDataInfoControlls(self , config):
-        self.ui.led_trials.setText(str(config['numberOfTrials']))
-        self.ui.led_channels.setText(str(config['numberOfChannels']))
-        self.ui.led_samples.setText(str(config['numberOfSamples']))
-        self.ui.led_samplingFrequency.setText(str(config['samplingFreq']))
+    def setDataInfoControlls(self , config=[]):
+        if config != []:
+            self.ui.led_trials.setText(str(config['numberOfTrials']))
+            self.ui.led_channels.setText(str(config['numberOfChannels']))
+            self.ui.led_samples.setText(str(config['numberOfSamples']))
+            self.ui.led_samplingFrequency.setText(str(config['samplingFreq']))
+        else:
+            self.ui.led_trials.setText('')
+            self.ui.led_channels.setText('')
+            self.ui.led_samples.setText('')
+            self.ui.led_samplingFrequency.setText('')
 
-    def setAlgorithmControlls(self , config):
-        self.ui.led_iterationsLimit.setText(config['iterationsLimit'])
-        self.ui.led_energyLimit.setText(config['energyLimit'])
-        self.ui.led_nfft.setText(config['nfft'])
+    def setAlgorithmControlls(self , config=[]):
+        if config != []:
+            self.ui.led_iterationsLimit.setText(config['iterationsLimit'])
+            self.ui.led_energyLimit.setText(config['energyLimit'])
+            self.ui.led_nfft.setText(config['nfft'])
+            ind = self.ui.cmb_algorithmType.findText(config['algorithmType'])
+            self.ui.cmb_algorithmType.setCurrentIndex(ind)
+            self.ui.led_trials2calc.setText(config['trials2calc'])
+            self.ui.led_channels2calc.setText(config['channels2calc'])
+            self.ui.chb_displayInfo.setChecked(config['displayInfo'])
+            self.ui.chb_useGradient.setChecked(config['useGradient'])
+        else:
+            self.ui.led_iterationsLimit.setText('')
+            self.ui.led_energyLimit.setText('')
+            self.ui.led_nfft.setText('')
+            ind = self.ui.cmb_algorithmType.findText('smp')
+            self.ui.cmb_algorithmType.setCurrentIndex(ind)
+            self.ui.led_trials2calc.setText('')
+            self.ui.led_channels2calc.setText('')
+            self.ui.chb_displayInfo.setChecked(0)
+            self.ui.chb_useGradient.setChecked(0)
 
-        ind = self.ui.cmb_algorithmType.findText(config['algorithmType'])
-        self.ui.cmb_algorithmType.setCurrentIndex(ind)
-        
-        self.ui.led_trials2calc.setText(config['trials2calc'])
-        self.ui.led_channels2calc.setText(config['channels2calc'])
-        self.ui.chb_displayInfo.setChecked(config['displayInfo'])
-        self.ui.chb_useGradient.setChecked(config['useGradient'])
 
     def setDictionaryControlls(self):
-
         self.ui.led_dictonaryDensity.setText(self.dictionaryConfig['dictionaryDensity'])
         ind = self.ui.cmb_minS.findText(self.dictionaryConfig['minS'][1])
         self.ui.cmb_minS.setCurrentIndex(ind)
@@ -172,24 +185,54 @@ class mainWindow(QtGui.QMainWindow):
                 self.displayInformation('Opening file '+ filePath + '. Please wait...' , 'new')
                 if filePath[-4:] == '.mat':
                     (dataMatrix , dataInfo , message) = dl.loadSigmalFromMatlabFile(filePath)
-                    if message == 'ok':
-                        self.addData(filePath , dataMatrix , dataInfo)
-                    else:
-                        warningCollector = warningCollector + self.warnings['openData_'+message] + filePath + '\n'
-
                 elif filePath[-2:] == '.p':
                     pass
+                else:
+                    warningCollector = warningCollector + self.warnings['wrongType'] + filePath + '\n'
+
+                if message == 'ok':
+                    self.addData(filePath , dataMatrix , dataInfo)
+                else:
+                    warningCollector = warningCollector + self.warnings['openData_'+message] + filePath + '\n'
 
         self.displayInformation('' , 'new')
         if warningCollector != '':
             self.warrning('on' , warningCollector)
 
+        self.changeButtonsAvailability()
+
+    def removeData(self):
+        item = self.ui.lst_data.currentItem()
+        del self.dataMatrixes[item.text()]
+        self.ui.lst_data.takeItem(self.ui.lst_data.currentRow())
+
+        if self.ui.lst_data.count() < 1:
+            if self.flags['groupBoxDataResized'] == 1:
+                self.resizeWindow()
+
+        self.changeButtonsAvailability()
+
+
     def selectData(self , dataInfo , algorithmConfig):
-
-        filePath = self.ui.lst_data.currentItem().text()
-
-        self.setDataInfoControlls(self.dataMatrixes[filePath][1])
-        self.setAlgorithmControlls(self.dataMatrixes[filePath][2])
+        try:
+            filePath = self.ui.lst_data.currentItem().text()
+            self.setDataInfoControlls(self.dataMatrixes[filePath][1])
+            self.setAlgorithmControlls(self.dataMatrixes[filePath][2])
+        except AttributeError:
+            self.setDataInfoControlls()
+            self.setAlgorithmControlls()
+        
+    def changeButtonsAvailability(self):
+        if len(self.dataMatrixes) > 0:
+            self.ui.btn_settingsData.setEnabled(True)
+            self.ui.btn_removeData.setEnabled(True)
+        else:
+            self.ui.btn_calculate.setEnabled(False)
+            self.ui.btn_settingsData.setEnabled(False)
+            self.ui.btn_saveSelectedBooks.setEnabled(False)
+            self.ui.btn_openVisualisationTool.setEnabled(False)
+            self.ui.btn_dictionarySave.setEnabled(False)
+            self.ui.btn_removeData.setEnabled(False)
 
     def displayInformation(self , text , flag='new'):
         # possible flags: new, add, remove_last
@@ -240,7 +283,6 @@ class mainWindow(QtGui.QMainWindow):
         item = QtGui.QListWidgetItem(filePath)
         self.ui.lst_data.addItem(item)
         self.ui.lst_data.setCurrentItem(item)
-        # self.ui.lst_data.setItemSelected(item,True)
 
     def timerEvent(self):
         self.warrning('off')

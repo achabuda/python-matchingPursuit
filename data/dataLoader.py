@@ -29,7 +29,6 @@ from scipy.io import loadmat, savemat
 
 import pickle
 
-
 def loadSigmalFromMatlabFile(nameOfFile):
 	'''
 	Function loads data from a Matlab .mat file. It is assumed that the signal is an EEG recording
