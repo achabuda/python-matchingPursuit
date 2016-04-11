@@ -76,6 +76,8 @@ class mainWindow(QtGui.QMainWindow):
         self.ui.btn_removeData.clicked.connect(self.removeData)
 
         self.ui.led_samplingFrequency.textChanged.connect(self.samplingFrequencyChanged)
+        self.ui.led_iterationsLimit.textChanged.connect(self.iterationsLimitChanged)
+        self.ui.led_energyLimit.textChanged.connect(self.energyLimitChanged)
 
     def initializeFlags(self):
         self.flags = {}
@@ -177,19 +179,66 @@ class mainWindow(QtGui.QMainWindow):
         text = self.ui.led_samplingFrequency.text()
         try:
             sf = float(text)
+            dataId = str(self.ui.lst_data.currentItem().text())
+            if sf > 0.0:
+                self.dataMatrixes[dataId][1]['samplingFreq'] = sf
+            elif sf == 0.0:
+                self.ui.led_samplingFrequency.setText(str(self.dataMatrixes[dataId][1]['samplingFreq']))
+                msg = 'Sampling Frequency can not be equal to 0[Hz]!'
+                self.warrning('on' , msg , 3000)
+            else:
+                self.dataMatrixes[dataId][1]['samplingFreq'] = abs(sf)
+                self.ui.led_samplingFrequency.setText(str(abs(sf)))
         except ValueError:
             self.ui.led_samplingFrequency.setText(text[0:-1])
             if len(text[0:-1]) > 0:
                 msg = '"Sampling Frequency" field contained incorrect characters!'
                 self.warrning('on' , msg , 3000)
 
+    def energyLimitChanged(self):
+        text = self.ui.led_energyLimit.text()
         try:
+            energy = float(text)
             dataId = str(self.ui.lst_data.currentItem().text())
-            self.dataMatrixes[dataId][1]['samplingFreq'] = sf
-        except KeyError:
-            print 'aaa'
-            pass    # this means data are just loaded, not modified
+            if energy < 1 and energy > 0:
+                self.dataMatrixes[dataId][1]['energyLimit'] = energy
+            elif energy >= 1:
+                self.dataMatrixes[dataId][1]['energyLimit'] = 0.99
+                self.ui.led_energyLimit.setText(str(0.99))
+                msg = 'It is impossible to explain more than 100 percent of a signal energy!'
+                self.warrning('on' , msg , 3000)
+            elif energy < 0:
+                self.dataMatrixes[dataId][1]['energyLimit'] = abs(energy)
+                self.ui.led_energyLimit.setText(str(abs(energy)))
+            else:
+                self.ui.led_energyLimit.setText(str(self.dataMatrixes[dataId][1]['energyLimit']))
+                msg = 'Explained signal energy should be greater than 0!'
+                self.warrning('on' , msg , 3000)
+        except ValueError:
+            self.ui.led_energyLimit.setText(text[0:-1])
+            if len(text[0:-1]) > 0:
+                msg = '"Energy percentage" field contained incorrect characters!'
+                self.warrning('on' , msg , 3000)
 
+    def iterationsLimitChanged(self):
+        text = self.ui.led_iterationsLimit.text()
+        try:
+            iterations = int(text)
+            dataId = str(self.ui.lst_data.currentItem().text())
+            if iterations > 0:
+                self.dataMatrixes[dataId][1]['iterationsLimit'] = iterations
+            elif iterations == 0:
+                self.ui.led_iterationsLimit.setText(str(self.dataMatrixes[dataId][1]['iterationsLimit']))
+                msg = '# of iterations should be greater than 0!'
+                self.warrning('on' , msg , 3000)
+            else:
+                self.dataMatrixes[dataId][1]['iterationsLimit'] = abs(iterations)
+                self.ui.led_iterationsLimit.setText(str(abs(iterations)))
+        except ValueError:
+            self.ui.led_iterationsLimit.setText(text[0:-1])
+            if len(text[0:-1]) > 0:
+                msg = '"# of iterations" has to be integer!'
+                self.warrning('on' , msg , 3000)
 
 # WIDGETS BEHAVIOUR
 ##################
