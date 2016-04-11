@@ -69,8 +69,9 @@ class mainWindow(QtGui.QMainWindow):
 # WIDGETS STATE
 ###############
     def setConnections(self):
+        self.ui.lst_data.currentItemChanged.connect(self.selectData)
         self.ui.btn_settingsData.clicked.connect(self.resizeWindow)
-        self.ui.btn_addData.clicked.connect(self.selectDataFiles)
+        self.ui.btn_addData.clicked.connect(self.chooseDataFiles)
 
     def initializeFlags(self):
         self.flags = {}
@@ -161,7 +162,7 @@ class mainWindow(QtGui.QMainWindow):
 
 # WIDGETS BEHAVIOUR
 ##################
-    def selectDataFiles(self):
+    def chooseDataFiles(self):
 
         dialog = QtGui.QFileDialog.getOpenFileNames(self , 'Open data files' , expanduser('~') , 'Matlab files (*.mat);;Python pickles (*.p);;All Files (*)')
 
@@ -182,6 +183,13 @@ class mainWindow(QtGui.QMainWindow):
         self.displayInformation('' , 'new')
         if warningCollector != '':
             self.warrning('on' , warningCollector)
+
+    def selectData(self , dataInfo , algorithmConfig):
+
+        filePath = self.ui.lst_data.currentItem().text()
+
+        self.setDataInfoControlls(self.dataMatrixes[filePath][1])
+        self.setAlgorithmControlls(self.dataMatrixes[filePath][2])
 
     def displayInformation(self , text , flag='new'):
         # possible flags: new, add, remove_last
@@ -227,12 +235,12 @@ class mainWindow(QtGui.QMainWindow):
 
         self.dataMatrixes[filePath] = (dataMatrix , dataInfo , algorithmConfig)
         
-        self.setDataInfoControlls(dataInfo)
-        self.setAlgorithmControlls(algorithmConfig)
         self.setDictionaryControlls()
 
-        # item = QListWidgetItem("Item %i" % i)
-        # listWidget.addItem(item)
+        item = QtGui.QListWidgetItem(filePath)
+        self.ui.lst_data.addItem(item)
+        self.ui.lst_data.setCurrentItem(item)
+        # self.ui.lst_data.setItemSelected(item,True)
 
     def timerEvent(self):
         self.warrning('off')
@@ -276,7 +284,7 @@ class mainWindow(QtGui.QMainWindow):
             self.animationGroupBoxBooks.setEndValue(QtCore.QRect(710,10,280,370))
             self.animationGroupBoxDataInfo.setEndValue(QtCore.QSize(180,140))
             self.animationGroupBoxAlgorithm.setEndValue(QtCore.QSize(180,220))
-            self.animationGroupBoxErrors.setEndValue(QtCore.QSize(980,60))
+            self.animationGroupBoxErrors.setEndValue(QtCore.QSize(980,160))
             self.animationGroupBoxDictionary.setEndValue(QtCore.QRect(495,10,200,370))
             self.setMaximumSize(QtCore.QSize(1000, self.ui.basicWindowSize[1]))
             self.flags['groupBoxDataResized'] = 1
@@ -285,8 +293,7 @@ class mainWindow(QtGui.QMainWindow):
             self.animationGroupBoxBooks.setEndValue(QtCore.QRect(310,10,280,370))
             self.animationGroupBoxDataInfo.setEndValue(QtCore.QSize(0,140))
             self.animationGroupBoxAlgorithm.setEndValue(QtCore.QSize(0,220))
-            self.animationGroupBoxErrors.setEndValue(QtCore.QSize(580,60))
-            #self.animationGroupBoxDictionary.setEndValue(QtCore.QRect(305,10,0,370))
+            self.animationGroupBoxErrors.setEndValue(QtCore.QSize(580,160))
             self.animationGroupBoxDictionary.setEndValue(QtCore.QRect(305,10,0,370))
             self.setMinimumSize(QtCore.QSize(self.ui.basicWindowSize[0], self.ui.basicWindowSize[1]))
             self.flags['groupBoxDataResized'] = 0
@@ -302,8 +309,8 @@ class mainWindow(QtGui.QMainWindow):
 
     def setProperWindowSize(self):
     	if self.flags['groupBoxDataResized'] == 0:
-    		self.setMaximumSize(QtCore.QSize(600, 450))
+    		self.setMaximumSize(QtCore.QSize(self.ui.basicWindowSize[0], self.ui.basicWindowSize[1]))
     	else:
-    		self.setMinimumSize(QtCore.QSize(1000, 450))
+    		self.setMinimumSize(QtCore.QSize(1000, self.ui.basicWindowSize[1]))
 
 

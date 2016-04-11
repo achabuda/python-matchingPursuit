@@ -172,6 +172,7 @@ class mainWindowUI(object):
 
         self.led_samples = QtGui.QLineEdit(self.groupBoxDataInfo)
         self.led_samples.setObjectName(_fromUtf8("led_samples"))
+        self.led_samples.setAlignment(QtCore.Qt.AlignCenter)
         self.led_samples.setEnabled(False)
         dataInfoGrid.addWidget(self.led_samples,1,1)
 
@@ -181,6 +182,7 @@ class mainWindowUI(object):
 
         self.led_channels = QtGui.QLineEdit(self.groupBoxDataInfo)
         self.led_channels.setObjectName(_fromUtf8("led_channels"))
+        self.led_channels.setAlignment(QtCore.Qt.AlignCenter)
         self.led_channels.setEnabled(False)
         dataInfoGrid.addWidget(self.led_channels,2,1)
 
@@ -190,6 +192,7 @@ class mainWindowUI(object):
 
         self.led_trials = QtGui.QLineEdit(self.groupBoxDataInfo)
         self.led_trials.setObjectName(_fromUtf8("led_trials"))
+        self.led_trials.setAlignment(QtCore.Qt.AlignCenter)
         self.led_trials.setEnabled(False)
         dataInfoGrid.addWidget(self.led_trials,3,1)
 
