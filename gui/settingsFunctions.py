@@ -270,7 +270,7 @@ class mainWindow(QtGui.QMainWindow):
 
     def removeData(self):
         item = self.ui.lst_data.currentItem()
-        del self.dataMatrixes[item.text()]
+        del self.dataMatrixes[str(item.text())]
         self.ui.lst_data.takeItem(self.ui.lst_data.currentRow())
 
         if self.ui.lst_data.count() < 1:
