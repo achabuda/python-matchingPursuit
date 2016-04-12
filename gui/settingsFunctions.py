@@ -78,6 +78,7 @@ class mainWindow(QtGui.QMainWindow):
         self.ui.led_samplingFrequency.textChanged.connect(self.samplingFrequencyChanged)
         self.ui.led_iterationsLimit.textChanged.connect(self.iterationsLimitChanged)
         self.ui.led_energyLimit.textChanged.connect(self.energyLimitChanged)
+        self.ui.led_nfft.textChanged.connect(self.nfftChanged)
 
     def initializeFlags(self):
         self.flags = {}
@@ -201,17 +202,17 @@ class mainWindow(QtGui.QMainWindow):
             energy = float(text)
             dataId = str(self.ui.lst_data.currentItem().text())
             if energy < 1 and energy > 0:
-                self.dataMatrixes[dataId][1]['energyLimit'] = energy
+                self.dataMatrixes[dataId][2]['energyLimit'] = energy
             elif energy >= 1:
-                self.dataMatrixes[dataId][1]['energyLimit'] = 0.99
+                self.dataMatrixes[dataId][2]['energyLimit'] = 0.99
                 self.ui.led_energyLimit.setText(str(0.99))
                 msg = 'It is impossible to explain more than 100 percent of a signal energy!'
                 self.warrning('on' , msg , 3000)
             elif energy < 0:
-                self.dataMatrixes[dataId][1]['energyLimit'] = abs(energy)
+                self.dataMatrixes[dataId][2]['energyLimit'] = abs(energy)
                 self.ui.led_energyLimit.setText(str(abs(energy)))
             else:
-                self.ui.led_energyLimit.setText(str(self.dataMatrixes[dataId][1]['energyLimit']))
+                self.ui.led_energyLimit.setText(str(self.dataMatrixes[dataId][2]['energyLimit']))
                 msg = 'Explained signal energy should be greater than 0!'
                 self.warrning('on' , msg , 3000)
         except ValueError:
@@ -226,19 +227,28 @@ class mainWindow(QtGui.QMainWindow):
             iterations = int(text)
             dataId = str(self.ui.lst_data.currentItem().text())
             if iterations > 0:
-                self.dataMatrixes[dataId][1]['iterationsLimit'] = iterations
+                self.dataMatrixes[dataId][2]['iterationsLimit'] = iterations
             elif iterations == 0:
-                self.ui.led_iterationsLimit.setText(str(self.dataMatrixes[dataId][1]['iterationsLimit']))
+                self.ui.led_iterationsLimit.setText(str(self.dataMatrixes[dataId][2]['iterationsLimit']))
                 msg = '# of iterations should be greater than 0!'
                 self.warrning('on' , msg , 3000)
             else:
-                self.dataMatrixes[dataId][1]['iterationsLimit'] = abs(iterations)
+                self.dataMatrixes[dataId][2]['iterationsLimit'] = abs(iterations)
                 self.ui.led_iterationsLimit.setText(str(abs(iterations)))
         except ValueError:
             self.ui.led_iterationsLimit.setText(text[0:-1])
             if len(text[0:-1]) > 0:
                 msg = '"# of iterations" has to be integer!'
                 self.warrning('on' , msg , 3000)
+
+    def nfftChanged(self):
+        text = self.ui.led_nfft.text()
+        try:
+            iterations = int(text)
+        except ValueError:
+            self.ui.led_nfft.setText(text[0:-1])
+
+        # str(1 << (int(dataInfo['samplingFreq'])-1).bit_length())
 
 # WIDGETS BEHAVIOUR
 ##################
