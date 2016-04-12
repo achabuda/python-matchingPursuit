@@ -25,6 +25,41 @@ from __future__ import division
 
 import numpy as np
 
+
+def generateRangeFromString(text):
+	text = text.replace(' ' , '')
+	text = text.replace(',' , ' ')
+	text = text.split()
+	
+	finalRange = []
+	iterator   = 0
+	for element in text:
+		f1 = element.find(':')
+		f2 = element.find('-')
+		f3 = element.find(';')
+		if f1 != -1:
+			start = int(element[0:f1])
+			end   = int(element[f1+1:len(element)])+1
+			print start,end
+			for number in range(start , end):
+				finalRange.append(number)
+		elif f2 != -1:
+			start = int(element[0:f2])
+			end   = int(element[f2+1:len(element)])+1
+			print start,end
+			for number in range(start , end):
+				finalRange.append(number)
+		elif f3 != -1:
+			start = int(element[0:f3])
+			end   = int(element[f3+1:len(element)])+1
+			print start,end
+			for number in range(start , end):
+				finalRange.append(number)
+		else:
+			finalRange.append(int(element))
+
+	return finalRange
+
 def determineAlgorithmConfig(dataInfo):
 	config = {}
 	config['algorithmType']   = 'smp'
