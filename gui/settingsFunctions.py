@@ -202,14 +202,14 @@ class mainWindow(QtGui.QMainWindow):
             energy = float(text)
             dataId = str(self.ui.lst_data.currentItem().text())
             if energy < 1 and energy > 0:
-                self.dataMatrixes[dataId][2]['energyLimit'] = energy
+                self.dataMatrixes[dataId][2]['energyLimit'] = str(energy)
             elif energy >= 1:
-                self.dataMatrixes[dataId][2]['energyLimit'] = 0.99
+                self.dataMatrixes[dataId][2]['energyLimit'] = str(0.99)
                 self.ui.led_energyLimit.setText(str(0.99))
                 msg = 'It is impossible to explain more than 100 percent of a signal energy!'
                 self.warrning('on' , msg , 3000)
             elif energy < 0:
-                self.dataMatrixes[dataId][2]['energyLimit'] = abs(energy)
+                self.dataMatrixes[dataId][2]['energyLimit'] = str(abs(energy))
                 self.ui.led_energyLimit.setText(str(abs(energy)))
             else:
                 self.ui.led_energyLimit.setText(str(self.dataMatrixes[dataId][2]['energyLimit']))
@@ -227,7 +227,7 @@ class mainWindow(QtGui.QMainWindow):
             iterations = int(text)
             dataId = str(self.ui.lst_data.currentItem().text())
             if iterations > 0:
-                self.dataMatrixes[dataId][2]['iterationsLimit'] = iterations
+                self.dataMatrixes[dataId][2]['iterationsLimit'] = str(iterations)
             elif iterations == 0:
                 self.ui.led_iterationsLimit.setText(str(self.dataMatrixes[dataId][2]['iterationsLimit']))
                 msg = '# of iterations should be greater than 0!'
