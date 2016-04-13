@@ -40,19 +40,16 @@ def generateRangeFromString(text):
 		if f1 != -1:
 			start = int(element[0:f1])
 			end   = int(element[f1+1:len(element)])+1
-			print start,end
 			for number in range(start , end):
 				finalRange.append(number)
 		elif f2 != -1:
 			start = int(element[0:f2])
 			end   = int(element[f2+1:len(element)])+1
-			print start,end
 			for number in range(start , end):
 				finalRange.append(number)
 		elif f3 != -1:
 			start = int(element[0:f3])
 			end   = int(element[f3+1:len(element)])+1
-			print start,end
 			for number in range(start , end):
 				finalRange.append(number)
 		else:
@@ -65,11 +62,13 @@ def determineAlgorithmConfig(dataInfo):
 	config['algorithmType']   = 'smp'
 	config['useGradient']     = 1
 	config['displayInfo']     = 0
-	config['nfft']            = str(1 << (int(dataInfo['samplingFreq'])-1).bit_length())
-	config['energyLimit']     = '0.99'
-	config['iterationsLimit'] = '20'
+	config['nfft']            = 1 << (int(dataInfo['samplingFreq'])-1).bit_length()
+	config['energyLimit']     = 0.99
+	config['iterationsLimit'] = 20
 	config['channels2calc']   = '1 - ' + str(dataInfo['numberOfChannels'])
+	config['channelsRang']    = generateRangeFromString(config['channels2calc'])
 	config['trials2calc']     = '1 - ' + str(dataInfo['numberOfTrials'])
+	config['trialsRange']     = generateRangeFromString(config['trials2calc'])
 	return config
 
 def determineDictionaryConfig(dictionaryConfig , energyLimit , dataInfo):
@@ -78,15 +77,15 @@ def determineDictionaryConfig(dictionaryConfig , energyLimit , dataInfo):
 	if dictionaryConfig == {}:
 		dictionaryConfig['useAsym'] = 0
 		dictionaryConfig['useRect'] = 0
-		dictionaryConfig['minS']    = (str(int((dataInfo['numberOfSeconds']/8)*dataInfo['samplingFreq'])) , '[samples]')
-		dictionaryConfig['maxS']    = (str(int(dataInfo['numberOfSamples'])) , '[samples]')
-		dictionaryConfig['dictionaryDensity'] = str(density)
+		dictionaryConfig['minS']    = (int((dataInfo['numberOfSeconds']/8)*dataInfo['samplingFreq']) , '[samples]')
+		dictionaryConfig['maxS']    = (int(dataInfo['numberOfSamples']) , '[samples]')
+		dictionaryConfig['dictionaryDensity'] = density
 	else:
 		if dataInfo['numberOfSamples'] > dictionaryConfig['maxS'][0]:
-			dictionaryConfig['maxS']    = (str(int(dataInfo['numberOfSamples'])) , '[samples]')
+			dictionaryConfig['maxS']    = (int(dataInfo['numberOfSamples']) , '[samples]')
 		if (dataInfo['numberOfSeconds']/8)*dataInfo['samplingFreq'] < dictionaryConfig['minS'][0]:
-			dictionaryConfig['minS']    = (str(int((dataInfo['numberOfSeconds']/8)*dataInfo['samplingFreq'])) , '[samples]')
+			dictionaryConfig['minS']    = (int((dataInfo['numberOfSeconds']/8)*dataInfo['samplingFreq']) , '[samples]')
 		if float(dictionaryConfig['dictionaryDensity']) > density:
-			dictionaryConfig['dictionaryDensity'] = str(density)
+			dictionaryConfig['dictionaryDensity'] = density
 
 	return dictionaryConfig

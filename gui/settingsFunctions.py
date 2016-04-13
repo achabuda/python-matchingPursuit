@@ -145,9 +145,9 @@ class mainWindow(QtGui.QMainWindow):
 
     def setAlgorithmControlls(self , config=[]):
         if config != []:
-            self.ui.led_iterationsLimit.setText(config['iterationsLimit'])
-            self.ui.led_energyLimit.setText(config['energyLimit'])
-            self.ui.led_nfft.setText(config['nfft'])
+            self.ui.led_iterationsLimit.setText(str(config['iterationsLimit']))
+            self.ui.led_energyLimit.setText(str(config['energyLimit']))
+            self.ui.led_nfft.setText(str(config['nfft']))
             ind = self.ui.cmb_algorithmType.findText(config['algorithmType'])
             self.ui.cmb_algorithmType.setCurrentIndex(ind)
             self.ui.led_trials2calc.setText(config['trials2calc'])
@@ -166,13 +166,13 @@ class mainWindow(QtGui.QMainWindow):
             self.ui.chb_useGradient.setChecked(0)
 
     def setDictionaryControlls(self):
-        self.ui.led_dictonaryDensity.setText(self.dictionaryConfig['dictionaryDensity'])
+        self.ui.led_dictonaryDensity.setText(str(self.dictionaryConfig['dictionaryDensity']))
         ind = self.ui.cmb_minS.findText(self.dictionaryConfig['minS'][1])
         self.ui.cmb_minS.setCurrentIndex(ind)
-        self.ui.led_minS.setText(self.dictionaryConfig['minS'][0])
+        self.ui.led_minS.setText(str(self.dictionaryConfig['minS'][0]))
         ind = self.ui.cmb_maxS.findText(self.dictionaryConfig['maxS'][1])
         self.ui.cmb_maxS.setCurrentIndex(ind)
-        self.ui.led_maxS.setText(self.dictionaryConfig['maxS'][0])
+        self.ui.led_maxS.setText(str(self.dictionaryConfig['maxS'][0]))
         self.ui.chb_useRect.setChecked(self.dictionaryConfig['useRect'])
         self.ui.chb_useAsym.setChecked(self.dictionaryConfig['useAsym'])
 
@@ -182,6 +182,7 @@ class mainWindow(QtGui.QMainWindow):
             sf = float(text)
             dataId = str(self.ui.lst_data.currentItem().text())
             if sf > 0.0:
+                pass
                 self.dataMatrixes[dataId][1]['samplingFreq'] = sf
             elif sf == 0.0:
                 self.ui.led_samplingFrequency.setText(str(self.dataMatrixes[dataId][1]['samplingFreq']))
