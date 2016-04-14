@@ -108,6 +108,7 @@ class mainWindow(QtGui.QMainWindow):
 
             self.warnings = {}
             self.warnings['wrongType']      = 'Wrong file type, in '
+            self.warnings['openData_err_0'] = 'Wrong file type, in '
             self.warnings['openData_err_1'] = 'Field "data" was not found in the file '
             self.warnings['openData_err_2'] = 'Either "channels" or "trials" did not match the shape of "data", in '
             self.warnings['openData_err_3'] = 'Data matrix has more than three dimensions, in '
@@ -316,16 +317,14 @@ class mainWindow(QtGui.QMainWindow):
 ##################
     def chooseDataFiles(self):
 
-        dialog = QtGui.QFileDialog.getOpenFileNames(self , 'Open data files' , expanduser('~') , 'Matlab files (*.mat);;Python pickles (*.p);;All Files (*)')
+        dialog = QtGui.QFileDialog.getOpenFileNames(self , 'Open data files' , expanduser('~') , 'All Files (*);;Matlab files (*.mat);;Python pickles (*.p)')
 
         warningCollector = ''
         for filePath in dialog:
             if filePath != '':
                 self.displayInformation('Opening file '+ filePath + '. Please wait...' , 'new')
-                if filePath[-4:] == '.mat':
-                    (dataMatrix , dataInfo , message) = dl.loadSigmalFromMatlabFile(filePath)
-                elif filePath[-2:] == '.p':
-                    (dataMatrix , dataInfo , message) = dl.loadSigmalFromPythonFile(filePath)
+                if filePath[-4:] == '.mat' or filePath[-2:] == '.p':
+                    (dataMatrix , dataInfo , message) = dl.loadSigmalFromFile(filePath)
                 else:
                     warningCollector = warningCollector + self.warnings['wrongType'] + filePath + '\n'
 

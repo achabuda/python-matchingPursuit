@@ -30,96 +30,9 @@ from scipy.io import loadmat, savemat
 import pickle
 
 
-def loadSigmalFromPythonFile(nameOfFile):
-	structure = pickle.load( open( nameOfFile,"rb" ) )
-
-	dataInfo = {}
-
-	try:
-		dataInfo['numberOfTrials']   = structure['trials']
-		dataInfo['numberOfChannels'] = structure['channels']
-		dataInfo['numberOfSamples']  = structure['samples']
-		dataInfo['samplingFreq']     = structure['samplingFreq']
-		dataMatrix                   = structure['data']
-	except KeyError:
-		try:
-			dataMatrix = structure['data']
-			numbers    = np.array(dataMatrix.shape , dtype='int')
-			for ID in ['numberOfSamples' , 'numberOfTrials' , 'numberOfChannels']:
-				dataInfo[ID]   = numbers.max()
-				where          = numbers.argmax()
-				numbers[where] = -1
-			dataInfo['samplingFreq'] = pow(2 , int(log(dataInfo['numberOfSamples'], 2)))
-		except KeyError:
-			return(np.array([]) , {} , 'err_1')
-
-	numbers = []
-	[numbers.append(int(el)) for el in dataMatrix.shape]
-
-	if len(numbers) == 1:
-		dataInfo['numberOfTrials']   = 1
-		dataInfo['numberOfChannels'] = 1
-	elif len(numbers) == 2 and dataInfo['numberOfChannels']==1:
-		indices = {}
-		ind     = 0
-		for ID in ['numberOfSamples' , 'numberOfTrials']:
-			where = []
-			[where.append(tmp) for tmp,el in enumerate(numbers) if el == dataInfo[ID]]
-			if len(where) > 1:
-				indices[ID] = where[ind]
-				ind += 1
-			elif len(where)==1:
-				indices[ID] = where[0]
-			elif where == []:
-				return (np.array([]) , {} , 'err_2')
-		dataMatrix = np.transpose(dataMatrix , (indices['numberOfTrials'] , indices['numberOfSamples']))
-		dataMatrix = np.expand_dims(dataMatrix , 1)
-	elif len(numbers) == 2 and dataInfo['numberOfTrials']==1:
-		indices = {}
-		ind     = 0
-		for ID in ['numberOfSamples' , 'numberOfChannels']:
-			where = []
-			[where.append(tmp) for tmp,el in enumerate(numbers) if el == dataInfo[ID]]
-			if len(where) > 1:
-				indices[ID] = where[ind]
-				ind += 1
-			elif len(where)==1:
-				indices[ID] = where[0]
-			elif where == []:
-				return (np.array([]) , {} , 'err_2')
-		dataMatrix = np.transpose(dataMatrix , (indices['numberOfChannels'] , indices['numberOfSamples']))
-		dataMatrix = np.expand_dims(dataMatrix , 0)
-	elif len(numbers) == 2 and dataInfo['numberOfTrials']!=1 and dataInfo['numberOfChannels']!=1:
-		return(np.array([]) , {} , 'err_2')
-	elif len(numbers) == 3:
-		indices = {}
-		ind     = 0
-		for ID in ['numberOfSamples' , 'numberOfTrials' , 'numberOfChannels']:
-			where = []
-			[where.append(tmp) for tmp,el in enumerate(numbers) if el == dataInfo[ID]]
-			if len(where) > 1:
-				indices[ID] = where[ind]
-				ind += 1
-			elif len(where)==1:
-				indices[ID] = where[0]
-			elif where == []:
-				return (np.array([]) , {} , 'err_2')
-
-		dataMatrix = np.transpose(dataMatrix , (indices['numberOfTrials'] , indices['numberOfChannels'] , indices['numberOfSamples']))
-	else:
-		return(np.array([]) , {} , 'err_3')
-
-	dataInfo['numberOfSeconds'] = dataInfo['numberOfSamples'] / dataInfo['samplingFreq']
-	dataInfo['time']            = np.arange(0 , dataInfo['numberOfSeconds'] , 1./dataInfo['samplingFreq'])
-
-	return (dataMatrix , dataInfo , 'ok')
-
-
-	
-
-def loadSigmalFromMatlabFile(nameOfFile):
+def loadSigmalFromFile(nameOfFile):
 	'''
-	Function loads data from a Matlab .mat file. It is assumed that the signal is an EEG recording
+	Function loads data from a Matlab .mat or Python .p file. It is assumed that the signal is an EEG recording
 	or at least can be treaten like one and data are stored in at most 3 dimensional array.
 
 	File should contain a matrix called "data" and four numeric parameters:
@@ -158,31 +71,55 @@ def loadSigmalFromMatlabFile(nameOfFile):
     message : string
     	Text providing information of how the loading procedure ended, as described below:
     	- "ok"   - data was loaded without any error,
-    	- "err1" - field "data" was not present in the given file,
-    	- "err2" - numeric parameters, like "channels" for instance, did not match the shape of the "data",
-    	- "err3" - data matrix has more than three dimensions.
+    	- "err_0" - wrong file extension/type,
+    	- "err_1" - field "data" was not present in the given file,
+    	- "err_2" - numeric parameters, like "channels" for instance, did not match the shape of the "data",
+    	- "err_3" - data matrix has more than three dimensions.
 	'''
-	structure = loadmat(unicode(nameOfFile))
 
-	dataInfo = {}
-
-	try:
-		dataInfo['numberOfTrials']   = structure['trials'][0][0]
-		dataInfo['numberOfChannels'] = structure['channels'][0][0]
-		dataInfo['numberOfSamples']  = structure['samples'][0][0]
-		dataInfo['samplingFreq']     = structure['samplingFreq'][0][0]
-		dataMatrix                   = structure['data']
-	except KeyError:
+	if nameOfFile[-4:] == '.mat':
+		structure = loadmat(unicode(nameOfFile))
+		dataInfo = {}
 		try:
-			dataMatrix = structure['data']
-			numbers    = np.array(dataMatrix.shape , dtype='int')
-			for ID in ['numberOfSamples' , 'numberOfTrials' , 'numberOfChannels']:
-				dataInfo[ID]   = numbers.max()
-				where          = numbers.argmax()
-				numbers[where] = -1
-			dataInfo['samplingFreq'] = pow(2 , int(log(dataInfo['numberOfSamples'], 2)))
+			dataInfo['numberOfTrials']   = structure['trials'][0][0]
+			dataInfo['numberOfChannels'] = structure['channels'][0][0]
+			dataInfo['numberOfSamples']  = structure['samples'][0][0]
+			dataInfo['samplingFreq']     = structure['samplingFreq'][0][0]
+			dataMatrix                   = structure['data']
 		except KeyError:
-			return(np.array([]) , {} , 'err_1')
+			try:
+				dataMatrix = structure['data']
+				numbers    = np.array(dataMatrix.shape , dtype='int')
+				for ID in ['numberOfSamples' , 'numberOfTrials' , 'numberOfChannels']:
+					dataInfo[ID]   = numbers.max()
+					where          = numbers.argmax()
+					numbers[where] = -1
+				dataInfo['samplingFreq'] = pow(2 , int(log(dataInfo['numberOfSamples'], 2)))
+			except KeyError:
+				return(np.array([]) , {} , 'err_1')
+
+	elif nameOfFile[-2:] == '.p':
+		structure = pickle.load( open( nameOfFile,"rb" ) )
+		dataInfo = {}
+		try:
+			dataInfo['numberOfTrials']   = structure['trials']
+			dataInfo['numberOfChannels'] = structure['channels']
+			dataInfo['numberOfSamples']  = structure['samples']
+			dataInfo['samplingFreq']     = structure['samplingFreq']
+			dataMatrix                   = structure['data']
+		except KeyError:
+			try:
+				dataMatrix = structure['data']
+				numbers    = np.array(dataMatrix.shape , dtype='int')
+				for ID in ['numberOfSamples' , 'numberOfTrials' , 'numberOfChannels']:
+					dataInfo[ID]   = numbers.max()
+					where          = numbers.argmax()
+					numbers[where] = -1
+				dataInfo['samplingFreq'] = pow(2 , int(log(dataInfo['numberOfSamples'], 2)))
+			except KeyError:
+				return(np.array([]) , {} , 'err_1')
+   	else:
+   		return(np.array([]) , {} , 'err_0')
 
 	numbers = []
 	[numbers.append(int(el)) for el in dataMatrix.shape]
