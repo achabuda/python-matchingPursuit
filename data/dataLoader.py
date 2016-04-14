@@ -29,6 +29,33 @@ from scipy.io import loadmat, savemat
 
 import pickle
 
+
+def loadSigmalFromPythonFile(nameOfFile):
+	structure = pickle.load( open( nameOfFile,"rb" ) )
+	print structure
+
+	dataInfo = {}
+
+	try:
+		dataInfo['numberOfTrials']   = structure['trials']
+		dataInfo['numberOfChannels'] = structure['channels']
+		dataInfo['numberOfSamples']  = structure['samples']
+		dataInfo['samplingFreq']     = structure['samplingFreq']
+		dataMatrix                   = structure['data']
+	except KeyError:
+		try:
+			dataMatrix = structure['data']
+			numbers    = np.array(dataMatrix.shape , dtype='int')
+			for ID in ['numberOfSamples' , 'numberOfTrials' , 'numberOfChannels']:
+				dataInfo[ID]   = numbers.max()
+				where          = numbers.argmax()
+				numbers[where] = -1
+			dataInfo['samplingFreq'] = pow(2 , int(log(dataInfo['numberOfSamples'], 2)))
+		except KeyError:
+			return(np.array([]) , {} , 'err_1')
+
+	return(np.array([]) , {} , 'err_1')
+
 def loadSigmalFromMatlabFile(nameOfFile):
 	'''
 	Function loads data from a Matlab .mat file. It is assumed that the signal is an EEG recording

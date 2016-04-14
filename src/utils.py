@@ -66,26 +66,32 @@ def determineAlgorithmConfig(dataInfo):
 	config['energyLimit']     = 0.99
 	config['iterationsLimit'] = 20
 	config['channels2calc']   = '1 - ' + str(dataInfo['numberOfChannels'])
-	config['channelsRang']    = generateRangeFromString(config['channels2calc'])
+	config['channelsRange']   = generateRangeFromString(config['channels2calc'])
 	config['trials2calc']     = '1 - ' + str(dataInfo['numberOfTrials'])
 	config['trialsRange']     = generateRangeFromString(config['trials2calc'])
 	return config
 
 def determineDictionaryConfig(dictionaryConfig , energyLimit , dataInfo):
-	density = 1.0 - float(energyLimit)
+	density = 1.0 - energyLimit
 
 	if dictionaryConfig == {}:
-		dictionaryConfig['useAsym'] = 0
-		dictionaryConfig['useRect'] = 0
-		dictionaryConfig['minS']    = (int((dataInfo['numberOfSeconds']/8)*dataInfo['samplingFreq']) , '[samples]')
-		dictionaryConfig['maxS']    = (int(dataInfo['numberOfSamples']) , '[samples]')
+		dictionaryConfig['useAsym']      = 0
+		dictionaryConfig['useRect']      = 0
+		dictionaryConfig['minS_samples'] = int((dataInfo['numberOfSeconds']/8)*dataInfo['samplingFreq'])
+		dictionaryConfig['minS_seconds'] = float(dataInfo['numberOfSeconds']/8)
+		dictionaryConfig['maxS_samples'] = int(dataInfo['numberOfSamples'])
+		dictionaryConfig['maxS_seconds'] = float(dataInfo['numberOfSeconds'])
 		dictionaryConfig['dictionaryDensity'] = density
 	else:
-		if dataInfo['numberOfSamples'] > dictionaryConfig['maxS'][0]:
-			dictionaryConfig['maxS']    = (int(dataInfo['numberOfSamples']) , '[samples]')
-		if (dataInfo['numberOfSeconds']/8)*dataInfo['samplingFreq'] < dictionaryConfig['minS'][0]:
-			dictionaryConfig['minS']    = (int((dataInfo['numberOfSeconds']/8)*dataInfo['samplingFreq']) , '[samples]')
-		if float(dictionaryConfig['dictionaryDensity']) > density:
+		if dataInfo['numberOfSamples'] > dictionaryConfig['maxS_samples']:
+			dictionaryConfig['maxS_samples'] = int(dataInfo['numberOfSamples'])
+			dictionaryConfig['maxS_seconds'] = float(dataInfo['numberOfSamples'] / dataInfo['samplingFreq'])
+
+		if (dataInfo['numberOfSeconds']/8)*dataInfo['samplingFreq'] < dictionaryConfig['minS_samples']:
+			dictionaryConfig['minS_samples'] = int((dataInfo['numberOfSeconds']/8)*dataInfo['samplingFreq'])
+			dictionaryConfig['minS_seconds'] = float(dataInfo['numberOfSeconds']/8)
+		
+		if dictionaryConfig['dictionaryDensity'] > density:
 			dictionaryConfig['dictionaryDensity'] = density
 
 	return dictionaryConfig
