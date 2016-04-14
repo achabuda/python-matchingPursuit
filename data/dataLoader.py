@@ -32,7 +32,6 @@ import pickle
 
 def loadSigmalFromPythonFile(nameOfFile):
 	structure = pickle.load( open( nameOfFile,"rb" ) )
-	print structure
 
 	dataInfo = {}
 
@@ -54,7 +53,69 @@ def loadSigmalFromPythonFile(nameOfFile):
 		except KeyError:
 			return(np.array([]) , {} , 'err_1')
 
-	return(np.array([]) , {} , 'err_1')
+	numbers = []
+	[numbers.append(int(el)) for el in dataMatrix.shape]
+
+	if len(numbers) == 1:
+		dataInfo['numberOfTrials']   = 1
+		dataInfo['numberOfChannels'] = 1
+	elif len(numbers) == 2 and dataInfo['numberOfChannels']==1:
+		indices = {}
+		ind     = 0
+		for ID in ['numberOfSamples' , 'numberOfTrials']:
+			where = []
+			[where.append(tmp) for tmp,el in enumerate(numbers) if el == dataInfo[ID]]
+			if len(where) > 1:
+				indices[ID] = where[ind]
+				ind += 1
+			elif len(where)==1:
+				indices[ID] = where[0]
+			elif where == []:
+				return (np.array([]) , {} , 'err_2')
+		dataMatrix = np.transpose(dataMatrix , (indices['numberOfTrials'] , indices['numberOfSamples']))
+		dataMatrix = np.expand_dims(dataMatrix , 1)
+	elif len(numbers) == 2 and dataInfo['numberOfTrials']==1:
+		indices = {}
+		ind     = 0
+		for ID in ['numberOfSamples' , 'numberOfChannels']:
+			where = []
+			[where.append(tmp) for tmp,el in enumerate(numbers) if el == dataInfo[ID]]
+			if len(where) > 1:
+				indices[ID] = where[ind]
+				ind += 1
+			elif len(where)==1:
+				indices[ID] = where[0]
+			elif where == []:
+				return (np.array([]) , {} , 'err_2')
+		dataMatrix = np.transpose(dataMatrix , (indices['numberOfChannels'] , indices['numberOfSamples']))
+		dataMatrix = np.expand_dims(dataMatrix , 0)
+	elif len(numbers) == 2 and dataInfo['numberOfTrials']!=1 and dataInfo['numberOfChannels']!=1:
+		return(np.array([]) , {} , 'err_2')
+	elif len(numbers) == 3:
+		indices = {}
+		ind     = 0
+		for ID in ['numberOfSamples' , 'numberOfTrials' , 'numberOfChannels']:
+			where = []
+			[where.append(tmp) for tmp,el in enumerate(numbers) if el == dataInfo[ID]]
+			if len(where) > 1:
+				indices[ID] = where[ind]
+				ind += 1
+			elif len(where)==1:
+				indices[ID] = where[0]
+			elif where == []:
+				return (np.array([]) , {} , 'err_2')
+
+		dataMatrix = np.transpose(dataMatrix , (indices['numberOfTrials'] , indices['numberOfChannels'] , indices['numberOfSamples']))
+	else:
+		return(np.array([]) , {} , 'err_3')
+
+	dataInfo['numberOfSeconds'] = dataInfo['numberOfSamples'] / dataInfo['samplingFreq']
+	dataInfo['time']            = np.arange(0 , dataInfo['numberOfSeconds'] , 1./dataInfo['samplingFreq'])
+
+	return (dataMatrix , dataInfo , 'ok')
+
+
+	
 
 def loadSigmalFromMatlabFile(nameOfFile):
 	'''
