@@ -81,17 +81,15 @@ class mainWindow(QtGui.QMainWindow):
         self.ui.led_samplingFrequency.textChanged.connect(self.samplingFrequencyChanged)
         self.ui.led_iterationsLimit.textChanged.connect(self.iterationsLimitChanged)
         self.ui.led_energyLimit.textChanged.connect(self.energyLimitChanged)
-        
         self.ui.led_nfft.textChanged.connect(self.nfftChanged)
+        self.ui.led_channels2calc.textChanged.connect(self.channelsRangeChanged)
+        self.ui.led_trials2calc.textChanged.connect(self.trialsRangeChanged)
+        self.ui.led_dictonaryDensity.textChanged.connect(self.dictionaryDensityChanged)
+        self.ui.led_minS.textChanged.connect(self.minSValueChanged)
+        self.ui.led_maxS.textChanged.connect(self.maxSValueChanged)
 
-        # GroupboxDictionary
-        # self.led_dictonaryDensity
-        # self.led_minS
-        # self.led_maxS
-        # self.cmb_minS
-        # self.cmb_maxS
-        # self.cmb_maxS
-        # self.cmb_minS
+        self.ui.cmb_maxS.currentIndexChanged.connect(self.maxSUnitChanged)
+        self.ui.cmb_minS.currentIndexChanged.connect(self.minSUnitChanged)
 
     def initializeFlags(self):
         self.flags = {}
@@ -228,20 +226,19 @@ class mainWindow(QtGui.QMainWindow):
         self.dictionaryConfig['useRect']           = int(self.ui.chb_useAsym.checkStateSet())
         self.dictionaryConfig['useAsym']           = int(self.ui.chb_useRect.checkStateSet())
         
-        if str(self.ui.cmb_maxS.currentText) == 'samples':
+        if str(self.ui.cmb_maxS.currentText()) == '[samples]':
             self.dictionaryConfig['maxS_samples']      = int(self.ui.led_maxS.text())
             self.dictionaryConfig['maxS_seconds']      = float(self.dictionaryConfig['maxS_samples'] / float(self.ui.led_samplingFrequency.text()))
         else:
             self.dictionaryConfig['maxS_seconds']      = float(self.ui.led_maxS.text())
             self.dictionaryConfig['maxS_samples']      = int(self.dictionaryConfig['maxS_seconds'] * float(self.ui.led_samplingFrequency.text()))
 
-        if str(self.ui.cmb_minS.currentText) == 'samples':
+        if str(self.ui.cmb_minS.currentText()) == '[samples]':
             self.dictionaryConfig['minS_samples']      = int(self.ui.led_minS.text()) 
             self.dictionaryConfig['minS_seconds']      = float(self.dictionaryConfig['minS_samples'] / float(self.ui.led_samplingFrequency.text()))
         else:
             self.dictionaryConfig['minS_seconds']      = float(self.ui.led_minS.text())
             self.dictionaryConfig['minS_samples']      = int(self.dictionaryConfig['minS_seconds'] * float(self.ui.led_samplingFrequency.text()))
-
 
     def samplingFrequencyChanged(self):
         text = self.ui.led_samplingFrequency.text()
@@ -281,6 +278,7 @@ class mainWindow(QtGui.QMainWindow):
                 msg = 'It is impossible to explain more than 100 percent of a signal energy!'
                 self.warrning('on' , msg , 3000)
             elif energy < 0.0:
+                self.ui.led_energyLimit.setStyleSheet("color: rgb(0, 0, 0);")
                 self.ui.led_energyLimit.setText(str(abs(energy)))
             elif energy == 0.0:
                 self.ui.led_energyLimit.setStyleSheet("color: rgb(255, 0, 0);")
@@ -329,9 +327,192 @@ class mainWindow(QtGui.QMainWindow):
         except ValueError:
             self.ui.led_nfft.setText(text[0:-1])
 
+    def channelsRangeChanged(self):
+        text     = self.ui.led_channels2calc.text()
+        possible = ['1','2','3','4','5','6','7','8','9','0',':',';','-',' ',',']
+        if any(x not in possible for x in text):
+            self.ui.led_channels2calc.setStyleSheet("color: rgb(255, 0, 0);")
+            msg = 'Channels range contains incorrect characters!'
+            self.warrning('on' , msg , 3000)
+        else:
+            self.ui.led_channels2calc.setStyleSheet("color: rgb(0, 0, 0);")
+        self.changeButtonsAvailability()
+            
+    def trialsRangeChanged(self):
+        text = self.ui.led_trials2calc.text()
+        possible = ['1','2','3','4','5','6','7','8','9','0',':',';','-',' ']
+        if any(x not in possible for x in text):
+            self.ui.led_trials2calc.setStyleSheet("color: rgb(255, 0, 0);")
+            msg = 'Trials range contains incorrect characters!'
+            self.warrning('on' , msg , 3000)
+        else:
+            self.ui.led_trials2calc.setStyleSheet("color: rgb(0, 0, 0);")
+        self.changeButtonsAvailability()
+
+    def dictionaryDensityChanged(self):
+        text = self.ui.led_dictonaryDensity.text()
+        try:
+            density = float(text)
+            if density >= 1.0:
+                self.ui.led_dictonaryDensity.setStyleSheet("color: rgb(255, 0, 0);")
+                msg = 'Density of the dictionary should be less than 1.0!'
+                self.warrning('on' , msg , 3000)
+            elif density <= -1.0 or density == 0.0:
+                self.ui.led_dictonaryDensity.setStyleSheet("color: rgb(255, 0, 0);")
+                msg = 'Density of the dictionary should be greater than 0.0!'
+                self.warrning('on' , msg , 3000)
+            elif density < 0.0 and density > -1.0:
+                self.ui.led_dictonaryDensity.setStyleSheet("color: rgb(0, 0, 0);")
+                self.ui.led_dictonaryDensity.setText(str(abs(density)))
+            else:
+                self.ui.led_dictonaryDensity.setStyleSheet("color: rgb(0, 0, 0);")
+            self.changeButtonsAvailability()
+        except ValueError:
+            self.ui.led_dictonaryDensity.setText(text[0:-1])
+
+    def maxSValueChanged(self):
+        text = self.ui.led_maxS.text()
+
+        if str(self.ui.cmb_maxS.currentText()) == '[samples]':
+            try:
+                maxS = int(text)
+            except ValueError:
+                self.ui.led_maxS.setText(text[0:-1])
+                return
+
+            if str(self.ui.cmb_minS.currentText()) == '[samples]':
+                minS = int(self.ui.led_minS.text())
+            elif str(self.ui.cmb_maxS.currentText()) == '[sec]':
+                minS = int(self.ui.led_minS.text()) * float(self.ui.led_samplingFrequency.text())
+            else:
+                return
+
+        elif str(self.ui.cmb_maxS.currentText()) == '[sec]':
+            try:
+                maxS = float(text)
+            except ValueError:
+                self.ui.led_maxS.setText(text[0:-1])
+                return
+
+            if str(self.ui.cmb_minS.currentText()) == '[samples]':
+                minS = int(self.ui.led_minS.text()) / float(self.ui.led_samplingFrequency.text())
+            elif str(self.ui.cmb_maxS.currentText()) == '[sec]':
+                minS = float(self.ui.led_minS.text())
+            else:
+                return
+
+        if maxS > minS:
+            if minS > 0:
+                self.ui.led_minS.setStyleSheet("color: rgb(0, 0, 0);")
+
+            if maxS > 0:
+                self.ui.led_maxS.setStyleSheet("color: rgb(0, 0, 0);")
+            elif maxS < 0:
+                self.ui.led_maxS.setStyleSheet("color: rgb(0, 0, 0);")
+                self.ui.led_maxS.setText(str(abs(maxS)))
+            elif maxS == 0:
+                self.ui.led_maxS.setStyleSheet("color: rgb(255, 0, 0);")
+                msg = 'Width of structures in the dictionary should be greater than 0 [samples]!'
+                self.warrning('on' , msg , 3000)
+            self.changeButtonsAvailability()
+        else:
+            self.ui.led_maxS.setStyleSheet("color: rgb(255, 0, 0);")
+            msg = 'Width of the widest structure in the dictionary should be greater than width of the most narrow one!'
+            self.warrning('on' , msg , 3000)
+
+    def minSValueChanged(self):
+        text = self.ui.led_minS.text()
+
+        if str(self.ui.cmb_minS.currentText()) == '[samples]':
+            try:
+                minS = int(text)
+            except ValueError:
+                self.ui.led_minS.setText(text[0:-1])
+                return
+
+            if str(self.ui.cmb_maxS.currentText()) == '[samples]':
+                maxS = int(self.ui.led_maxS.text())
+            elif str(self.ui.cmb_maxS.currentText()) == '[sec]':
+                maxS = int(self.ui.led_maxS.text()) * float(self.ui.led_samplingFrequency.text())
+            else:
+                return
+
+        elif str(self.ui.cmb_minS.currentText()) == '[sec]':
+            try:
+                minS = float(text)
+            except ValueError:
+                self.ui.led_minS.setText(text[0:-1])
+                return
+
+            if str(self.ui.cmb_maxS.currentText()) == '[samples]':
+                maxS = int(self.ui.led_maxS.text()) / float(self.ui.led_samplingFrequency.text())
+            elif str(self.ui.cmb_maxS.currentText()) == '[sec]':
+                maxS = float(self.ui.led_maxS.text())
+            else:
+                return
+
+        if minS < maxS:
+            if maxS > 0:
+                self.ui.led_maxS.setStyleSheet("color: rgb(0, 0, 0);")
+
+            if minS > 0:
+                self.ui.led_minS.setStyleSheet("color: rgb(0, 0, 0);")
+            elif minS < 0:
+                self.ui.led_minS.setStyleSheet("color: rgb(0, 0, 0);")
+                self.ui.led_minS.setText(str(abs(minS)))
+            elif minS == 0:
+                self.ui.led_minS.setStyleSheet("color: rgb(255, 0, 0);")
+                msg = 'Width of structures in the dictionary should be greater than 0 [samples]!'
+                self.warrning('on' , msg , 3000)
+            self.changeButtonsAvailability()
+        else:
+            self.ui.led_minS.setStyleSheet("color: rgb(255, 0, 0);")
+            msg = 'Width of the widest structure in the dictionary should be greater than width of the most narrow one!'
+            self.warrning('on' , msg , 3000)
+
+    def maxSUnitChanged(self):
+        if str(self.ui.cmb_maxS.currentText()) == '[samples]':
+            try:
+                tmp = float(str(self.ui.led_maxS.text()))
+                tmp = tmp * float(str(self.ui.led_samplingFrequency.text()))
+                tmp = int(tmp)
+                self.ui.led_maxS.setText( str(tmp) )
+            except ValueError:
+                pass
+
+        elif str(self.ui.cmb_maxS.currentText()) == '[sec]':
+            try:
+                tmp = int(str(self.ui.led_maxS.text())) / float(str(self.ui.led_samplingFrequency.text()))
+                tmp = float(tmp)
+                self.ui.led_maxS.setText( str(tmp) )
+            except ValueError:
+                pass
+
+
+    def minSUnitChanged(self):
+        if str(self.ui.cmb_minS.currentText()) == '[samples]':
+            try:
+                tmp = float(str(self.ui.led_minS.text()))
+                tmp = tmp * float(str(self.ui.led_samplingFrequency.text()))
+                tmp = int(tmp)
+                self.ui.led_minS.setText( str(tmp) )
+            except ValueError:
+                pass
+
+        elif str(self.ui.cmb_minS.currentText()) == '[sec]':
+            try:
+                tmp = int(str(self.ui.led_minS.text())) / float(str(self.ui.led_samplingFrequency.text()))
+                tmp = float(tmp)
+                self.ui.led_minS.setText( str(tmp) )
+            except ValueError:
+                pass
+
 # WIDGETS BEHAVIOUR
 ##################
     def chooseDataFiles(self):
+        # if self.ui.lst_data.count() > 0:
+        #     self.dataMatrixes[self.filePath][2] = self.setAlgorithmConfig()
+        #     self.dataMatrixes[self.filePath][1] = self.setDataInfoConfig()
 
         dialog = QtGui.QFileDialog.getOpenFileNames(self , 'Open data files' , expanduser('~') , 'All Files (*);;Matlab files (*.mat);;Python pickles (*.p)')
 
@@ -341,7 +522,7 @@ class mainWindow(QtGui.QMainWindow):
 
                 if self.ui.lst_data.findItems(str(filePath) , QtCore.Qt.MatchExactly) != []:
                     warningCollector = warningCollector + self.warnings['openData_err_4'] + filePath + '\n'
-                    break
+                    continue
                 
                 self.displayInformation('Opening file '+ filePath + '. Please wait...' , 'new')
                 if filePath[-4:] == '.mat' or filePath[-2:] == '.p':
