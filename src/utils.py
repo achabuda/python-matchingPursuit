@@ -90,9 +90,9 @@ def determineAlgorithmConfig(dataInfo):
 	config['nfft']            = 1 << (int(dataInfo['samplingFreq'])-1).bit_length()
 	config['energyLimit']     = 0.99
 	config['iterationsLimit'] = 20
-	config['channels2calc']   = '1 - ' + str(dataInfo['numberOfChannels'])
+	config['channels2calc']   = '1:' + str(dataInfo['numberOfChannels'])
 	config['channelsRange']   = generateRangeFromString(config['channels2calc'])
-	config['trials2calc']     = '1 - ' + str(dataInfo['numberOfTrials'])
+	config['trials2calc']     = '1:' + str(dataInfo['numberOfTrials'])
 	config['trialsRange']     = generateRangeFromString(config['trials2calc'])
 	return config
 

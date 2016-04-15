@@ -192,9 +192,9 @@ class mainWindow(QtGui.QMainWindow):
 
     def setAlgorithmConfig(self):
         config = {}
-        config['iterationsLimit'] = int(self.ui.led_iterationsLimit.text())
-        config['energyLimit']     = float(self.ui.led_energyLimit.text())
-        config['nfft']            = int(self.ui.led_nfft.text())
+        config['iterationsLimit'] = int(str(self.ui.led_iterationsLimit.text()))
+        config['energyLimit']     = float(str(self.ui.led_energyLimit.text()))
+        config['nfft']            = int(str(self.ui.led_nfft.text()))
         if self.ui.chb_displayInfo.isChecked():
             config['displayInfo'] = 1
         else:
@@ -262,7 +262,6 @@ class mainWindow(QtGui.QMainWindow):
                     self.warrning('on' , msg , 3000)
             elif sf == 0.0:
                 self.ui.led_samplingFrequency.setStyleSheet("color: rgb(255, 0, 0);")
-                self.ui.led_samplingFrequency.setPalette(palette)
                 msg = 'Sampling Frequency can not be equal to 0[Hz]!'
                 self.warrning('on' , msg , 3000)
             elif sf < 0.0:
@@ -309,7 +308,8 @@ class mainWindow(QtGui.QMainWindow):
             self.ui.led_iterationsLimit.setText(text[0:-1])
 
     def nfftChanged(self):
-        text = self.ui.led_nfft.text()
+        text      = self.ui.led_nfft.text()
+        nfftThres = 1<<(int(float(self.ui.led_samplingFrequency.text()))-1).bit_length()
         try:
             nfft = int(text)
             if nfft < 0:
@@ -319,7 +319,7 @@ class mainWindow(QtGui.QMainWindow):
                 self.ui.led_nfft.setStyleSheet("color: rgb(255, 0, 0);")
                 msg = 'NFFT parameter should be greater than 0!'
                 self.warrning('on' , msg , 3000)
-            elif nfft > 0 and nfft < int(1 << (int(self.ui.led_samplingFrequency.text())-1).bit_length()):
+            elif nfft > 0 and nfft < nfftThres:
                 self.ui.led_nfft.setStyleSheet("color: rgb(255, 0, 0);")
                 msg = 'NFFT parameter should be at least the next power of 2, greater than sampling frequency!'
                 self.warrning('on' , msg , 3000)
@@ -347,16 +347,18 @@ class mainWindow(QtGui.QMainWindow):
                 if filePath[-4:] == '.mat' or filePath[-2:] == '.p':
                     (dataMatrix , dataInfo , message) = dl.loadSigmalFromFile(filePath)
                 else:
-                    warningCollector = warningCollector + self.warnings['wrongType'] + filePath + '\n'
+                    warningCollector += self.warnings['wrongType'] + filePath + '\n'
 
                 if message == 'ok':
                     self.addData(filePath , dataMatrix , dataInfo)
                 else:
-                    warningCollector = warningCollector + self.warnings['openData_'+message] + filePath + '\n'
+                    warningCollector += self.warnings['openData_'+message] + filePath + '\n'
+
+        if self.refreshSamplingFrequency() == 1:
+            warningCollector += 'Sampling frequency is not uniform across all files!' + '\n'
 
         self.displayInformation('' , 'new')
         if warningCollector != '':
-            self.timer.stop()
             self.warrning('on' , warningCollector)
 
         self.changeButtonsAvailability()
@@ -381,12 +383,12 @@ class mainWindow(QtGui.QMainWindow):
 
     def selectData(self):
         try:
-            try:
+            if self.ui.led_iterationsLimit.text() != '':
+                # means in fact, that there are fields loaded into gui
+                # print self.ui.led_nfft.text()
+
                 self.dataMatrixes[self.filePath][2] = self.setAlgorithmConfig()
                 self.dataMatrixes[self.filePath][1] = self.setDataInfoConfig()
-            except ValueError:
-                # means, that element was removed, so nothing is to be stored.
-                pass
 
             self.filePath = str(self.ui.lst_data.currentItem().text())
             self.setDataInfoControlls(self.dataMatrixes[self.filePath][1])
@@ -424,10 +426,12 @@ class mainWindow(QtGui.QMainWindow):
         if freqs.shape == (1L,):
             self.ui.led_samplingFrequency.setStyleSheet("color: rgb(0, 0, 0);")
             self.warrning('off')
+            return 0
         else:
             self.ui.led_samplingFrequency.setStyleSheet("color: rgb(255, 0, 0);")
             msg = 'Sampling Frequencies are still not uniform!'
             self.warrning('on' , msg , 3000)
+            return 1
 
     def displayInformation(self , text , flag='new'):
         # possible flags: new, add, remove_last
@@ -486,6 +490,8 @@ class mainWindow(QtGui.QMainWindow):
         self.dataMatrixes[filePath] = [dataMatrix , dataInfo , algorithmConfig]
         
         self.setDictionaryControlls()
+        # self.setAlgorithmControlls(algorithmConfig)
+        # self.setDataInfoControlls(dataInfo)
 
         item = QtGui.QListWidgetItem(filePath)
         self.ui.lst_data.addItem(item)
