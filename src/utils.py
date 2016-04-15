@@ -26,6 +26,28 @@ from __future__ import division
 import numpy as np
 
 
+def generateFinalConfig(dictionaryConfig , dataInfo , algorithmConfig):
+	config = {}
+
+	flags = {}
+	flags['useAsymA']                = dictionaryConfig['useAsym']
+	flags['useRectA']                = dictionaryConfig['useRect']
+	flags['useGradientOptimization'] = algorithmConfig['useGradient']
+	flags['displayInfo']             = algorithmConfig['displayInfo']
+	
+	config = {}
+	config['flags']                 = flags
+	config['algorithm']             = algorithmConfig['algorithmType']
+	config['minS']                  = dictionaryConfig['minS_samples']
+	config['maxS']                  = dictionaryConfig['maxS_samples']
+	config['density']               = dictionaryConfig['dictionaryDensity']
+	config['maxNumberOfIterations'] = algorithmConfig['iterationsLimit']
+	config['minEnergyExplained']    = algorithmConfig['energyLimit']
+	config['samplingFrequency']     = dataInfo['samplingFreq']
+	config['minNFFT']               = algorithmConfig['nfft']
+
+	return config
+
 def generateRangeFromString(text):
 	text = text.replace(' ' , '')
 	text = text.replace(',' , ' ')
