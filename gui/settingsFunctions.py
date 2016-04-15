@@ -79,9 +79,10 @@ class mainWindow(QtGui.QMainWindow):
         self.ui.btn_dictionarySave.clicked.connect(self.createDictionary)
 
         self.ui.led_samplingFrequency.textChanged.connect(self.samplingFrequencyChanged)
-        # self.ui.led_iterationsLimit.textChanged.connect(self.iterationsLimitChanged)
+        self.ui.led_iterationsLimit.textChanged.connect(self.iterationsLimitChanged)
         self.ui.led_energyLimit.textChanged.connect(self.energyLimitChanged)
-        # self.ui.led_nfft.textChanged.connect(self.nfftChanged)
+        
+        self.ui.led_nfft.textChanged.connect(self.nfftChanged)
 
         # GroupboxDictionary
         # self.led_dictonaryDensity
@@ -291,34 +292,43 @@ class mainWindow(QtGui.QMainWindow):
         except ValueError:
             self.ui.led_energyLimit.setText(text[0:-1])
 
-    # def iterationsLimitChanged(self):
-    #     text = self.ui.led_iterationsLimit.text()
-    #     try:
-    #         iterations = int(text)
-    #         dataId = str(self.ui.lst_data.currentItem().text())
-    #         if iterations > 0:
-    #             self.dataMatrixes[dataId][2]['iterationsLimit'] = str(iterations)
-    #         elif iterations == 0:
-    #             self.ui.led_iterationsLimit.setText(str(self.dataMatrixes[dataId][2]['iterationsLimit']))
-    #             msg = '# of iterations should be greater than 0!'
-    #             self.warrning('on' , msg , 3000)
-    #         else:
-    #             self.dataMatrixes[dataId][2]['iterationsLimit'] = abs(iterations)
-    #             self.ui.led_iterationsLimit.setText(str(abs(iterations)))
-    #     except ValueError:
-    #         self.ui.led_iterationsLimit.setText(text[0:-1])
-    #         if len(text[0:-1]) > 0:
-    #             msg = '"# of iterations" has to be integer!'
-    #             self.warrning('on' , msg , 3000)
+    def iterationsLimitChanged(self):
+        text = self.ui.led_iterationsLimit.text()
+        try:
+            iterations = int(text)
+            if iterations > 0:
+                self.ui.led_iterationsLimit.setStyleSheet("color: rgb(0, 0, 0);")
+            elif iterations < 0:
+                self.ui.led_iterationsLimit.setStyleSheet("color: rgb(0, 0, 0);")
+                self.ui.led_iterationsLimit.setText(str(abs(iterations)))
+            elif iterations == 0:
+                self.ui.led_iterationsLimit.setStyleSheet("color: rgb(255, 0, 0);")
+                msg = '# of iterations should be greater than 0!'
+                self.warrning('on' , msg , 3000)
+            self.changeButtonsAvailability()
+        except ValueError:
+            self.ui.led_iterationsLimit.setText(text[0:-1])
 
-    # def nfftChanged(self):
-    #     text = self.ui.led_nfft.text()
-    #     try:
-    #         iterations = int(text)
-    #     except ValueError:
-    #         self.ui.led_nfft.setText(text[0:-1])
-
-    #     # str(1 << (int(dataInfo['samplingFreq'])-1).bit_length())
+    def nfftChanged(self):
+        text = self.ui.led_nfft.text()
+        try:
+            nfft = int(text)
+            if nfft < 0:
+                self.ui.led_nfft.setStyleSheet("color: rgb(0, 0, 0);")
+                self.ui.led_nfft.setText(str(abs(nfft)))
+            elif nfft == 0:
+                self.ui.led_nfft.setStyleSheet("color: rgb(255, 0, 0);")
+                msg = 'NFFT parameter should be greater than 0!'
+                self.warrning('on' , msg , 3000)
+            elif nfft > 0 and nfft < int(1 << (int(self.ui.led_samplingFrequency.text())-1).bit_length()):
+                self.ui.led_nfft.setStyleSheet("color: rgb(255, 0, 0);")
+                msg = 'NFFT parameter should be at least the next power of 2, greater than sampling frequency!'
+                self.warrning('on' , msg , 3000)
+            else:
+                self.ui.led_nfft.setStyleSheet("color: rgb(0, 0, 0);")
+            self.changeButtonsAvailability()
+        except ValueError:
+            self.ui.led_nfft.setText(text[0:-1])
 
 # WIDGETS BEHAVIOUR
 ##################
@@ -354,21 +364,26 @@ class mainWindow(QtGui.QMainWindow):
     def removeData(self):
         item = self.ui.lst_data.currentItem()
         del self.dataMatrixes[str(item.text())]
-        self.ui.lst_data.takeItem(self.ui.lst_data.currentRow())
+        item = self.ui.lst_data.takeItem(self.ui.lst_data.currentRow())
+        item = None
+
+        # QtGui.QApplication.instance().processEvents()
 
         if self.ui.lst_data.count() < 1:
             if self.flags['groupBoxDataResized'] == 1:
                 self.resizeWindow()
+            self.filePath = ''
+        else:
+            self.filePath = str(self.ui.lst_data.currentItem().text())
+            self.refreshSamplingFrequency()
 
         self.changeButtonsAvailability()
 
     def selectData(self):
         try:
             try:
-                config = self.setAlgorithmConfig()
-                self.dataMatrixes[self.filePath][2] = config
-                config = self.setDataInfoConfig()
-                self.dataMatrixes[self.filePath][1] = config
+                self.dataMatrixes[self.filePath][2] = self.setAlgorithmConfig()
+                self.dataMatrixes[self.filePath][1] = self.setDataInfoConfig()
             except ValueError:
                 # means, there is nothing to store
                 pass
@@ -398,6 +413,20 @@ class mainWindow(QtGui.QMainWindow):
             self.ui.btn_openVisualisationTool.setEnabled(False)
             self.ui.btn_dictionarySave.setEnabled(False)
             self.ui.btn_removeData.setEnabled(False)
+
+    def refreshSamplingFrequency(self):
+        freqs   = []
+        for ind in range(self.ui.lst_data.count()):
+            path = str(self.ui.lst_data.item(ind).text())
+            freqs.append(self.dataMatrixes[path][1]['samplingFreq'])
+        freqs = np.array(freqs)
+        freqs = np.unique(freqs)
+        if freqs.shape == (1L,):
+            self.ui.led_samplingFrequency.setStyleSheet("color: rgb(0, 0, 0);")
+        else:
+            self.ui.led_samplingFrequency.setStyleSheet("color: rgb(255, 0, 0);")
+            msg = 'Sampling Frequencies are still not uniform!'
+            self.warrning('on' , msg , 3000)
 
     def displayInformation(self , text , flag='new'):
         # possible flags: new, add, remove_last
