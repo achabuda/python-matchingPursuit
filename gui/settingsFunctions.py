@@ -35,7 +35,8 @@ from settingsGraphics import mainWindowUI
 
 # modules imports #
 import data.dataLoader as dl
-from src.utils import determineAlgorithmConfig , determineDictionaryConfig , generateRangeFromString
+from src.utils      import determineAlgorithmConfig , determineDictionaryConfig , generateRangeFromString
+from src.dictionary import generateDictionary
 
 class mainWindow(QtGui.QMainWindow):
 
@@ -112,6 +113,7 @@ class mainWindow(QtGui.QMainWindow):
             self.warnings['openData_err_1'] = 'Field "data" was not found in the file '
             self.warnings['openData_err_2'] = 'Either "channels" or "trials" did not match the shape of "data", in '
             self.warnings['openData_err_3'] = 'Data matrix has more than three dimensions, in '
+            self.warnings['openData_err_4'] = 'Duplicated input file - '
 
             self.warrningDisplayTime = 5000     # in [ms]
 
@@ -322,6 +324,11 @@ class mainWindow(QtGui.QMainWindow):
         warningCollector = ''
         for filePath in dialog:
             if filePath != '':
+
+                if self.ui.lst_data.findItems(str(filePath) , QtCore.Qt.MatchExactly) != []:
+                    warningCollector = warningCollector + self.warnings['openData_err_4'] + filePath + '\n'
+                    break
+                
                 self.displayInformation('Opening file '+ filePath + '. Please wait...' , 'new')
                 if filePath[-4:] == '.mat' or filePath[-2:] == '.p':
                     (dataMatrix , dataInfo , message) = dl.loadSigmalFromFile(filePath)
