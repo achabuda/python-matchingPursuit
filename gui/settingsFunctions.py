@@ -231,7 +231,6 @@ class mainWindow(QtGui.QMainWindow):
         if str(self.ui.cmb_maxS.currentText) == 'samples':
             self.dictionaryConfig['maxS_samples']      = int(self.ui.led_maxS.text())
             self.dictionaryConfig['maxS_seconds']      = float(self.dictionaryConfig['maxS_samples'] / float(self.ui.led_samplingFrequency.text()))
-            # self.dataMatrixes[self.filePath][1]['samplingFreq']
         else:
             self.dictionaryConfig['maxS_seconds']      = float(self.ui.led_maxS.text())
             self.dictionaryConfig['maxS_samples']      = int(self.dictionaryConfig['maxS_seconds'] * float(self.ui.led_samplingFrequency.text()))
@@ -362,12 +361,12 @@ class mainWindow(QtGui.QMainWindow):
         self.changeButtonsAvailability()
 
     def removeData(self):
+        path = self.filePath
+
         item = self.ui.lst_data.currentItem()
-        del self.dataMatrixes[str(item.text())]
         item = self.ui.lst_data.takeItem(self.ui.lst_data.currentRow())
         item = None
-
-        # QtGui.QApplication.instance().processEvents()
+        del self.dataMatrixes[path]
 
         if self.ui.lst_data.count() < 1:
             if self.flags['groupBoxDataResized'] == 1:
@@ -385,7 +384,7 @@ class mainWindow(QtGui.QMainWindow):
                 self.dataMatrixes[self.filePath][2] = self.setAlgorithmConfig()
                 self.dataMatrixes[self.filePath][1] = self.setDataInfoConfig()
             except ValueError:
-                # means, there is nothing to store
+                # means, that element was removed, so nothing is to be stored.
                 pass
 
             self.filePath = str(self.ui.lst_data.currentItem().text())
@@ -401,11 +400,8 @@ class mainWindow(QtGui.QMainWindow):
         if len(self.dataMatrixes) > 0:
             self.ui.btn_settingsData.setEnabled(True)
             self.ui.btn_removeData.setEnabled(True)
-            # self.ui.btn_calculate.setEnabled(True)
+            self.ui.btn_calculate.setEnabled(True)
             self.ui.btn_dictionarySave.setEnabled(True)
-            # for ind in range(self.ui.lst_data.count()):
-            #     path = str(self.ui.lst_data.item(ind).text())
-            #     dataMatrixes[path]
         else:
             self.ui.btn_calculate.setEnabled(False)
             self.ui.btn_settingsData.setEnabled(False)
@@ -416,7 +412,7 @@ class mainWindow(QtGui.QMainWindow):
 
     def refreshSamplingFrequency(self):
         freqs   = []
-        for ind in range(self.ui.lst_data.count()):
+        for ind in range(0 , self.ui.lst_data.count()):
             path = str(self.ui.lst_data.item(ind).text())
             freqs.append(self.dataMatrixes[path][1]['samplingFreq'])
         freqs = np.array(freqs)
