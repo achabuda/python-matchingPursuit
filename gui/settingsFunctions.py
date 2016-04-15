@@ -259,11 +259,13 @@ class mainWindow(QtGui.QMainWindow):
                 else:
                     self.ui.led_samplingFrequency.setStyleSheet("color: rgb(255, 0, 0);")
                     msg = 'Sampling Frequencies are not uniform!'
+                    self.timer.stop()
                     self.warrning('on' , msg , 3000)
             elif sf == 0.0:
                 self.ui.led_samplingFrequency.setStyleSheet("color: rgb(255, 0, 0);")
                 self.ui.led_samplingFrequency.setPalette(palette)
                 msg = 'Sampling Frequency can not be equal to 0[Hz]!'
+                self.timer.stop()
                 self.warrning('on' , msg , 3000)
             elif sf < 0.0:
                 self.ui.led_samplingFrequency.setText(str(abs(sf)))
@@ -280,12 +282,14 @@ class mainWindow(QtGui.QMainWindow):
             elif energy >= 1.0:
                 self.ui.led_energyLimit.setStyleSheet("color: rgb(255, 0, 0);")
                 msg = 'It is impossible to explain more than 100 percent of a signal energy!'
+                self.timer.stop()
                 self.warrning('on' , msg , 3000)
             elif energy < 0.0:
                 self.ui.led_energyLimit.setText(str(abs(energy)))
             elif energy == 0.0:
                 self.ui.led_energyLimit.setStyleSheet("color: rgb(255, 0, 0);")
                 msg = 'Explained signal energy should be greater than 0!'
+                self.timer.stop()
                 self.warrning('on' , msg , 3000)
             self.changeButtonsAvailability()
         except ValueError:
@@ -303,6 +307,7 @@ class mainWindow(QtGui.QMainWindow):
             elif iterations == 0:
                 self.ui.led_iterationsLimit.setStyleSheet("color: rgb(255, 0, 0);")
                 msg = '# of iterations should be greater than 0!'
+                self.timer.stop()
                 self.warrning('on' , msg , 3000)
             self.changeButtonsAvailability()
         except ValueError:
@@ -318,10 +323,12 @@ class mainWindow(QtGui.QMainWindow):
             elif nfft == 0:
                 self.ui.led_nfft.setStyleSheet("color: rgb(255, 0, 0);")
                 msg = 'NFFT parameter should be greater than 0!'
+                self.timer.stop()
                 self.warrning('on' , msg , 3000)
             elif nfft > 0 and nfft < int(1 << (int(self.ui.led_samplingFrequency.text())-1).bit_length()):
                 self.ui.led_nfft.setStyleSheet("color: rgb(255, 0, 0);")
                 msg = 'NFFT parameter should be at least the next power of 2, greater than sampling frequency!'
+                self.timer.stop()
                 self.warrning('on' , msg , 3000)
             else:
                 self.ui.led_nfft.setStyleSheet("color: rgb(0, 0, 0);")
@@ -356,6 +363,7 @@ class mainWindow(QtGui.QMainWindow):
 
         self.displayInformation('' , 'new')
         if warningCollector != '':
+            self.timer.stop()
             self.warrning('on' , warningCollector)
 
         self.changeButtonsAvailability()
@@ -422,6 +430,7 @@ class mainWindow(QtGui.QMainWindow):
         else:
             self.ui.led_samplingFrequency.setStyleSheet("color: rgb(255, 0, 0);")
             msg = 'Sampling Frequencies are still not uniform!'
+            self.timer.stop()
             self.warrning('on' , msg , 3000)
 
     def displayInformation(self , text , flag='new'):
