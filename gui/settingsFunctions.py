@@ -25,6 +25,7 @@ University of Warsaw, July 06, 2015
 # libraries imports #
 import os
 import time
+import numpy as np
 from platform  import system
 from functools import partial
 from os.path   import expanduser
@@ -75,10 +76,11 @@ class mainWindow(QtGui.QMainWindow):
         self.ui.btn_settingsData.clicked.connect(self.resizeWindow)
         self.ui.btn_addData.clicked.connect(self.chooseDataFiles)
         self.ui.btn_removeData.clicked.connect(self.removeData)
+        self.ui.btn_dictionarySave.clicked.connect(self.createDictionary)
 
-        # self.ui.led_samplingFrequency.textChanged.connect(self.samplingFrequencyChanged)
+        self.ui.led_samplingFrequency.textChanged.connect(self.samplingFrequencyChanged)
         # self.ui.led_iterationsLimit.textChanged.connect(self.iterationsLimitChanged)
-        # self.ui.led_energyLimit.textChanged.connect(self.energyLimitChanged)
+        self.ui.led_energyLimit.textChanged.connect(self.energyLimitChanged)
         # self.ui.led_nfft.textChanged.connect(self.nfftChanged)
 
         # GroupboxDictionary
@@ -106,6 +108,7 @@ class mainWindow(QtGui.QMainWindow):
 
             self.informationTextColor = QtCore.Qt.green
             self.warrningTextColor    = QtCore.Qt.red
+            self.standardTextColor    = QtCore.Qt.black
 
             self.warnings = {}
             self.warnings['wrongType']      = 'Wrong file type, in '
@@ -240,51 +243,53 @@ class mainWindow(QtGui.QMainWindow):
             self.dictionaryConfig['minS_samples']      = int(self.dictionaryConfig['minS_seconds'] * float(self.ui.led_samplingFrequency.text()))
 
 
-    # def samplingFrequencyChanged(self):
-    #     text = self.ui.led_samplingFrequency.text()
-    #     try:
-    #         sf = float(text)
-    #         dataId = str(self.ui.lst_data.currentItem().text())
-    #         if sf > 0.0:
-    #             pass
-    #             self.dataMatrixes[dataId][1]['samplingFreq'] = sf
-    #         elif sf == 0.0:
-    #             self.ui.led_samplingFrequency.setText(str(self.dataMatrixes[dataId][1]['samplingFreq']))
-    #             msg = 'Sampling Frequency can not be equal to 0[Hz]!'
-    #             self.warrning('on' , msg , 3000)
-    #         else:
-    #             self.dataMatrixes[dataId][1]['samplingFreq'] = abs(sf)
-    #             self.ui.led_samplingFrequency.setText(str(abs(sf)))
-    #     except ValueError:
-    #         self.ui.led_samplingFrequency.setText(text[0:-1])
-    #         if len(text[0:-1]) > 0:
-    #             msg = '"Sampling Frequency" field contained incorrect characters!'
-    #             self.warrning('on' , msg , 3000)
+    def samplingFrequencyChanged(self):
+        text = self.ui.led_samplingFrequency.text()
+        try:
+            sf = float(text)
+            if sf > 0.0:
+                freqs   = []
+                for ind in range(self.ui.lst_data.count()):
+                    path = str(self.ui.lst_data.item(ind).text())
+                    freqs.append(self.dataMatrixes[path][1]['samplingFreq'])
+                freqs = np.array(freqs)
+                freqs = np.unique(freqs)
+                if freqs.shape == (1L,) and freqs[0] == sf:
+                    self.ui.led_samplingFrequency.setStyleSheet("color: rgb(0, 0, 0);")
+                else:
+                    self.ui.led_samplingFrequency.setStyleSheet("color: rgb(255, 0, 0);")
+                    msg = 'Sampling Frequencies are not uniform!'
+                    self.warrning('on' , msg , 3000)
+            elif sf == 0.0:
+                self.ui.led_samplingFrequency.setStyleSheet("color: rgb(255, 0, 0);")
+                self.ui.led_samplingFrequency.setPalette(palette)
+                msg = 'Sampling Frequency can not be equal to 0[Hz]!'
+                self.warrning('on' , msg , 3000)
+            elif sf < 0.0:
+                self.ui.led_samplingFrequency.setText(str(abs(sf)))
+            self.changeButtonsAvailability()
+        except ValueError:
+            self.ui.led_samplingFrequency.setText(text[0:-1])
 
-    # def energyLimitChanged(self):
-    #     text = self.ui.led_energyLimit.text()
-    #     try:
-    #         energy = float(text)
-    #         dataId = str(self.ui.lst_data.currentItem().text())
-    #         if energy < 1 and energy > 0:
-    #             self.dataMatrixes[dataId][2]['energyLimit'] = str(energy)
-    #         elif energy >= 1:
-    #             self.dataMatrixes[dataId][2]['energyLimit'] = str(0.99)
-    #             self.ui.led_energyLimit.setText(str(0.99))
-    #             msg = 'It is impossible to explain more than 100 percent of a signal energy!'
-    #             self.warrning('on' , msg , 3000)
-    #         elif energy < 0:
-    #             self.dataMatrixes[dataId][2]['energyLimit'] = str(abs(energy))
-    #             self.ui.led_energyLimit.setText(str(abs(energy)))
-    #         else:
-    #             self.ui.led_energyLimit.setText(str(self.dataMatrixes[dataId][2]['energyLimit']))
-    #             msg = 'Explained signal energy should be greater than 0!'
-    #             self.warrning('on' , msg , 3000)
-    #     except ValueError:
-    #         self.ui.led_energyLimit.setText(text[0:-1])
-    #         if len(text[0:-1]) > 0:
-    #             msg = '"Energy percentage" field contained incorrect characters!'
-    #             self.warrning('on' , msg , 3000)
+    def energyLimitChanged(self):
+        text = self.ui.led_energyLimit.text()
+        try:
+            energy = float(text)
+            if energy < 1.0 and energy > 0.0:
+                self.ui.led_energyLimit.setStyleSheet("color: rgb(0, 0, 0);")
+            elif energy >= 1.0:
+                self.ui.led_energyLimit.setStyleSheet("color: rgb(255, 0, 0);")
+                msg = 'It is impossible to explain more than 100 percent of a signal energy!'
+                self.warrning('on' , msg , 3000)
+            elif energy < 0.0:
+                self.ui.led_energyLimit.setText(str(abs(energy)))
+            elif energy == 0.0:
+                self.ui.led_energyLimit.setStyleSheet("color: rgb(255, 0, 0);")
+                msg = 'Explained signal energy should be greater than 0!'
+                self.warrning('on' , msg , 3000)
+            self.changeButtonsAvailability()
+        except ValueError:
+            self.ui.led_energyLimit.setText(text[0:-1])
 
     # def iterationsLimitChanged(self):
     #     text = self.ui.led_iterationsLimit.text()
@@ -381,8 +386,11 @@ class mainWindow(QtGui.QMainWindow):
         if len(self.dataMatrixes) > 0:
             self.ui.btn_settingsData.setEnabled(True)
             self.ui.btn_removeData.setEnabled(True)
-            self.ui.btn_calculate.setEnabled(True)
+            # self.ui.btn_calculate.setEnabled(True)
             self.ui.btn_dictionarySave.setEnabled(True)
+            # for ind in range(self.ui.lst_data.count()):
+            #     path = str(self.ui.lst_data.item(ind).text())
+            #     dataMatrixes[path]
         else:
             self.ui.btn_calculate.setEnabled(False)
             self.ui.btn_settingsData.setEnabled(False)
@@ -431,6 +439,10 @@ class mainWindow(QtGui.QMainWindow):
 
 ### PROCESSING EVENTS:
 ######################
+    def createDictionary(self):
+        pass
+        # dictionary = generateDictionary(time , config)
+
     def addData(self , filePath , dataMatrix , dataInfo):
         filePath = str(filePath)
 
