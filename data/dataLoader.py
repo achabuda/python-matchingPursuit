@@ -178,6 +178,10 @@ def loadSigmalFromFile(nameOfFile):
 		return(np.array([]) , {} , 'err_3')
 
 	dataInfo['numberOfSeconds'] = dataInfo['numberOfSamples'] / dataInfo['samplingFreq']
-	dataInfo['time']            = np.arange(0 , dataInfo['numberOfSeconds'] , 1./dataInfo['samplingFreq'])
+	# dataInfo['time']            = np.arange(0 , dataInfo['numberOfSeconds'] , 1./dataInfo['samplingFreq'])
+	dataInfo['numberOfTrials']   = int(dataInfo['numberOfTrials'])
+	dataInfo['numberOfChannels'] = int(dataInfo['numberOfChannels'])
+	dataInfo['numberOfSamples']  = int(dataInfo['numberOfSamples'])
+	dataInfo['samplingFreq']     = float(dataInfo['samplingFreq'])
 
 	return (dataMatrix , dataInfo , 'ok')
