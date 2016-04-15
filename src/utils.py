@@ -77,6 +77,9 @@ def generateRangeFromString(text):
 		else:
 			finalRange.append(int(element))
 
+	finalRange = np.array(finalRange)
+	finalRange.sort()
+	finalRange = np.unique(finalRange)
 	return finalRange
 
 def determineAlgorithmConfig(dataInfo):
