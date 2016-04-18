@@ -515,9 +515,12 @@ class mainWindow(QtGui.QMainWindow):
         #     self.dataMatrixes[self.filePath][1] = self.setDataInfoConfig()
 
         dialog = QtGui.QFileDialog.getOpenFileNames(self , 'Open data files' , expanduser('~') , 'All Files (*);;Matlab files (*.mat);;Python pickles (*.p)')
-
+        if len(dialog) == 0:
+            return
+            
         warningCollector = ''
         for filePath in dialog:
+            print filePath
             if filePath != '':
 
                 if self.ui.lst_data.findItems(str(filePath) , QtCore.Qt.MatchExactly) != []:
@@ -534,6 +537,8 @@ class mainWindow(QtGui.QMainWindow):
                     self.addData(filePath , dataMatrix , dataInfo)
                 else:
                     warningCollector += self.warnings['openData_'+message] + filePath + '\n'
+            else:
+                return
 
         if self.refreshSamplingFrequency() == 1:
             warningCollector += 'Sampling frequency is not uniform across all files!' + '\n'
