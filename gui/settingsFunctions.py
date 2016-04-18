@@ -36,7 +36,7 @@ from settingsGraphics import mainWindowUI
 
 # modules imports #
 import data.dataLoader as dl
-from src.utils      import determineAlgorithmConfig , determineDictionaryConfig , generateRangeFromString
+from src.utils      import determineAlgorithmConfig , determineDictionaryConfig , generateRangeFromString, generateFinalConfig
 from src.dictionary import generateDictionary
 
 class mainWindow(QtGui.QMainWindow):
@@ -109,6 +109,8 @@ class mainWindow(QtGui.QMainWindow):
             self.informationTextColor = QtCore.Qt.green
             self.warrningTextColor    = QtCore.Qt.red
             self.standardTextColor    = QtCore.Qt.black
+
+            self.ledFields = [self.ui.led_samplingFrequency , self.ui.led_nfft , self.ui.led_maxS , self.ui.led_minS , self.ui.led_iterationsLimit, self.ui.led_energyLimit , self.ui.led_dictonaryDensity]
 
             self.warnings = {}
             self.warnings['wrongType']      = 'Wrong file type, in '
@@ -418,11 +420,11 @@ class mainWindow(QtGui.QMainWindow):
                 self.ui.led_maxS.setStyleSheet("color: rgb(255, 0, 0);")
                 msg = 'Width of structures in the dictionary should be greater than 0 [samples]!'
                 self.warrning('on' , msg , 3000)
-            self.changeButtonsAvailability()
         else:
             self.ui.led_maxS.setStyleSheet("color: rgb(255, 0, 0);")
             msg = 'Width of the widest structure in the dictionary should be greater than width of the most narrow one!'
             self.warrning('on' , msg , 3000)
+        self.changeButtonsAvailability()
 
     def minSValueChanged(self):
         text = self.ui.led_minS.text()
@@ -468,11 +470,11 @@ class mainWindow(QtGui.QMainWindow):
                 self.ui.led_minS.setStyleSheet("color: rgb(255, 0, 0);")
                 msg = 'Width of structures in the dictionary should be greater than 0 [samples]!'
                 self.warrning('on' , msg , 3000)
-            self.changeButtonsAvailability()
         else:
             self.ui.led_minS.setStyleSheet("color: rgb(255, 0, 0);")
             msg = 'Width of the widest structure in the dictionary should be greater than width of the most narrow one!'
             self.warrning('on' , msg , 3000)
+        self.changeButtonsAvailability()
 
     def maxSUnitChanged(self):
         if str(self.ui.cmb_maxS.currentText()) == '[samples]':
@@ -491,6 +493,7 @@ class mainWindow(QtGui.QMainWindow):
                 self.ui.led_maxS.setText( str(tmp) )
             except ValueError:
                 pass
+        self.changeButtonsAvailability()
 
 
     def minSUnitChanged(self):
@@ -510,6 +513,7 @@ class mainWindow(QtGui.QMainWindow):
                 self.ui.led_minS.setText( str(tmp) )
             except ValueError:
                 pass
+        self.changeButtonsAvailability()
 
 # WIDGETS BEHAVIOUR
 ##################
@@ -620,17 +624,41 @@ class mainWindow(QtGui.QMainWindow):
             self.filePath = ''
         
     def changeButtonsAvailability(self):
+        flags = []
+        # [self.ui.led_samplingFrequency , self.ui.led_nfft , self.ui.led_maxS , self.ui.led_minS , 
+        #  self.ui.led_iterationsLimit, self.ui.led_energyLimit , self.ui.led_dictonaryDensity]
+        for element in self.ledFields:
+            color = element.palette().color(QtGui.QPalette.Text)
+            flags.append(color.getRgb()[0])
+
         if len(self.dataMatrixes) > 0:
             self.ui.btn_settingsData.setEnabled(True)
             self.ui.btn_removeData.setEnabled(True)
-            self.ui.btn_calculate.setEnabled(True)
-            self.ui.btn_dictionarySave.setEnabled(True)
+            self.ui.btn_configSave.setEnabled(True)
+
+            if np.array(flags).sum() == 0:
+                self.ui.btn_calculate.setEnabled(True)
+            else:
+                self.ui.btn_calculate.setEnabled(False)
+            
+            if flags[0] + flags[2] + flags[3] + flags[6] == 0:
+                self.ui.btn_dictionarySave.setEnabled(True)
+            else:
+                self.ui.btn_dictionarySave.setEnabled(False)
+
+            if self.ui.lst_books.count() > 0:
+                self.ui.btn_saveSelectedBooks.setEnabled(True)
+                self.ui.btn_openVisualisationTool.setEnabled(True)
+            else:
+                self.ui.btn_saveSelectedBooks.setEnabled(False)
+                self.ui.btn_openVisualisationTool.setEnabled(False)
         else:
             self.ui.btn_calculate.setEnabled(False)
             self.ui.btn_settingsData.setEnabled(False)
             self.ui.btn_saveSelectedBooks.setEnabled(False)
             self.ui.btn_openVisualisationTool.setEnabled(False)
             self.ui.btn_dictionarySave.setEnabled(False)
+            self.ui.btn_configSave.setEnabled(False)
             self.ui.btn_removeData.setEnabled(False)
 
     def refreshSamplingFrequency(self):
