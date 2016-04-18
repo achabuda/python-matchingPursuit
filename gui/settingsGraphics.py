@@ -59,6 +59,7 @@ class mainWindowUI(object):
         mainWindow.resize(self.basicWindowSize[0] , self.basicWindowSize[1])
         mainWindow.setMinimumSize(QtCore.QSize(self.basicWindowSize[0] , self.basicWindowSize[1]))
         mainWindow.setMaximumSize(QtCore.QSize(self.basicWindowSize[0] , self.basicWindowSize[1]))
+        mainWindow.move(100,100)
         # icon = QtGui.QIcon()
         # 
         # if system() == 'Windows':
@@ -90,8 +91,12 @@ class mainWindowUI(object):
         self.groupBoxAlgorithm.setObjectName(_fromUtf8("groupBoxAlgorithm"))        
 
         self.groupBoxDictionary = QtGui.QGroupBox(self.centralwidget)
-        self.groupBoxDictionary.setGeometry(QtCore.QRect(305,10,0,370))
+        self.groupBoxDictionary.setGeometry(QtCore.QRect(305,10,0,200))
         self.groupBoxDictionary.setObjectName(_fromUtf8("groupBoxDictionary"))
+
+        self.groupBoxSaving = QtGui.QGroupBox(self.centralwidget)
+        self.groupBoxSaving.setGeometry(QtCore.QRect(305,220,0,160))
+        self.groupBoxSaving.setObjectName(_fromUtf8("groupBoxSaving"))        
 
         self.groupBoxBooks = QtGui.QGroupBox(self.centralwidget)
         self.groupBoxBooks.setGeometry(QtCore.QRect(310,10,280,370))
@@ -328,7 +333,36 @@ class mainWindowUI(object):
         self.chb_useRect.setObjectName(_fromUtf8("chb_useRect"))
         dictionaryGrid.addWidget(self.chb_useRect,5,2)
 
-        self.btn_dictionarySave = QtGui.QPushButton(self.groupBoxDictionary)
+        dictionaryGrid.setRowStretch(6,1)
+
+        # self.lbl_dictionaryH2 = QtGui.QLabel(self.groupBoxDictionary)
+        # self.lbl_dictionaryH2.setStyleSheet('font-weight: bold;')
+        # self.lbl_dictionaryH2.setObjectName(_fromUtf8("lbl_dictionaryH2"))
+        # dictionaryGrid.addWidget(self.lbl_dictionaryH2,8,0,2,0)
+
+        # self.lbl_dictionaryFileName = QtGui.QLabel(self.groupBoxDictionary)
+        # self.lbl_dictionaryFileName.setStyleSheet("border: 1px solid gray; background-color: white;")
+        # self.lbl_dictionaryFileName.setObjectName(_fromUtf8("lbl_dictionaryFileName"))
+        # dictionaryGrid.addWidget(self.lbl_dictionaryFileName,9,0,1,0)
+
+        # self.btn_openDictionary = QtGui.QPushButton(self.groupBoxDictionary)
+        # icon1 = QtGui.QIcon()
+        # if system() == 'Windows':
+        #     icon1path = _fromUtf8("./pictures/file.png")
+        # else:
+        #     icon1path = _fromUtf8("./pictures/file.svg")
+        # icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
+        # self.btn_openDictionary.setIcon(icon1)
+        # self.btn_openDictionary.setIconSize(QtCore.QSize(24, 24))
+        # self.btn_openDictionary.setObjectName(_fromUtf8("btn_openDictionary"))
+        # dictionaryGrid.addWidget(self.btn_openDictionary,9,2)
+
+
+# GROUPBOX - SAVING
+        savingGrid = QtGui.QGridLayout()
+        self.groupBoxSaving.setLayout(savingGrid)
+
+        self.btn_dictionarySave = QtGui.QPushButton(self.groupBoxSaving)
         # icon1 = QtGui.QIcon()
         # if system() == 'Windows':
         #     icon1path = _fromUtf8("./pictures/add.png")
@@ -338,31 +372,21 @@ class mainWindowUI(object):
         # self.btn_dictionarySave.setIcon(icon1)
         # self.btn_dictionarySave.setIconSize(QtCore.QSize(24, 24))
         self.btn_dictionarySave.setObjectName(_fromUtf8("btn_dictionarySave"))
-        dictionaryGrid.addWidget(self.btn_dictionarySave,6,0,1,0)
+        savingGrid.addWidget(self.btn_dictionarySave,0,0)
 
-        dictionaryGrid.setRowStretch(7,0)
+        self.btn_configSave = QtGui.QPushButton(self.groupBoxSaving)
+        # icon1 = QtGui.QIcon()
+        # if system() == 'Windows':
+        #     icon1path = _fromUtf8("./pictures/add.png")
+        # else:
+        #     icon1path = _fromUtf8("./pictures/add.svg")
+        # icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        # self.btn_dictionarySave.setIcon(icon1)
+        # self.btn_dictionarySave.setIconSize(QtCore.QSize(24, 24))
+        self.btn_configSave.setObjectName(_fromUtf8("btn_configSave"))
+        savingGrid.addWidget(self.btn_configSave,1,0)
 
-        self.lbl_dictionaryH2 = QtGui.QLabel(self.groupBoxDictionary)
-        self.lbl_dictionaryH2.setStyleSheet('font-weight: bold;')
-        self.lbl_dictionaryH2.setObjectName(_fromUtf8("lbl_dictionaryH2"))
-        dictionaryGrid.addWidget(self.lbl_dictionaryH2,8,0,2,0)
-
-        self.lbl_dictionaryFileName = QtGui.QLabel(self.groupBoxDictionary)
-        self.lbl_dictionaryFileName.setStyleSheet("border: 1px solid gray; background-color: white;")
-        self.lbl_dictionaryFileName.setObjectName(_fromUtf8("lbl_dictionaryFileName"))
-        dictionaryGrid.addWidget(self.lbl_dictionaryFileName,9,0,1,0)
-
-        self.btn_openDictionary = QtGui.QPushButton(self.groupBoxDictionary)
-        icon1 = QtGui.QIcon()
-        if system() == 'Windows':
-            icon1path = _fromUtf8("./pictures/file.png")
-        else:
-            icon1path = _fromUtf8("./pictures/file.svg")
-        icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
-        self.btn_openDictionary.setIcon(icon1)
-        self.btn_openDictionary.setIconSize(QtCore.QSize(24, 24))
-        self.btn_openDictionary.setObjectName(_fromUtf8("btn_openDictionary"))
-        dictionaryGrid.addWidget(self.btn_openDictionary,9,2)
+        savingGrid.setRowStretch(3,1)
 
 # GROUPBOX - BOOKS
         booksGrid = QtGui.QGridLayout()
@@ -438,6 +462,7 @@ class mainWindowUI(object):
         self.groupBoxDataInfo.setTitle(_translate("mainWindow", "Data specification", None))
         self.groupBoxAlgorithm.setTitle(_translate("mainWindow", "MP configuration", None))
         self.groupBoxDictionary.setTitle(_translate("mainWindow", "Dictionary configuration", None))
+        self.groupBoxSaving.setTitle(_translate("mainWindow", "Save", None))
         self.groupBoxBooks.setTitle(_translate("mainWindow", "Results", None))
         self.groupBoxErrors.setTitle(_translate("mainWindow", "Informations", None))
         self.groupBoxErrors.setHidden(False)
@@ -455,13 +480,13 @@ class mainWindowUI(object):
         self.lbl_energyLimit.setText(_translate("mainWindow", "Energy percentage:", None))
         self.lbl_nfft.setText(_translate("mainWindow", "NFFT:", None))
         self.lbl_displayInfo.setText(_translate("mainWindow", "Display informations:", None))
-        self.lbl_dictionaryH1.setText(_translate("mainWindow", "Generate a dictionary:", None))
+        # self.lbl_dictionaryH1.setText(_translate("mainWindow", "Generate a dictionary:", None))
         self.lbl_dictonaryDensity.setText(_translate("mainWindow", "Dictionary density:", None))
         self.lbl_minS.setText(_translate("mainWindow", "Min. width:", None))
         self.lbl_maxS.setText(_translate("mainWindow", "Max. width:", None))
         self.lbl_useAsym.setText(_translate("mainWindow", "Include asymetrics:", None))
         self.lbl_useRect.setText(_translate("mainWindow", "Include rectangularities:", None))
-        self.lbl_dictionaryH2.setText(_translate("mainWindow", "Or load dictionary from a file:", None))
+        # self.lbl_dictionaryH2.setText(_translate("mainWindow", "Or load dictionary from a file:", None))
         self.lbl_errors.setText(_translate("mainWindow", "Some error", None))
 
         self.btn_addData.setText(_translate("mainWindow", "Add", None))
@@ -470,7 +495,10 @@ class mainWindowUI(object):
         self.btn_calculate.setText(_translate("mainWindow", "Run MP", None))
         self.btn_saveSelectedBooks.setText(_translate("mainWindow", "Save selected", None))
         self.btn_openVisualisationTool.setText(_translate("mainWindow", "Visualise", None))
-        self.btn_dictionarySave.setText(_translate("mainWindow", "Generate and Save", None))
+        
+        self.btn_dictionarySave.setText(_translate("mainWindow", "Save dictionary", None))
+        self.btn_configSave.setText(_translate("mainWindow", "Save config", None))
+
 
 ###################################################################################################################################################
 ###################################################################################################################################################
