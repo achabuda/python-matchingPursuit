@@ -72,6 +72,7 @@ class mainWindow(QtGui.QMainWindow):
 ###############
     def setConnections(self):
         self.ui.lst_data.currentItemChanged.connect(self.selectData)
+        self.ui.lst_data.sig_filesDropped.connect(self.dropDataFiles)
 
         self.ui.btn_settingsData.clicked.connect(self.resizeWindow)
         self.ui.btn_addData.clicked.connect(self.chooseDataFiles)
@@ -510,17 +511,12 @@ class mainWindow(QtGui.QMainWindow):
 # WIDGETS BEHAVIOUR
 ##################
     def chooseDataFiles(self):
-        # if self.ui.lst_data.count() > 0:
-        #     self.dataMatrixes[self.filePath][2] = self.setAlgorithmConfig()
-        #     self.dataMatrixes[self.filePath][1] = self.setDataInfoConfig()
-
         dialog = QtGui.QFileDialog.getOpenFileNames(self , 'Open data files' , expanduser('~') , 'All Files (*);;Matlab files (*.mat);;Python pickles (*.p)')
         if len(dialog) == 0:
             return
-            
+
         warningCollector = ''
         for filePath in dialog:
-            print filePath
             if filePath != '':
 
                 if self.ui.lst_data.findItems(str(filePath) , QtCore.Qt.MatchExactly) != []:
@@ -548,6 +544,38 @@ class mainWindow(QtGui.QMainWindow):
             self.warrning('on' , warningCollector)
 
         self.changeButtonsAvailability()
+
+    def dropDataFiles(self , listOfFiles):
+        warningCollector = ''
+        for filePath in listOfFiles:
+            if filePath != '':
+
+                if self.ui.lst_data.findItems(str(filePath) , QtCore.Qt.MatchExactly) != []:
+                    warningCollector = warningCollector + self.warnings['openData_err_4'] + filePath + '\n'
+                    continue
+                
+                self.displayInformation('Opening file '+ filePath + '. Please wait...' , 'new')
+                if filePath[-4:] == '.mat' or filePath[-2:] == '.p':
+                    (dataMatrix , dataInfo , message) = dl.loadSigmalFromFile(filePath)
+                else:
+                    warningCollector += self.warnings['wrongType'] + filePath + '\n'
+
+                if message == 'ok':
+                    self.addData(filePath , dataMatrix , dataInfo)
+                else:
+                    warningCollector += self.warnings['openData_'+message] + filePath + '\n'
+            else:
+                return
+
+        if self.refreshSamplingFrequency() == 1:
+            warningCollector += 'Sampling frequency is not uniform across all files!' + '\n'
+
+        self.displayInformation('' , 'new')
+        if warningCollector != '':
+            self.warrning('on' , warningCollector)
+
+        self.changeButtonsAvailability()
+
 
     def removeData(self):
         path = self.filePath

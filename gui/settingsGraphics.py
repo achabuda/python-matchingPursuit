@@ -141,11 +141,7 @@ class mainWindowUI(object):
         self.btn_settingsData.setObjectName(_fromUtf8("btn_settingsData"))
         dataGrid.addWidget(self.btn_settingsData,0,2)
 
-        self.lst_data = QtGui.QListWidget(self.groupBoxData)
-        self.lst_data.setAcceptDrops(True)
-        # self.lst_data.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
-        # self.lst_data.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
-        # self.lst_data.setViewMode(QtGui.QListView.IconMode)
+        self.lst_data = DragDropListWidget(QtGui.QMainWindow)
         dataGrid.addWidget(self.lst_data,1,0,2,0)
 
 # GROUPBOX - DATAINFO
@@ -409,7 +405,6 @@ class mainWindowUI(object):
         booksGrid.addWidget(self.btn_openVisualisationTool,0,2)
 
         self.lst_books = QtGui.QListWidget(self.groupBoxBooks)
-        # self.lst_data.setViewMode(QtGui.QListView.IconMode)
         booksGrid.addWidget(self.lst_books,1,0,2,0)
 
 # GROUPBOX - ERRORS
@@ -480,39 +475,43 @@ class mainWindowUI(object):
 ###################################################################################################################################################
 ###################################################################################################################################################
 
-# class DragDropListWidget(QListWidget):
-#     def __init__(self, type, parent=None):
-#         super(DragDropListWidget, self).__init__(parent)
-#         self.setAcceptDrops(True)
-#         # self.setIconSize(QSize(72, 72))
+class DragDropListWidget(QtGui.QListWidget):
+
+    sig_filesDropped = QtCore.pyqtSignal(list)
+
+    def __init__(self, type, parent=None):
+        super(DragDropListWidget, self).__init__(parent)
+        self.setAcceptDrops(True) 
  
-#     def dragEnterEvent(self, event):
-#         if event.mimeData().hasUrls():
-#             event.accept()
-#         else:
-#             event.ignore()
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.accept()
+        else:
+            event.ignore()
  
-#     def dragMoveEvent(self, event):
-#         if event.mimeData().hasUrls():
-#             event.setDropAction(Qt.CopyAction)
-#             event.accept()
-#         else:
-#             event.ignore()
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.setDropAction(QtCore.Qt.CopyAction)
+            event.accept()
+        else:
+            event.ignore()
  
-#     def dropEvent(self, event):
-#         if event.mimeData().hasUrls():
-#             event.setDropAction(Qt.CopyAction)
-#             event.accept()
-#             l = []
-#             for url in event.mimeData().urls():
-#                 l.append(str(url.toLocalFile()))
-#             self.emit(SIGNAL("dropped"), l)
-#         else:
-#             event.ignore()
+    def dropEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.setDropAction(QtCore.Qt.CopyAction)
+            event.accept()
+            fileList = []
+            for url in event.mimeData().urls():
+                # url = url.toLocalFile()
+                fileList.append(str(url.toLocalFile()))
+            
+            self.sig_filesDropped.emit(fileList)
+        else:
+            event.ignore()
 
 ###################################################################################################################################################
 ###################################################################################################################################################
 
 if __name__ == '__main__':
-    print 'Using this class without it\'s functional part may be possible, but'
+    print 'Using this classes without it\'s functional parts may be possible, but'
     print 'it would be completely useless.'
