@@ -38,8 +38,8 @@ def generateDictionary(time , config):
 	
 	time:list - original time vector
 	'''
-
-	time       = np.arange(0,3*len(time))
+	
+	time       = np.arange(0 , 3*len(time))
 
 	dictionary = generateBasicStructures(time , config)
 	if config['flags']['useRectA'] == 1:

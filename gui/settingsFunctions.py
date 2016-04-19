@@ -27,7 +27,8 @@ import os
 import time
 import numpy as np
 from platform  import system
-from functools import partial
+# from functools import partial
+from scipy.io  import savemat
 from os.path   import expanduser
 from PyQt4     import QtCore, QtGui
 
@@ -77,6 +78,7 @@ class mainWindow(QtGui.QMainWindow):
         self.ui.btn_settingsData.clicked.connect(self.resizeWindow)
         self.ui.btn_addData.clicked.connect(self.chooseDataFiles)
         self.ui.btn_removeData.clicked.connect(self.removeData)
+
         self.ui.btn_dictionarySave.clicked.connect(self.createDictionary)
 
         self.ui.led_samplingFrequency.textChanged.connect(self.samplingFrequencyChanged)
@@ -226,8 +228,16 @@ class mainWindow(QtGui.QMainWindow):
 
     def setDictionaryConfig(self):
         self.dictionaryConfig['dictionaryDensity'] = float(self.ui.led_dictonaryDensity.text())
-        self.dictionaryConfig['useRect']           = int(self.ui.chb_useAsym.checkStateSet())
-        self.dictionaryConfig['useAsym']           = int(self.ui.chb_useRect.checkStateSet())
+        
+        if self.ui.chb_useAsym.isChecked():
+            self.dictionaryConfig['useAsym'] = 1
+        else:
+            self.dictionaryConfig['useAsym'] = 0
+        
+        if self.ui.chb_useRect.isChecked():
+            self.dictionaryConfig['useRect'] = 1
+        else:
+            self.dictionaryConfig['useRect'] = 0
         
         if str(self.ui.cmb_maxS.currentText()) == '[samples]':
             self.dictionaryConfig['maxS_samples']      = int(self.ui.led_maxS.text())
@@ -723,8 +733,33 @@ class mainWindow(QtGui.QMainWindow):
 ### PROCESSING EVENTS:
 ######################
     def createDictionary(self):
-        pass
-        # dictionary = generateDictionary(time , config)
+        fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save dictionary to a file' , expanduser('~') , 'Matlab files (*.mat);;Python pickles (*.p);;Comma sep. values (*.csv);;Excel files (*.xlsx)')
+        if len(fileName) == 0:
+            return
+
+        self.displayInformation('Saving dictionary...' , flag='new')
+        
+        fileName = str(fileName)
+
+        self.setDictionaryConfig()
+        self.setAlgorithmConfig()
+
+        config     = generateFinalConfig(self.dictionaryConfig , self.dataMatrixes[self.filePath][1] , self.dataMatrixes[self.filePath][2])
+        time       = np.arange(0,self.dataMatrixes[self.filePath][1]['numberOfSamples'])
+        
+        dictionary = generateDictionary(time , config)
+
+        if fileName[-4:] == '.mat':
+            dic = {col_name : dictionary[col_name].values for col_name in dictionary.columns.values}
+            savemat(fileName , dic)
+        elif fileName[-2:] == '.p':
+            dictionary.to_pickle(fileName)
+        elif fileName[-4:] == '.csv':
+            dictionary.to_csv(fileName)
+        elif fileName[-5:] == '.xlsx':
+            dictionary.to_excel(fileName, sheet_name='dictionary')
+        
+        self.displayInformation('Dictionary is saved.' , flag='new')
 
     def addData(self , filePath , dataMatrix , dataInfo):
         filePath = str(filePath)
@@ -805,9 +840,6 @@ class mainWindow(QtGui.QMainWindow):
             self.setMinimumSize(QtCore.QSize(self.ui.basicWindowSize[0], self.ui.basicWindowSize[1]))
             self.flags['groupBoxDataResized'] = 0
 
-            # 305,10,0,200
-            # 305,220,0,150
-
         self.animation.addAnimation(self.animationWindow)
         self.animation.addAnimation(self.animationGroupBoxBooks)
         self.animation.addAnimation(self.animationGroupBoxDataInfo)
@@ -823,5 +855,3 @@ class mainWindow(QtGui.QMainWindow):
     		self.setMaximumSize(QtCore.QSize(self.ui.basicWindowSize[0], self.ui.basicWindowSize[1]))
     	else:
     		self.setMinimumSize(QtCore.QSize(1000, self.ui.basicWindowSize[1]))
-
-
