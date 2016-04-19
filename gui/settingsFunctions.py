@@ -31,7 +31,7 @@ from platform  import system
 from scipy.io  import savemat
 from os.path   import expanduser
 from PyQt4     import QtCore, QtGui
-
+from pickle    import dump
 # gui imports #
 from settingsGraphics import mainWindowUI
 
@@ -80,6 +80,7 @@ class mainWindow(QtGui.QMainWindow):
         self.ui.btn_removeData.clicked.connect(self.removeData)
 
         self.ui.btn_dictionarySave.clicked.connect(self.createDictionary)
+        self.ui.btn_configSave.clicked.connect(self.saveConfig)
 
         self.ui.led_samplingFrequency.textChanged.connect(self.samplingFrequencyChanged)
         self.ui.led_iterationsLimit.textChanged.connect(self.iterationsLimitChanged)
@@ -615,9 +616,7 @@ class mainWindow(QtGui.QMainWindow):
     def selectData(self):
         try:
             if self.ui.led_iterationsLimit.text() != '':
-                # means in fact, that there are fields loaded into gui
-                # print self.ui.led_nfft.text()
-
+                # means, in fact, that there are fields loaded into gui
                 self.dataMatrixes[self.filePath][2] = self.setAlgorithmConfig()
                 self.dataMatrixes[self.filePath][1] = self.setDataInfoConfig()
 
@@ -626,7 +625,6 @@ class mainWindow(QtGui.QMainWindow):
             self.setAlgorithmControlls(self.dataMatrixes[self.filePath][2])
 
             self.refreshSamplingFrequency()
-
         except AttributeError:
             # means that list is empty, or nothing is selected
             self.setDataInfoControlls()
@@ -732,11 +730,38 @@ class mainWindow(QtGui.QMainWindow):
 
 ### PROCESSING EVENTS:
 ######################
-    def createDictionary(self):
-        fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save dictionary to a file' , expanduser('~') , 'Matlab files (*.mat);;Python pickles (*.p);;Comma sep. values (*.csv);;Excel files (*.xlsx)')
+    def saveConfig(self):
+        fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save configuration file' , expanduser('~')+'/config' , 'Python pickle (*.p);;Text file (*.txt);;')
         if len(fileName) == 0:
             return
+        self.displayInformation('Saving configuration...' , flag='new')
 
+        fileName = str(fileName)
+
+        self.setDictionaryConfig()
+        self.setAlgorithmConfig()
+
+        config = generateFinalConfig(self.dictionaryConfig , self.dataMatrixes[self.filePath][1] , self.dataMatrixes[self.filePath][2])
+
+        if fileName[-4:] == '.txt':
+            with open(fileName , 'w') as f:
+                for key in config.keys():
+                    if isinstance(config[key] , unicode):
+                        stringToWrite = key + ' ' + config[key] + '\n'
+                    else:
+                        stringToWrite = key + ' ' + str(config[key]) + '\n'
+                    f.write(stringToWrite.encode('UTF8'))
+        elif fileName[-2:] == '.p':
+            with open(fileName , 'wb') as f:
+                dump(config , f)
+            
+        self.displayInformation('Configuration saved.' , flag='new')
+
+
+    def createDictionary(self):
+        fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save dictionary to a file' , expanduser('~')+'/dictionary' , 'Matlab file (*.mat);;Python pickle (*.p);;Comma sep. values (*.csv);;Excel file (*.xlsx)')
+        if len(fileName) == 0:
+            return
         self.displayInformation('Saving dictionary...' , flag='new')
         
         fileName = str(fileName)
@@ -744,8 +769,8 @@ class mainWindow(QtGui.QMainWindow):
         self.setDictionaryConfig()
         self.setAlgorithmConfig()
 
-        config     = generateFinalConfig(self.dictionaryConfig , self.dataMatrixes[self.filePath][1] , self.dataMatrixes[self.filePath][2])
-        time       = np.arange(0,self.dataMatrixes[self.filePath][1]['numberOfSamples'])
+        config = generateFinalConfig(self.dictionaryConfig , self.dataMatrixes[self.filePath][1] , self.dataMatrixes[self.filePath][2])
+        time   = np.arange(0,self.dataMatrixes[self.filePath][1]['numberOfSamples'])
         
         dictionary = generateDictionary(time , config)
 
@@ -759,7 +784,7 @@ class mainWindow(QtGui.QMainWindow):
         elif fileName[-5:] == '.xlsx':
             dictionary.to_excel(fileName, sheet_name='dictionary')
         
-        self.displayInformation('Dictionary is saved.' , flag='new')
+        self.displayInformation('Dictionary saved.' , flag='new')
 
     def addData(self , filePath , dataMatrix , dataInfo):
         filePath = str(filePath)
@@ -770,8 +795,6 @@ class mainWindow(QtGui.QMainWindow):
         self.dataMatrixes[filePath] = [dataMatrix , dataInfo , algorithmConfig]
         
         self.setDictionaryControlls()
-        # self.setAlgorithmControlls(algorithmConfig)
-        # self.setDataInfoControlls(dataInfo)
 
         item = QtGui.QListWidgetItem(filePath)
         self.ui.lst_data.addItem(item)
