@@ -32,8 +32,10 @@ from scipy.io  import savemat
 from os.path   import expanduser
 from PyQt4     import QtCore, QtGui
 from pickle    import dump
+
 # gui imports #
 from settingsGraphics import mainWindowUI
+from calcFunctions    import calcWindow
 
 # modules imports #
 import data.dataLoader as dl
@@ -78,9 +80,10 @@ class mainWindow(QtGui.QMainWindow):
         self.ui.btn_settingsData.clicked.connect(self.resizeWindow)
         self.ui.btn_addData.clicked.connect(self.chooseDataFiles)
         self.ui.btn_removeData.clicked.connect(self.removeData)
-
         self.ui.btn_dictionarySave.clicked.connect(self.createDictionary)
         self.ui.btn_configSave.clicked.connect(self.saveConfig)
+
+        self.ui.btn_calculate.clicked.connect(self.startButtonClicked)
 
         self.ui.led_samplingFrequency.textChanged.connect(self.samplingFrequencyChanged)
         self.ui.led_iterationsLimit.textChanged.connect(self.iterationsLimitChanged)
@@ -98,6 +101,7 @@ class mainWindow(QtGui.QMainWindow):
     def initializeFlags(self):
         self.flags = {}
         self.flags['groupBoxDataResized'] = 0
+        self.flags['MPisRunning']         = 0
 
     def setVariablesState(self , flag):
 
@@ -114,6 +118,7 @@ class mainWindow(QtGui.QMainWindow):
             self.standardTextColor    = QtCore.Qt.black
 
             self.ledFields = [self.ui.led_samplingFrequency , self.ui.led_nfft , self.ui.led_maxS , self.ui.led_minS , self.ui.led_iterationsLimit, self.ui.led_energyLimit , self.ui.led_dictonaryDensity]
+            self.buttons   = [self.ui.btn_addData , self.ui.btn_calculate , self.ui.btn_settingsData , self.ui.btn_saveSelectedBooks , self.ui.btn_openVisualisationTool , self.ui.btn_dictionarySave , self.ui.btn_configSave , self.ui.btn_removeData]
 
             self.warnings = {}
             self.warnings['wrongType']      = 'Wrong file type, in '
@@ -127,6 +132,7 @@ class mainWindow(QtGui.QMainWindow):
 
             self.filePath         = ''
             self.dataMatrixes     = {}
+            self.books            = {}
             self.dictionaryConfig = {}
 
     def setWidgetsInitialState(self):
@@ -730,6 +736,46 @@ class mainWindow(QtGui.QMainWindow):
 
 ### PROCESSING EVENTS:
 ######################
+    def startButtonClicked(self):
+        self.books = {}
+        if self.ui.lst_books.count() > 0:
+            self.ui.lst_books.clear()
+
+        self.setDictionaryConfig()
+        self.setAlgorithmConfig()
+
+        self.flags['MPisRunning'] = 1
+        self.enableAllWidgets(False)
+        self.calcWindowHandler = calcWindow(self.dataMatrixes , self.dictionaryConfig)
+        
+        self.calcWindowHandler.sig_calculationsStoped.connect(self.calculationsStoped)
+        self.calcWindowHandler.sig_singleBookDone.connect(self.getSingleBook)
+
+        self.calcWindowHandler.show()
+        self.displayInformation('Program is running...')
+
+    def enableAllWidgets(self , what):
+        for led in self.ledFields:
+            led.setEnabled(what)
+        for btn in self.buttons:
+            btn.setEnabled(what)
+        self.ui.cmb_maxS.setEnabled(what)
+        self.ui.cmb_minS.setEnabled(what)
+        self.ui.cmb_algorithmType.setEnabled(what)
+        self.ui.chb_displayInfo.setEnabled(what)
+        self.ui.chb_useGradient.setEnabled(what)
+        self.ui.chb_useRect.setEnabled(what)
+        self.ui.chb_useAsym.setEnabled(what)
+
+    def calculationsStoped(self):
+        self.enableAllWidgets(True)
+        self.displayInformation('')
+
+    def getSingleBook(self , book , config , key):
+        self.books[key] = [book , config]
+        item = QtGui.QListWidgetItem(key)
+        self.ui.lst_books.addItem(item)
+        
     def saveConfig(self):
         fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save configuration file' , expanduser('~')+'/config' , 'Python pickle (*.p);;Text file (*.txt);;')
         if len(fileName) == 0:

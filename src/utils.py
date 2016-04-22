@@ -25,15 +25,24 @@ from __future__ import division
 
 import numpy as np
 
+from src.processing import calculateMP
+
+def calculateBook(dictionary , dataMatrixes , config):
+	book = []
+	for channel in config['channels2calc']:
+		tmpResult = []
+		for trial in config['trials2calc']:
+			tmpResult.append(calculateMP(dictionary , signal , config))
+		book.append(tmpResult)
+	return np.array(book)
 
 def generateFinalConfig(dictionaryConfig , dataInfo , algorithmConfig):
-	config = {}
-
 	flags = {}
 	flags['useAsymA']                = dictionaryConfig['useAsym']
 	flags['useRectA']                = dictionaryConfig['useRect']
 	flags['useGradientOptimization'] = algorithmConfig['useGradient']
 	flags['displayInfo']             = algorithmConfig['displayInfo']
+	# flags['displayInfo'] = 1
 	
 	config = {}
 	config['flags']                 = flags
@@ -45,8 +54,24 @@ def generateFinalConfig(dictionaryConfig , dataInfo , algorithmConfig):
 	config['minEnergyExplained']    = algorithmConfig['energyLimit']
 	config['samplingFrequency']     = dataInfo['samplingFreq']
 	config['minNFFT']               = algorithmConfig['nfft']
+	config['channels2calc']         = algorithmConfig['channelsRange']
+	config['trials2calc']           = algorithmConfig['trialsRange']
 
 	return config
+
+def retranslateDictionaryConfig(dictionaryConfig):
+	config = {}
+
+	flags = {}
+	flags['useAsymA'] = dictionaryConfig['useAsym']
+	flags['useRectA'] = dictionaryConfig['useRect']
+
+	config['flags']   = flags
+	config['minS']    = dictionaryConfig['minS_samples']
+	config['maxS']    = dictionaryConfig['maxS_samples']
+	config['density'] = dictionaryConfig['dictionaryDensity']
+	return config
+
 
 def generateRangeFromString(text):
 	text = text.replace(' ' , '')
