@@ -351,23 +351,29 @@ class mainWindow(QtGui.QMainWindow):
             self.ui.led_nfft.setText(text[0:-1])
 
     def channelsRangeChanged(self):
-        text     = self.ui.led_channels2calc.text()
-        possible = ['1','2','3','4','5','6','7','8','9','0',':',';','-',' ',',']
+        text      = self.ui.led_channels2calc.text()
+        possible  = ['1','2','3','4','5','6','7','8','9','0',':',';','-',' ',',']
+        forbidden = ['::',':;',';;',';:','-:',':-',';-','-;','--']
         if any(x not in possible for x in text):
             self.ui.led_channels2calc.setStyleSheet("color: rgb(255, 0, 0);")
             msg = 'Channels range contains incorrect characters!'
             self.warrning('on' , msg , 3000)
+        elif any(x in text for x in forbidden):
+            self.ui.led_channels2calc.setText(text[0:-1])
         else:
             self.ui.led_channels2calc.setStyleSheet("color: rgb(0, 0, 0);")
         self.changeButtonsAvailability()
             
     def trialsRangeChanged(self):
-        text = self.ui.led_trials2calc.text()
-        possible = ['1','2','3','4','5','6','7','8','9','0',':',';','-',' ']
+        text      = self.ui.led_trials2calc.text()
+        possible  = ['1','2','3','4','5','6','7','8','9','0',':',';','-',' ']
+        forbidden = ['::',':;',';;',';:','-:',':-',';-','-;','--']
         if any(x not in possible for x in text):
             self.ui.led_trials2calc.setStyleSheet("color: rgb(255, 0, 0);")
             msg = 'Trials range contains incorrect characters!'
             self.warrning('on' , msg , 3000)
+        elif any(x in text for x in forbidden):
+            self.ui.led_trials2calc.setText(text[0:-1])
         else:
             self.ui.led_trials2calc.setStyleSheet("color: rgb(0, 0, 0);")
         self.changeButtonsAvailability()
