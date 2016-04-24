@@ -74,7 +74,9 @@ def loadSigmalFromFile(nameOfFile):
     	- "err_0" - wrong file extension/type,
     	- "err_1" - field "data" was not present in the given file,
     	- "err_2" - numeric parameters, like "channels" for instance, did not match the shape of the "data",
-    	- "err_3" - data matrix has more than three dimensions.
+    	- "err_3" - data matrix has more than three dimensions,
+    	- "err_4" - unexpected eof in pickle file,
+    	- "err_5" - not a proper data type.
 	'''
 
 	if nameOfFile[-4:] == '.mat':
@@ -86,6 +88,8 @@ def loadSigmalFromFile(nameOfFile):
 			dataInfo['numberOfSamples']  = structure['samples'][0][0]
 			dataInfo['samplingFreq']     = structure['samplingFreq'][0][0]
 			dataMatrix                   = structure['data']
+		except TypeError:
+			return(np.array([]) , {} , 'err_5')
 		except KeyError:
 			try:
 				dataMatrix = structure['data']
@@ -99,7 +103,10 @@ def loadSigmalFromFile(nameOfFile):
 				return(np.array([]) , {} , 'err_1')
 
 	elif nameOfFile[-2:] == '.p':
-		structure = pickle.load( open( nameOfFile,"rb" ) )
+		try:
+			structure = pickle.load( open( nameOfFile,"rb" ) )
+		except EOFError:
+			return(np.array([]) , {} , 'err_4')
 		dataInfo = {}
 		try:
 			dataInfo['numberOfTrials']   = structure['trials']
@@ -107,6 +114,8 @@ def loadSigmalFromFile(nameOfFile):
 			dataInfo['numberOfSamples']  = structure['samples']
 			dataInfo['samplingFreq']     = structure['samplingFreq']
 			dataMatrix                   = structure['data']
+		except TypeError:
+			return(np.array([]) , {} , 'err_5')
 		except KeyError:
 			try:
 				dataMatrix = structure['data']

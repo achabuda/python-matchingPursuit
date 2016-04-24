@@ -126,7 +126,9 @@ class mainWindow(QtGui.QMainWindow):
             self.warnings['openData_err_1'] = 'Field "data" was not found in the file '
             self.warnings['openData_err_2'] = 'Either "channels" or "trials" did not match the shape of "data", in '
             self.warnings['openData_err_3'] = 'Data matrix has more than three dimensions, in '
-            self.warnings['openData_err_4'] = 'Duplicated input file - '
+            self.warnings['openData_err_4'] = 'Unexpected end of file in '
+            self.warnings['openData_err_5'] = 'Wrong data type in '
+            self.warnings['openData_err_N'] = 'Duplicated input file - '
 
             self.warrningDisplayTime = 5000     # in [ms]
 
@@ -550,7 +552,7 @@ class mainWindow(QtGui.QMainWindow):
             if filePath != '':
 
                 if self.ui.lst_data.findItems(str(filePath) , QtCore.Qt.MatchExactly) != []:
-                    warningCollector = warningCollector + self.warnings['openData_err_4'] + filePath + '\n'
+                    warningCollector = warningCollector + self.warnings['openData_err_N'] + filePath + '\n'
                     continue
                 
                 self.displayInformation('Opening file '+ filePath + '. Please wait...' , 'new')
@@ -581,7 +583,7 @@ class mainWindow(QtGui.QMainWindow):
             if filePath != '':
 
                 if self.ui.lst_data.findItems(str(filePath) , QtCore.Qt.MatchExactly) != []:
-                    warningCollector = warningCollector + self.warnings['openData_err_4'] + filePath + '\n'
+                    warningCollector = warningCollector + self.warnings['openData_err_N'] + filePath + '\n'
                     continue
                 
                 self.displayInformation('Opening file '+ filePath + '. Please wait...' , 'new')
