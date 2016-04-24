@@ -76,14 +76,15 @@ class mainWindow(QtGui.QMainWindow):
     def setConnections(self):
         self.ui.lst_data.currentItemChanged.connect(self.selectData)
         self.ui.lst_data.sig_filesDropped.connect(self.dropDataFiles)
+        self.ui.lst_books.currentItemChanged.connect(self.changeButtonsAvailability)
 
         self.ui.btn_settingsData.clicked.connect(self.resizeWindow)
         self.ui.btn_addData.clicked.connect(self.chooseDataFiles)
         self.ui.btn_removeData.clicked.connect(self.removeData)
         self.ui.btn_dictionarySave.clicked.connect(self.createDictionary)
         self.ui.btn_configSave.clicked.connect(self.saveConfig)
-
         self.ui.btn_calculate.clicked.connect(self.startButtonClicked)
+        self.ui.btn_saveSelectedBooks.clicked.connect(self.saveBooks)
 
         self.ui.led_samplingFrequency.textChanged.connect(self.samplingFrequencyChanged)
         self.ui.led_iterationsLimit.textChanged.connect(self.iterationsLimitChanged)
@@ -608,7 +609,6 @@ class mainWindow(QtGui.QMainWindow):
 
         self.changeButtonsAvailability()
 
-
     def removeData(self):
         path = self.filePath
 
@@ -669,7 +669,10 @@ class mainWindow(QtGui.QMainWindow):
                 self.ui.btn_dictionarySave.setEnabled(False)
 
             if self.ui.lst_books.count() > 0:
-                self.ui.btn_saveSelectedBooks.setEnabled(True)
+                if len(self.ui.lst_books.selectedItems()) > 0:
+                    self.ui.btn_saveSelectedBooks.setEnabled(True)
+                else:
+                    self.ui.btn_saveSelectedBooks.setEnabled(False)
                 self.ui.btn_openVisualisationTool.setEnabled(True)
             else:
                 self.ui.btn_saveSelectedBooks.setEnabled(False)
@@ -778,11 +781,39 @@ class mainWindow(QtGui.QMainWindow):
     def calculationsStoped(self):
         self.enableAllWidgets(True)
         self.displayInformation('')
+        if self.ui.lst_books.count() > 0:
+            self.ui.lst_books.setCurrentRow(0)
+        self.changeButtonsAvailability()
 
     def getSingleBook(self , book , config , key):
-        self.books[key] = [book , config]
-        item = QtGui.QListWidgetItem(key)
+        key        = str(key)
+        
+        whereTo    = key.rfind('.')
+        nameOfBook = key[:whereTo] + '_BOOK' + key[whereTo:]
+
+        self.books[nameOfBook] = [book , config]
+        item = QtGui.QListWidgetItem(nameOfBook)
         self.ui.lst_books.addItem(item)
+
+    def saveBooks(self):
+        for ind in range(0 , self.ui.lst_books.count()):
+            nameOfBook = str(self.ui.lst_books.item(ind).text())
+            whereFrom  = nameOfBook.rfind('/')
+            whereTo    = nameOfBook.rfind('.')
+            nameOfBook = nameOfBook[whereFrom:whereTo]
+
+            fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save book file' , expanduser('~')+nameOfBook , 'Python pickle (*.p);;Matlab file (*.mat);;')
+            if len(fileName) == 0:
+                return
+
+            self.displayInformation('Saving book...' , flag='new')
+
+            fileName = str(fileName)
+            if fileName[-2:] == '.p':
+                with open(fileName , 'wb') as f:
+                    dump(config , f)
+            elif fileName[-4:] == '.mat':
+                pass
         
     def saveConfig(self):
         fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save configuration file' , expanduser('~')+'/config' , 'Python pickle (*.p);;Text file (*.txt);;')

@@ -429,6 +429,7 @@ class mainWindowUI(object):
         booksGrid.addWidget(self.btn_openVisualisationTool,0,2)
 
         self.lst_books = QtGui.QListWidget(self.groupBoxBooks)
+        self.lst_books.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         booksGrid.addWidget(self.lst_books,1,0,2,0)
 
 # GROUPBOX - ERRORS
