@@ -94,7 +94,6 @@ class calcWindow(QtGui.QMainWindow):
 
 		self.mpThread.sig_singleBookDone.connect(self.mpThreadReturningSingleBook)
 		self.mpThread.finished.connect(self.mpThreadFinished)
-		# self.mpThread.terminated.connect(self.jobDone)
 
 	def timerEvent(self):
 		self.mpThread.start()
@@ -110,10 +109,6 @@ class calcWindow(QtGui.QMainWindow):
 		self.mpThread.stop()
 
 	def mpThreadFinished(self):
-		self.sig_calculationsFinished.emit()
-		self.close()
-
-	def jobDone(self):
 		self.sig_calculationsFinished.emit()
 		self.close()
 
@@ -161,7 +156,6 @@ class thr_MP(QtCore.QThread):
 	sig_prb_trial_setMax     = QtCore.pyqtSignal(int)
 	sig_prb_channel_setMax   = QtCore.pyqtSignal(int)
 
-	# sig_calculationsStoped   = QtCore.pyqtSignal()
 	sig_singleBookDone       = QtCore.pyqtSignal(np.ndarray , dict , str)
 
 	def __init__(self , files2run , inputData , dictionary , dictionaryConfig , parent=None):
@@ -219,4 +213,3 @@ class thr_MP(QtCore.QThread):
 
 	def stop(self):
 		self.cancelClicked = 1
-		# self.terminate()
