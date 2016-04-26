@@ -801,22 +801,25 @@ class mainWindow(QtGui.QMainWindow):
             nameOfBook = str(self.ui.lst_books.item(ind).text())
             whereFrom  = nameOfBook.rfind('/')
             whereTo    = nameOfBook.rfind('.')
-            nameOfBook = nameOfBook[whereFrom:whereTo]
+            tmpName = nameOfBook[whereFrom:whereTo]
 
-            fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save book file' , expanduser('~')+nameOfBook , 'Python pickle (*.p);;Matlab file (*.mat);;')
+            fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save book file' , expanduser('~')+tmpName , 'Python pickle (*.p);;Matlab file (*.mat);;')
             if len(fileName) == 0:
                 return
 
             self.displayInformation('Saving book...' , flag='new')
 
+            book = self.books[nameOfBook][0]
+            conf = self.books[nameOfBook][1]
+
             fileName = str(fileName)
             if fileName[-2:] == '.p':
-                book = self.books[nameOfBook][0]
-                conf = self.books[nameOfBook][1]
                 with open(fileName , 'wb') as f:
                     dump({'book':book,'config':conf} , f)
             elif fileName[-4:] == '.mat':
-                pass
+                dic = {col_name : book[col_name].values for col_name in book.columns.values}
+                dic['config'] = config
+                savemat(fileName , dic)
         
     def saveConfig(self):
         fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save configuration file' , expanduser('~')+'/config' , 'Python pickle (*.p);;Text file (*.txt);;')
