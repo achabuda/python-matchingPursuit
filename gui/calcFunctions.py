@@ -57,9 +57,6 @@ class calcWindow(QtGui.QMainWindow):
 
 		self.setWidgetsInitialState()
 
-	def stopCalculations(self):
-		self.flags['cancelClicked'] = 1
-
 	def initializeFlags(self):
 		self.flags = {}
 		self.flags['cancelClicked'] = 0
@@ -95,9 +92,9 @@ class calcWindow(QtGui.QMainWindow):
 		self.mpThread.sig_prb_trial_setMax.connect(self.setMaximumTrialBar)
 		self.mpThread.sig_prb_channel_setMax.connect(self.setMaximumChannelBar)
 
-		# self.mpThread.sig_calculationsStoped.connect(self.calculationsStoped)
 		self.mpThread.sig_singleBookDone.connect(self.mpThreadReturningSingleBook)
-		self.mpThread.sig_calculationsFinished.connect(self.mpThreadFinished)
+		self.mpThread.finished.connect(self.mpThreadFinished)
+		# self.mpThread.terminated.connect(self.jobDone)
 
 	def timerEvent(self):
 		self.mpThread.start()
@@ -108,8 +105,15 @@ class calcWindow(QtGui.QMainWindow):
 		self.timer.timeout.connect(self.timerEvent)
 		self.timer.start(500)
 
+	def stopCalculations(self):
+		self.flags['cancelClicked'] = 1
+		self.mpThread.stop()
+
 	def mpThreadFinished(self):
-		self.mpThread.terminate()
+		self.sig_calculationsFinished.emit()
+		self.close()
+
+	def jobDone(self):
 		self.sig_calculationsFinished.emit()
 		self.close()
 
@@ -157,8 +161,7 @@ class thr_MP(QtCore.QThread):
 	sig_prb_trial_setMax     = QtCore.pyqtSignal(int)
 	sig_prb_channel_setMax   = QtCore.pyqtSignal(int)
 
-	sig_calculationsStoped   = QtCore.pyqtSignal()
-	sig_calculationsFinished = QtCore.pyqtSignal()
+	# sig_calculationsStoped   = QtCore.pyqtSignal()
 	sig_singleBookDone       = QtCore.pyqtSignal(np.ndarray , dict , str)
 
 	def __init__(self , files2run , inputData , dictionary , dictionaryConfig , parent=None):
@@ -168,6 +171,8 @@ class thr_MP(QtCore.QThread):
 		self.files2run        = files2run
 		self.dictionary       = dictionary
 		self.dictionaryConfig = dictionaryConfig
+
+		self.cancelClicked    = 0
 
 	def run(self):
 		self.sig_prb_file_setMax.emit(len(self.files2run))
@@ -198,6 +203,10 @@ class thr_MP(QtCore.QThread):
 					ind_trial += 1
 					self.sig_prb_trial_update.emit(ind_trial)
 					self.sig_lbl_trial_update.emit('Trials - (' + str(ind_trial) + ' / ' + str(len(config['trials2calc'])) + ')')
+
+					if self.cancelClicked == 1:
+						return
+
 				ind_channel += 1
 				self.sig_prb_channel_update.emit(ind_channel)
 				self.sig_lbl_channel_update.emit('Channels - (' + str(ind_channel) + ' / ' + str(len(config['channels2calc'])) + ')')
@@ -208,4 +217,6 @@ class thr_MP(QtCore.QThread):
 
 			self.sig_singleBookDone.emit(book , config , file2run)
 
-		self.sig_calculationsFinished.emit()
+	def stop(self):
+		self.cancelClicked = 1
+		# self.terminate()
