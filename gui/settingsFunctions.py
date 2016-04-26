@@ -760,6 +760,7 @@ class mainWindow(QtGui.QMainWindow):
         self.calcWindowHandler = calcWindow(self.dataMatrixes , self.dictionaryConfig)
         
         self.calcWindowHandler.sig_calculationsStoped.connect(self.calculationsStoped)
+        self.calcWindowHandler.sig_calculationsFinished.connect(self.calculationsStoped)
         self.calcWindowHandler.sig_singleBookDone.connect(self.getSingleBook)
 
         self.calcWindowHandler.show()
@@ -810,8 +811,10 @@ class mainWindow(QtGui.QMainWindow):
 
             fileName = str(fileName)
             if fileName[-2:] == '.p':
+                book = self.books[nameOfBook][0]
+                conf = self.books[nameOfBook][1]
                 with open(fileName , 'wb') as f:
-                    dump(config , f)
+                    dump({'book':book,'config':conf} , f)
             elif fileName[-4:] == '.mat':
                 pass
         
