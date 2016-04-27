@@ -36,10 +36,11 @@ from pickle    import dump
 # gui imports #
 from settingsGraphics import mainWindowUI
 from calcFunctions    import calcWindow
+from visFunctions     import visWindow
 
 # modules imports #
 import data.dataLoader as dl
-from src.utils      import determineAlgorithmConfig , determineDictionaryConfig , generateRangeFromString, generateFinalConfig
+from src.utils      import determineAlgorithmConfig, determineDictionaryConfig, generateRangeFromString, generateFinalConfig, saveBookAsMat
 from src.dictionary import generateDictionary
 
 class mainWindow(QtGui.QMainWindow):
@@ -85,6 +86,7 @@ class mainWindow(QtGui.QMainWindow):
         self.ui.btn_configSave.clicked.connect(self.saveConfig)
         self.ui.btn_calculate.clicked.connect(self.startButtonClicked)
         self.ui.btn_saveSelectedBooks.clicked.connect(self.saveBooks)
+        self.ui.btn_openVisualisationTool.clicked.connect(self.openVisualizer)
 
         self.ui.led_samplingFrequency.textChanged.connect(self.samplingFrequencyChanged)
         self.ui.led_iterationsLimit.textChanged.connect(self.iterationsLimitChanged)
@@ -103,6 +105,7 @@ class mainWindow(QtGui.QMainWindow):
         self.flags = {}
         self.flags['groupBoxDataResized'] = 0
         self.flags['MPisRunning']         = 0
+        self.flags['visualizerOpened']    = 0
 
     def setVariablesState(self , flag):
 
@@ -673,7 +676,11 @@ class mainWindow(QtGui.QMainWindow):
                     self.ui.btn_saveSelectedBooks.setEnabled(True)
                 else:
                     self.ui.btn_saveSelectedBooks.setEnabled(False)
-                self.ui.btn_openVisualisationTool.setEnabled(True)
+
+                if self.flags['visualizerOpened'] == 0:
+                    self.ui.btn_openVisualisationTool.setEnabled(True)
+                else:
+                    self.ui.btn_openVisualisationTool.setEnabled(False)
             else:
                 self.ui.btn_saveSelectedBooks.setEnabled(False)
                 self.ui.btn_openVisualisationTool.setEnabled(False)
@@ -766,6 +773,20 @@ class mainWindow(QtGui.QMainWindow):
         self.calcWindowHandler.show()
         self.displayInformation('Program is running...')
 
+    def openVisualizer(self):
+        self.flags['visualizerOpened'] = 1
+
+        self.visWindowHandler = visWindow()
+        self.visWindowHandler.sig_windowClosed.connect(self.closeVisualizer)
+
+        self.visWindowHandler.showMaximized()
+
+        self.changeButtonsAvailability()
+
+    def closeVisualizer(self):
+        self.flags['visualizerOpened'] = 0
+        self.changeButtonsAvailability()        
+
     def enableAllWidgets(self , what):
         for led in self.ledFields:
             led.setEnabled(what)
@@ -782,6 +803,7 @@ class mainWindow(QtGui.QMainWindow):
     def calculationsStoped(self):
         self.enableAllWidgets(True)
         self.displayInformation('')
+        self.flags['MPisRunning'] = 0
         if self.ui.lst_books.count() > 0:
             self.ui.lst_books.setCurrentRow(0)
         self.changeButtonsAvailability()
@@ -817,9 +839,7 @@ class mainWindow(QtGui.QMainWindow):
                 with open(fileName , 'wb') as f:
                     dump({'book':book,'config':conf} , f)
             elif fileName[-4:] == '.mat':
-                dic = {col_name : book[col_name].values for col_name in book.columns.values}
-                dic['config'] = config
-                savemat(fileName , dic)
+                msg = saveBookAsMat(book , conf , fileName)
         
     def saveConfig(self):
         fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save configuration file' , expanduser('~')+'/config' , 'Python pickle (*.p);;Text file (*.txt);;')

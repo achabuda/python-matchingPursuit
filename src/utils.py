@@ -27,14 +27,12 @@ import numpy as np
 
 from src.processing import calculateMP
 
-def calculateBook(dictionary , dataMatrixes , config):
-	book = []
-	for channel in config['channels2calc']:
-		tmpResult = []
-		for trial in config['trials2calc']:
-			tmpResult.append(calculateMP(dictionary , signal , config))
-		book.append(tmpResult)
-	return np.array(book)
+def saveBookAsMat(book , config , nameOfFile):
+	for indTrial in np.arange(book.shape[0]):
+		for indChannel in np.arange(book.shape[1]):
+			pass
+	
+	return 'ok'
 
 def generateFinalConfig(dictionaryConfig , dataInfo , algorithmConfig):
 	flags = {}

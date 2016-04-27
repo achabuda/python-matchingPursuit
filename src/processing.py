@@ -29,7 +29,7 @@ import pandas as pd
 from scipy.signal      import hilbert
 from numpy.linalg      import norm
 from scipy.optimize    import fmin, minimize
-from collections       import deque
+# from collections       import deque
 
 import dictionary as dic
 
@@ -61,8 +61,10 @@ def calculateMP(dictionary , signal , config):
 			energyExplained    = np.abs(1 - calculateSignalEnergy(signalRest) / signalEnergy)
 			minEnergyExplained = config['minEnergyExplained'] - config['density'] * (calculateSignalEnergy(bookElement['reconstruction']) / calculateSignalEnergy(signalRest))
 			
+			msg = 'Iteration {} done, energy explained: {}.'.format(iteration , energyExplained)
+
 			if config['flags']['displayInfo'] != 0:
-				print 'Iteration {} done, energy explained: {}.'.format(iteration , energyExplained)
+				print msg
 			
 			if energyExplained > minEnergyExplained:
 				return pd.DataFrame(book)
