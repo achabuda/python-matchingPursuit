@@ -224,6 +224,7 @@ class mainWindow(QtGui.QMainWindow):
         config['channelsRange']   = generateRangeFromString(config['channels2calc'])
         config['trials2calc']     = str(self.ui.led_trials2calc.text())
         config['trialsRange']     = generateRangeFromString(config['trials2calc'])
+        
         return config
 
     def setDictionaryControlls(self):
@@ -760,7 +761,7 @@ class mainWindow(QtGui.QMainWindow):
             self.ui.lst_books.clear()
 
         self.setDictionaryConfig()
-        self.setAlgorithmConfig()
+        self.dataMatrixes[str(self.ui.lst_data.currentItem().text())][2] = self.setAlgorithmConfig()
 
         self.flags['MPisRunning'] = 1
         self.enableAllWidgets(False)
@@ -819,10 +820,14 @@ class mainWindow(QtGui.QMainWindow):
         self.ui.lst_books.addItem(item)
 
     def saveBooks(self):
+        warningCollector = ''
+
         for ind in range(0 , self.ui.lst_books.count()):
             nameOfBook = str(self.ui.lst_books.item(ind).text())
+
             whereFrom  = nameOfBook.rfind('/')
             whereTo    = nameOfBook.rfind('.')
+            whereBOOK  = nameOfBook.rfind('_BOOK')
             tmpName = nameOfBook[whereFrom:whereTo]
 
             fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save book file' , expanduser('~')+tmpName , 'Python pickle (*.p);;Matlab file (*.mat);;')
@@ -831,16 +836,28 @@ class mainWindow(QtGui.QMainWindow):
 
             self.displayInformation('Saving book...' , flag='new')
 
+            nameOfData = nameOfBook[:whereBOOK] + nameOfBook[whereBOOK+5:]
+            data = self.dataMatrixes[str(self.ui.lst_data.findItems(nameOfData , QtCore.Qt.MatchExactly)[0].text())][0]
             book = self.books[nameOfBook][0]
             conf = self.books[nameOfBook][1]
 
             fileName = str(fileName)
             if fileName[-2:] == '.p':
                 with open(fileName , 'wb') as f:
-                    dump({'book':book,'config':conf} , f)
+                    dump({'book':book,'config':conf,'originalData':data} , f)
+                    msg = 'ok'
             elif fileName[-4:] == '.mat':
-                msg = saveBookAsMat(book , conf , fileName)
-        
+                msg = saveBookAsMat(book , data , conf , fileName)
+            
+            if msg != 'ok':
+                warningCollector += msg + 'in' + nameOfBook + '\n'
+
+        self.displayInformation('' , 'new')
+        if warningCollector != '':
+            self.warrning('on' , warningCollector)
+
+
+
     def saveConfig(self):
         fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save configuration file' , expanduser('~')+'/config' , 'Python pickle (*.p);;Text file (*.txt);;')
         if len(fileName) == 0:

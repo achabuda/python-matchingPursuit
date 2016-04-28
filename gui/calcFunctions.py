@@ -182,6 +182,7 @@ class thr_MP(QtCore.QThread):
 			algorithmConfig = self.input[file2run][2]
 
 			config = generateFinalConfig(self.dictionaryConfig , dataInfo , algorithmConfig)
+			print config
 
 			book = np.empty(shape=(len(config['trials2calc']),len(config['channels2calc'])) , dtype = pd.core.frame.DataFrame)
 
