@@ -24,14 +24,25 @@ University of Warsaw, July 06, 2015
 from __future__ import division
 
 import numpy as np
+from scipy.io  import savemat
 
 from src.processing import calculateMP
 
-def saveBookAsMat(book , config , nameOfFile):
-	for indTrial in np.arange(book.shape[0]):
-		for indChannel in np.arange(book.shape[1]):
-			pass
+def saveBookAsMat(book , data , config , nameOfFile):
+	# matrix2save = np.zeros([data.shape[0],data.shape[1],config['maxNumberOfIterations']] , dtype='complex')	# trials x channels x iterations
+	results = {}
+
+	for indTrial in np.arange(data.shape[0]):
+		for indChannel in np.arange(data.shape[1]):
+	 		partialBook = book[indTrial,indChannel]
+
+	 		print partialBook
+	 		
+	 		nameOfStruct = 'trial_' + str(indTrial) + 'channel_' + str(indChannel)
+			
+			results[nameOfStruct] = {col_name : partialBook[col_name].values for col_name in partialBook.columns.values}
 	
+	savemat(nameOfFile , results)
 	return 'ok'
 
 def generateFinalConfig(dictionaryConfig , dataInfo , algorithmConfig):
