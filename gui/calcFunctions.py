@@ -37,6 +37,7 @@ from src.dictionary import generateDictionary
 from src.processing import calculateMP
 
 class calcWindow(QtGui.QMainWindow):
+#class calcWindow(QtGui.QDialog):
 	sig_singleBookDone       = QtCore.pyqtSignal(np.ndarray , dict , str)
 
 	sig_calculationsStoped   = QtCore.pyqtSignal()
@@ -44,6 +45,8 @@ class calcWindow(QtGui.QMainWindow):
 
 	def __init__(self, dataMatrixes , dictionaryConfig , parent=None):
 		QtGui.QWidget.__init__(self, parent)
+		self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowMinMaxButtonsHint)
+
 		self.ui = calcWindowUI()
 		self.ui.setupUi(self)
 
