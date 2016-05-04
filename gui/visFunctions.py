@@ -38,8 +38,6 @@ import random
 
 from weakref import proxy
 
-
-
 # libraries imports #
 import numpy     as np
 import pandas    as pd
@@ -69,8 +67,6 @@ class visWindow(QtGui.QMainWindow):
 				self.ui.lst_books.addItem(item[0])
 				self.books[item[0]] = item[1]
 
-		print self.books.keys()
-
 		self.plotter = Plotter(self.ui)
 		self.plotter.binding_plotter_with_ui(1)
 
@@ -79,14 +75,21 @@ class visWindow(QtGui.QMainWindow):
 
 	
 
+
+#######################################################################
+#######################################################################
+
 class Plotter(FigureCanvas):
     def __init__(self, parent):
-        ''' plot some random stuff '''
         self.parent = proxy(parent)
         
-        data = [random.random() for i in range(10)]
+        # data = [random.random() for i in range(10)]
+        # fig = Figure(figsize=(5, 5), dpi=100)
         fig = Figure()
         super(Plotter,self).__init__(fig)
+
+        FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
         
         # create an axis
         self.axes = fig.add_subplot(111)
@@ -95,7 +98,7 @@ class Plotter(FigureCanvas):
         self.axes.hold(False)
         
         # plot data
-        self.axes.plot(data, '*-')
+        # self.axes.plot(data, '*-')
 
     def binding_plotter_with_ui(self,where):
     	if where == 1:

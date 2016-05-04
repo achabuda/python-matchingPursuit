@@ -339,7 +339,7 @@ class visWindowUI(object):
 
         mainLayout.addLayout(leftPanel)
         mainLayout.addLayout(rightPanel)
-        mainLayout.addStretch(1)
+        mainLayout.setStretch(1,3)
 
         self.centralwidget.setLayout(mainLayout)
         visWindow.setCentralWidget(self.centralwidget)
