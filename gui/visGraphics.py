@@ -22,13 +22,9 @@ e-mail: tomasz@spustek.pl
 University of Warsaw, July 06, 2015
 '''
 
-from PyQt4                              import QtCore, QtGui
-from platform                           import system
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-
-# import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
-
+from PySide   import QtGui, QtCore
+# from PyQt4 import QtCore, QtGui
+from platform import system
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -46,7 +42,7 @@ except AttributeError:
 
 
 class visWindowUI(object):
-    def setupUi(self, visWindow):
+    def setupUi(self , visWindow):
         visWindow.setObjectName(_fromUtf8("visWindow"))
         visWindow.setEnabled(True)
         # visWindow.resize(500 , 200)
@@ -55,7 +51,7 @@ class visWindowUI(object):
         # visWindow.move(0,0)
 
 # CENTRAL WIDGET:
-        self.centralwidget = QtGui.QWidget(visWindow)
+        self.centralwidget   = QtGui.QWidget(visWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
 
 # MAIN LAYOUTS:
@@ -70,11 +66,11 @@ class visWindowUI(object):
         self.groupBoxSettings = QtGui.QGroupBox()
         self.groupBoxSettings.setObjectName(_fromUtf8("groupBoxSettings"))
 
-        self.groupBoxStatus = QtGui.QGroupBox()
-        self.groupBoxStatus.setObjectName(_fromUtf8("groupBoxStatus"))
+        # self.groupBoxStatus = QtGui.QGroupBox()
+        # self.groupBoxStatus.setObjectName(_fromUtf8("groupBoxStatus"))
 
-        self.groupBoxSubControlls= QtGui.QGroupBox()
-        self.groupBoxSubControlls.setObjectName(_fromUtf8("groupBoxSubControlls"))
+        # self.groupBoxSubControlls= QtGui.QGroupBox()
+        # self.groupBoxSubControlls.setObjectName(_fromUtf8("groupBoxSubControlls"))
 
 # GLOBAL BUTTONS & OTHER CONTROLLS:
         self.btn_saveDecomp = QtGui.QPushButton()
@@ -91,9 +87,6 @@ class visWindowUI(object):
 
         self.btn_complex = QtGui.QPushButton()
         self.btn_complex.setObjectName(_fromUtf8("btn_complex"))
-
-        # self.fig         = Figure()
-        # self.canvas = FigureCanvas(self.fig)
 
 # GROUPBOX BOOKS:
         booksLayout = QtGui.QVBoxLayout()
@@ -302,37 +295,36 @@ class visWindowUI(object):
         self.tabSpace.setTabsClosable(False)
 
         tab_decomposition = QtGui.QWidget()
-        layout1 = QtGui.QVBoxLayout(tab_decomposition)
-        # layout1.addWidget(self.canvas)
+        self.layout1 = QtGui.QVBoxLayout(tab_decomposition)
         subLayout1 = QtGui.QHBoxLayout()
         subLayout1.addWidget(self.btn_saveDecomp)
         subLayout1.addStretch(1)
-        layout1.addLayout(subLayout1)
+        self.layout1.addLayout(subLayout1)
         self.tabSpace.addTab(tab_decomposition, "Decomposition")
 
         tab_wvRepresentation = QtGui.QWidget()
-        layout2 = QtGui.QVBoxLayout(tab_wvRepresentation)
+        self.layout2 = QtGui.QVBoxLayout(tab_wvRepresentation)
         subLayout2 = QtGui.QHBoxLayout()
         subLayout2.addWidget(self.btn_saveWigner)
         subLayout2.addStretch(1)
-        layout2.addLayout(subLayout2)
+        self.layout2.addLayout(subLayout2)
         self.tabSpace.addTab(tab_wvRepresentation, "Wigner-Ville map")
 
         tab_amplitudeRepresentation = QtGui.QWidget()
-        layout3 = QtGui.QVBoxLayout(tab_amplitudeRepresentation)
+        self.layout3 = QtGui.QVBoxLayout(tab_amplitudeRepresentation)
         subLayout3 = QtGui.QHBoxLayout()
         subLayout3.addWidget(self.btn_saveAmplitude)
         subLayout3.addWidget(self.btn_complex)
         subLayout3.addStretch(1)
-        layout3.addLayout(subLayout3)
+        self.layout3.addLayout(subLayout3)
         self.tabSpace.addTab(tab_amplitudeRepresentation, "Amplitude map")
 
         tab_topographicalRepresentation = QtGui.QWidget()
-        layout4 = QtGui.QVBoxLayout(tab_topographicalRepresentation)
+        self.layout4 = QtGui.QVBoxLayout(tab_topographicalRepresentation)
         subLayout4 = QtGui.QHBoxLayout()
         subLayout4.addWidget(self.btn_saveTopography)
         subLayout4.addStretch(1)
-        layout4.addLayout(subLayout4)
+        self.layout4.addLayout(subLayout4)
         self.tabSpace.addTab(tab_topographicalRepresentation, "Topography")
 
 
@@ -342,8 +334,8 @@ class visWindowUI(object):
         leftPanel.addWidget(self.groupBoxSettings)
 
         rightPanel.addWidget(self.tabSpace)
-        rightPanel.addWidget(self.groupBoxSubControlls)
-        rightPanel.addWidget(self.groupBoxStatus)
+        # rightPanel.addWidget(self.groupBoxSubControlls)
+        # rightPanel.addWidget(self.groupBoxStatus)
 
         mainLayout.addLayout(leftPanel)
         mainLayout.addLayout(rightPanel)
@@ -359,9 +351,9 @@ class visWindowUI(object):
         visWindow.setWindowTitle(_translate("visWindow", "python-MatchingPursuit -- visualiser", None))
 
         self.groupBoxBooks.setTitle(_translate("visWindow"  , "Books", None))
-        self.groupBoxStatus.setTitle(_translate("visWindow"  , "Status", None))
+        # self.groupBoxStatus.setTitle(_translate("visWindow"  , "Status", None))
         self.groupBoxSettings.setTitle(_translate("visWindow"  , "Settings", None))
-        self.groupBoxSubControlls.setTitle(_translate("visWindow"  , "", None))
+        # self.groupBoxSubControlls.setTitle(_translate("visWindow"  , "", None))
 
         self.btn_saveDecomp.setText(_translate("visWindow", "Save", None))
         self.btn_saveAmplitude.setText(_translate("visWindow", "Save", None))

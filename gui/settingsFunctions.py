@@ -777,7 +777,8 @@ class mainWindow(QtGui.QMainWindow):
     def openVisualizer(self):
         self.flags['visualizerOpened'] = 1
 
-        self.visWindowHandler = visWindow()
+        books = self.getSelectedBooks()
+        self.visWindowHandler = visWindow(books)
         self.visWindowHandler.sig_windowClosed.connect(self.closeVisualizer)
 
         self.visWindowHandler.showMaximized()
@@ -786,7 +787,12 @@ class mainWindow(QtGui.QMainWindow):
 
     def closeVisualizer(self):
         self.flags['visualizerOpened'] = 0
-        self.changeButtonsAvailability()        
+        self.changeButtonsAvailability()
+
+    def getSelectedBooks(self):
+        books = []
+        [books.append( [str(x.text()) , self.books[str(x.text())]]) for x in self.ui.lst_books.selectedItems()]
+        return books
 
     def enableAllWidgets(self , what):
         for led in self.ledFields:
