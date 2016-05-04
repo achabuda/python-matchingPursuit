@@ -54,7 +54,7 @@ class visWindow(QtGui.QMainWindow):
 	sig_windowClosed   = QtCore.Signal()
 	# sig_windowClosed   = QtCore.pyqtSignal()
 
-	def __init__(self , books=[] , parent=None):
+	def __init__(self , inputs=[] , parent=None):
 		QtGui.QMainWindow.__init__(self, parent)
 
 		self.ui = visWindowUI()
@@ -62,25 +62,28 @@ class visWindow(QtGui.QMainWindow):
 
 		self.books = {}
 
-		if books != []:
-			for item in books:
-				self.ui.lst_books.addItem(item[0])
-				self.books[item[0]] = item[1]
+		if inputs != []:
+			for item in inputs.keys():
+				self.ui.lst_books.addItem(item)
+				self.books[item] = inputs[item]
+			self.ui.lst_books.setCurrentRow(0)
 
-		self.plotter = Plotter(self.ui)
+			self.plotter = Plotter(self.ui , self.books[str(self.ui.lst_books.currentItem().text())])
+		else:
+			self.plotter = Plotter(self.ui)
 		self.plotter.binding_plotter_with_ui(1)
 
 	def closeEvent(self, event):
 		self.sig_windowClosed.emit()
 
 	
-
-
 #######################################################################
 #######################################################################
 
 class Plotter(FigureCanvas):
-    def __init__(self, parent):
+    def __init__(self, parent , book=[]):
+    	print len(book)
+
         self.parent = proxy(parent)
         
         # data = [random.random() for i in range(10)]
@@ -102,10 +105,10 @@ class Plotter(FigureCanvas):
 
     def binding_plotter_with_ui(self,where):
     	if where == 1:
-        	self.parent.layout1.insertWidget(1, self)
+        	self.parent.layout1.insertWidget(0, self)
         elif where == 2:
-        	self.parent.layout2.insertWidget(1, self)
+        	self.parent.layout2.insertWidget(0, self)
         elif where == 3:
-        	self.parent.layout3.insertWidget(1, self)
+        	self.parent.layout3.insertWidget(0, self)
         elif where == 4:
-        	self.parent.layout4.insertWidget(1, self)
+        	self.parent.layout4.insertWidget(0, self)

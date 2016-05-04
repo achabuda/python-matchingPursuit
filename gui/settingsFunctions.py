@@ -777,8 +777,10 @@ class mainWindow(QtGui.QMainWindow):
     def openVisualizer(self):
         self.flags['visualizerOpened'] = 1
 
-        books = self.getSelectedBooks()
-        self.visWindowHandler = visWindow(books)
+        # books = self.getSelectedBooks()
+        inputs = self.saveBooks('passing')
+
+        self.visWindowHandler = visWindow(inputs)
         self.visWindowHandler.sig_windowClosed.connect(self.closeVisualizer)
 
         self.visWindowHandler.showMaximized()
@@ -788,11 +790,6 @@ class mainWindow(QtGui.QMainWindow):
     def closeVisualizer(self):
         self.flags['visualizerOpened'] = 0
         self.changeButtonsAvailability()
-
-    def getSelectedBooks(self):
-        books = []
-        [books.append( [str(x.text()) , self.books[str(x.text())]]) for x in self.ui.lst_books.selectedItems()]
-        return books
 
     def enableAllWidgets(self , what):
         for led in self.ledFields:
@@ -825,44 +822,55 @@ class mainWindow(QtGui.QMainWindow):
         item = QtGui.QListWidgetItem(nameOfBook)
         self.ui.lst_books.addItem(item)
 
-    def saveBooks(self):
-        warningCollector = ''
+    def saveBooks(self , flag='saving'):
+        '''
+        possible flags - saving , passing
+        '''
 
-        for ind in range(0 , self.ui.lst_books.count()):
-            nameOfBook = str(self.ui.lst_books.item(ind).text())
+        warningCollector = ''
+        if flag == 'passing':
+            inputs = {}
+
+        for item in self.ui.lst_books.selectedItems():
+            nameOfBook = str(item.text())
 
             whereFrom  = nameOfBook.rfind('/')
             whereTo    = nameOfBook.rfind('.')
             whereBOOK  = nameOfBook.rfind('_BOOK')
             tmpName = nameOfBook[whereFrom:whereTo]
 
-            fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save book file' , expanduser('~')+tmpName , 'Python pickle (*.p);;Matlab file (*.mat);;')
-            if len(fileName) == 0:
-                return
-
-            self.displayInformation('Saving book...' , flag='new')
-
             nameOfData = nameOfBook[:whereBOOK] + nameOfBook[whereBOOK+5:]
             data = self.dataMatrixes[str(self.ui.lst_data.findItems(nameOfData , QtCore.Qt.MatchExactly)[0].text())][0]
             book = self.books[nameOfBook][0]
             conf = self.books[nameOfBook][1]
 
-            fileName = str(fileName)
-            if fileName[-2:] == '.p':
-                with open(fileName , 'wb') as f:
-                    dump({'book':book,'config':conf,'originalData':data} , f)
-                    msg = 'ok'
-            elif fileName[-4:] == '.mat':
-                msg = saveBookAsMat(book , data , conf , fileName)
-            
-            if msg != 'ok':
-                warningCollector += msg + 'in' + nameOfBook + '\n'
+            if flag == 'passing':
+                inputs[nameOfBook]= {'book':book,'config':conf,'originalData':data}
+            else:
+                fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save book file' , expanduser('~')+tmpName , 'Python pickle (*.p);;Matlab file (*.mat);;')
+                if len(fileName) == 0:
+                    self.displayInformation('' , 'new')
+                    return
 
-        self.displayInformation('' , 'new')
-        if warningCollector != '':
-            self.warrning('on' , warningCollector)
+                self.displayInformation('Saving book...' , flag='new')
 
+                fileName = str(fileName)
+                if fileName[-2:] == '.p':
+                    with open(fileName , 'wb') as f:
+                        dump({'book':book,'config':conf,'originalData':data} , f)
+                        msg = 'ok'
+                elif fileName[-4:] == '.mat':
+                    msg = saveBookAsMat(book , data , conf , fileName)
+                
+                if msg != 'ok':
+                    warningCollector += msg + 'in' + nameOfBook + '\n'
 
+        if flag == 'passing':
+            return inputs
+        else:
+            self.displayInformation('' , 'new')
+            if warningCollector != '':
+                self.warrning('on' , warningCollector)
 
     def saveConfig(self):
         fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save configuration file' , expanduser('~')+'/config' , 'Python pickle (*.p);;Text file (*.txt);;')
