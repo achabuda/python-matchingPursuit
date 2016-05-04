@@ -155,6 +155,29 @@ class visWindowUI(object):
         settingsControllsSubLayout.addWidget(self.led_trial)
         settingsControllsSubLayout.addWidget(self.btn_trialNext)
         settingsControllsLayout.addLayout(settingsControllsSubLayout)
+
+        self.lbl_atom = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_atom.setObjectName(_fromUtf8("lbl_atom"))
+
+        self.btn_atomPrev = QtGui.QPushButton(self.groupBoxSettings)
+        self.btn_atomPrev.setObjectName(_fromUtf8("btn_atomPrev"))
+
+        self.led_atom = QtGui.QLineEdit(self.groupBoxSettings)
+        self.led_atom.setAlignment(QtCore.Qt.AlignCenter)
+        self.led_atom.setObjectName(_fromUtf8("led_atom"))
+
+        self.btn_atomNext = QtGui.QPushButton(self.groupBoxSettings)
+        self.btn_atomNext.setObjectName(_fromUtf8("btn_atomNext"))
+
+        settingsControllsSubLayout = QtGui.QHBoxLayout()
+        settingsControllsSubLayout.addWidget(self.lbl_atom)
+        settingsControllsSubLayout.addStretch(1)
+        settingsControllsSubLayout.addWidget(self.btn_atomPrev)
+        settingsControllsSubLayout.addWidget(self.led_atom)
+        settingsControllsSubLayout.addWidget(self.btn_atomNext)
+        settingsControllsLayout.addLayout(settingsControllsSubLayout)
+
+
         settingsFiltersLayout.addSpacing(50)
 
         self.lbl_mapFreqRange = QtGui.QLabel(self.groupBoxSettings)
@@ -366,10 +389,13 @@ class visWindowUI(object):
         self.btn_trialPrev.setText(_translate("visWindow", "<", None))
         self.btn_channelNext.setText(_translate("visWindow", ">", None))
         self.btn_channelPrev.setText(_translate("visWindow", "<", None))
+        self.btn_atomNext.setText(_translate("visWindow", ">", None))
+        self.btn_atomPrev.setText(_translate("visWindow", "<", None))
         self.btn_apply.setText(_translate("visWindow", "Apply", None))
 
         self.lbl_trial.setText(_translate("visWindow", "Trial:", None))
         self.lbl_channel.setText(_translate("visWindow", "Channel:", None))
+        self.lbl_atom.setText(_translate("visWindow", "Atom:", None))
         self.lbl_mapFreqRange.setText(_translate("visWindow", "Map frequency range", None))
         self.lbl_mapFreqRangeMin.setText(_translate("visWindow", "Lower limit [Hz]:", None))
         self.lbl_mapFreqRangeMinN.setText(_translate("visWindow", "xx", None))
