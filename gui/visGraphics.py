@@ -458,7 +458,7 @@ class visWindowUI(object):
         self.groupBoxSettings.setTitle(_translate("visWindow"  , "Settings", None))
         # self.groupBoxSubControlls.setTitle(_translate("visWindow"  , "", None))
 
-        self.btn_saveDecomp.setText(_translate("visWindow", "Save", None))
+        self.btn_saveDecomp.setText(_translate("visWindow", "Save Picture", None))
         self.btn_saveAmplitude.setText(_translate("visWindow", "Save", None))
         self.btn_saveWigner.setText(_translate("visWindow", "Save", None))
         self.btn_saveTopography.setText(_translate("visWindow", "Save", None))

@@ -67,50 +67,211 @@ class visWindow(QtGui.QMainWindow):
 			self.ui.lst_books.setCurrentRow(0)
 
 			self.setWidgetsState(0)
+			self.setConnections()
 
-			self.plotter = Plotter(self.ui , self.books[str(self.ui.lst_books.currentItem().text())])
+			self.decompositionPlot = PlotterDecomposition(self.ui , self.books[str(self.ui.lst_books.currentItem().text())])
 		else:
-			self.plotter = Plotter(self.ui)
-		self.plotter.binding_plotter_with_ui(1)
+			self.decompositionPlot = PlotterDecomposition(self.ui)
+		self.decompositionPlot.binding_plotter_with_ui(1)
+
+	def setConnections(self):
+		self.ui.btn_atomNext.clicked.connect(self.nextAtom)
+		self.ui.btn_atomPrev.clicked.connect(self.prevAtom)
+		self.ui.btn_trialNext.clicked.connect(self.nextTrial)
+		self.ui.btn_trialPrev.clicked.connect(self.prevTrial)
+		self.ui.btn_channelNext.clicked.connect(self.nextChannel)
+		self.ui.btn_channelPrev.clicked.connect(self.prevChannel)
+
+		self.ui.btn_add.clicked.connect(self.addBooks)
 
 	def setWidgetsState(self , flag=0):
 		if flag == 0:
-			self.trial   = 0
-			self.channel = 0
-			self.atom    = 0
+			self.trial     = 0
+			self.channel   = 0
+			self.atom      = 0
+			self.whichBook = 0
 
-			self.ui.led_trial.setText(str(self.trial+1))
-			self.ui.led_channel.setText(str(self.channel+1))
-			self.ui.led_atom.setText(str(self.atom+1))
+		self.ui.led_trial.setText(str(self.trial+1))
+		self.ui.led_channel.setText(str(self.channel+1))
+		self.ui.led_atom.setText(str(self.atom+1))
 
-			self.ui.led_atomWidth.setText(str(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['width'][self.atom]))
-			self.ui.led_atomFrequency.setText(str(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['freq'][self.atom]))
-			self.ui.led_atomAmplitude.setText(str(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['amplitude'][self.atom]))
-			
-			# print self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel].columns
+		self.ui.led_atomWidth.setText(str(self.books[self.ui.lst_books.item(self.whichBook).text()]['book'][self.trial,self.channel]['width'][self.atom]))
+		self.ui.led_atomFrequency.setText(str(self.books[self.ui.lst_books.item(self.whichBook).text()]['book'][self.trial,self.channel]['freq'][self.atom]))
+		self.ui.led_atomAmplitude.setText(str(self.books[self.ui.lst_books.item(self.whichBook).text()]['book'][self.trial,self.channel]['amplitude'][self.atom]))
 
-			envelope  = self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['envelope'][self.atom]
-			whereMax  = np.argmax(envelope)
-			threshold = 0.5
-			where     =  np.where(envelope > threshold * envelope.max())[0] / self.books[self.ui.lst_books.item(0).text()]['config']['samplingFrequency']
+		envelope  = self.books[self.ui.lst_books.item(self.whichBook).text()]['book'][self.trial,self.channel]['envelope'][self.atom]
+		whereMax  = np.argmax(envelope)
+		threshold = 0.5
+		where     =  np.where(envelope > threshold * envelope.max())[0] / self.books[self.ui.lst_books.item(0).text()]['config']['samplingFrequency']
 
-			self.ui.led_atomStart.setText(str(where[0]))
-			self.ui.led_atomEnd.setText(str(where[-1]))
+		self.ui.led_atomStart.setText(str(where[0]))
+		self.ui.led_atomEnd.setText(str(where[-1]))
 
-			self.ui.led_atomLatency.setText( str(whereMax / self.books[self.ui.lst_books.item(0).text()]['config']['samplingFrequency']) )
+		self.ui.led_atomLatency.setText( str(whereMax / self.books[self.ui.lst_books.item(self.whichBook).text()]['config']['samplingFrequency']) )
+
+		self.changeButtonsState()
+
+	def changeButtonsState(self):
+		(maxTrial,maxChannel) = self.books[self.ui.lst_books.item(self.whichBook).text()]['book'].shape
+		maxAtom               = self.books[self.ui.lst_books.item(self.whichBook).text()]['book'][self.trial,self.channel]['envelope'].shape[0]
+
+		if self.atom == 0:
+			self.ui.btn_atomPrev.setEnabled(False)
+		else:
+			self.ui.btn_atomPrev.setEnabled(True)
+
+		if self.trial == 0:
+			self.ui.btn_trialPrev.setEnabled(False)
+		else:
+			self.ui.btn_trialPrev.setEnabled(True)
+
+		if self.channel == 0:
+			self.ui.btn_channelPrev.setEnabled(False)
+		else:
+			self.ui.btn_channelPrev.setEnabled(True)
+
+
+		if self.atom+1 == maxAtom:
+			self.ui.btn_atomNext.setEnabled(False)
+		else:
+			self.ui.btn_atomNext.setEnabled(True)
+		
+		if self.channel+1 == maxChannel:
+			self.ui.btn_channelNext.setEnabled(False)
+		else:
+			self.ui.btn_channelNext.setEnabled(True)
+
+		if self.trial+1 == maxTrial:
+			self.ui.btn_trialNext.setEnabled(False)
+		else:
+			self.ui.btn_trialNext.setEnabled(True)
+
 
 	def closeEvent(self, event):
 		self.sig_windowClosed.emit()
+
+	def nextAtom(self):
+		self.atom += 1
+		self.setWidgetsState(1)
+		func = np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'][self.atom].real)
+		(y_fromWhere,y_toWhere) = self.decompositionPlot.ax1.get_ylim()
+		(x_fromWhere,x_toWhere) = self.decompositionPlot.ax1.get_xlim()
+		self.decompositionPlot.ax3.plot(func , 'k')
+		self.decompositionPlot.ax3.set_xlim([x_fromWhere , x_toWhere])
+		self.decompositionPlot.ax3.set_ylim([y_fromWhere , y_toWhere])
+		self.decompositionPlot.draw()
+
+	def prevAtom(self):
+		self.atom -= 1
+		self.setWidgetsState(1)
+
+		func = np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'][self.atom].real)
+		(y_fromWhere,y_toWhere) = self.decompositionPlot.ax1.get_ylim()
+		(x_fromWhere,x_toWhere) = self.decompositionPlot.ax1.get_xlim()
+
+		self.decompositionPlot.ax3.plot(func , 'k')
+		self.decompositionPlot.ax3.set_xlim([x_fromWhere , x_toWhere])
+		self.decompositionPlot.ax3.set_ylim([y_fromWhere , y_toWhere])
+
+		self.decompositionPlot.draw()
+
+	def nextChannel(self):
+		self.channel += 1
+		self.atom     = 0
+		self.setWidgetsState(1)
+
+		self.decompositionPlot.ax1.plot(np.squeeze(self.books[self.ui.lst_books.item(0).text()]['originalData'][self.trial,self.channel,:]) , 'k')
+		x_fromWhere = 0
+		x_toWhere   = self.books[self.ui.lst_books.item(0).text()]['originalData'].shape[2]
+		self.decompositionPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
+		(y_fromWhere,y_toWhere) = self.decompositionPlot.ax1.get_ylim()
+
+		self.decompositionPlot.ax2.plot(np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'].sum()).real , 'k')
+		self.decompositionPlot.ax2.set_xlim([x_fromWhere , x_toWhere])
+		self.decompositionPlot.ax2.set_ylim([y_fromWhere , y_toWhere])
+
+		func = np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'][self.atom].real)
+		self.decompositionPlot.ax3.plot(func , 'k')
+		self.decompositionPlot.ax3.set_xlim([x_fromWhere , x_toWhere])
+		self.decompositionPlot.ax3.set_ylim([y_fromWhere , y_toWhere])
+		self.decompositionPlot.draw()
+
+	def prevChannel(self):
+		self.channel -= 1
+		self.atom     = 0
+		self.setWidgetsState(1)
+
+		self.decompositionPlot.ax1.plot(np.squeeze(self.books[self.ui.lst_books.item(0).text()]['originalData'][self.trial,self.channel,:]) , 'k')
+		x_fromWhere = 0
+		x_toWhere   = self.books[self.ui.lst_books.item(0).text()]['originalData'].shape[2]
+		self.decompositionPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
+		(y_fromWhere,y_toWhere) = self.decompositionPlot.ax1.get_ylim()
+
+		self.decompositionPlot.ax2.plot(np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'].sum()).real , 'k')
+		self.decompositionPlot.ax2.set_xlim([x_fromWhere , x_toWhere])
+		self.decompositionPlot.ax2.set_ylim([y_fromWhere , y_toWhere])
+
+		func = np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'][self.atom].real)
+		self.decompositionPlot.ax3.plot(func , 'k')
+		self.decompositionPlot.ax3.set_xlim([x_fromWhere , x_toWhere])
+		self.decompositionPlot.ax3.set_ylim([y_fromWhere , y_toWhere])
+		self.decompositionPlot.draw()
+
+	def nextTrial(self):
+		self.trial += 1
+		self.atom   = 0
+		self.setWidgetsState(1)
+
+		self.decompositionPlot.ax1.plot(np.squeeze(self.books[self.ui.lst_books.item(0).text()]['originalData'][self.trial,self.channel,:]) , 'k')
+		x_fromWhere = 0
+		x_toWhere   = self.books[self.ui.lst_books.item(0).text()]['originalData'].shape[2]
+		self.decompositionPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
+		(y_fromWhere,y_toWhere) = self.decompositionPlot.ax1.get_ylim()
+
+		self.decompositionPlot.ax2.plot(np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'].sum()).real , 'k')
+		self.decompositionPlot.ax2.set_xlim([x_fromWhere , x_toWhere])
+		self.decompositionPlot.ax2.set_ylim([y_fromWhere , y_toWhere])
+
+		func = np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'][self.atom].real)
+		self.decompositionPlot.ax3.plot(func , 'k')
+		self.decompositionPlot.ax3.set_xlim([x_fromWhere , x_toWhere])
+		self.decompositionPlot.ax3.set_ylim([y_fromWhere , y_toWhere])
+		self.decompositionPlot.draw()
+
+	def prevTrial(self):
+		self.trial -= 1
+		self.atom   = 0
+		self.setWidgetsState(1)
+
+		self.decompositionPlot.ax1.plot(np.squeeze(self.books[self.ui.lst_books.item(0).text()]['originalData'][self.trial,self.channel,:]) , 'k')
+		x_fromWhere = 0
+		x_toWhere   = self.books[self.ui.lst_books.item(0).text()]['originalData'].shape[2]
+		self.decompositionPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
+		(y_fromWhere,y_toWhere) = self.decompositionPlot.ax1.get_ylim()
+
+		self.decompositionPlot.ax2.plot(np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'].sum()).real , 'k')
+		self.decompositionPlot.ax2.set_xlim([x_fromWhere , x_toWhere])
+		self.decompositionPlot.ax2.set_ylim([y_fromWhere , y_toWhere])
+
+		func = np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'][self.atom].real)
+		self.decompositionPlot.ax3.plot(func , 'k')
+		self.decompositionPlot.ax3.set_xlim([x_fromWhere , x_toWhere])
+		self.decompositionPlot.ax3.set_ylim([y_fromWhere , y_toWhere])
+		self.decompositionPlot.draw()
+
+	def addBooks(self):
+		pass
+
 
 	
 #######################################################################
 #######################################################################
 
-class Plotter(FigureCanvas):
+class PlotterDecomposition(FigureCanvas):
     def __init__(self, parent , book=[] , which=[0,0,0]):
 		self.parent = proxy(parent)
 		fig = Figure()
-		super(Plotter,self).__init__(fig)
+		super(PlotterDecomposition,self).__init__(fig)
 
 		FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
 		FigureCanvas.updateGeometry(self)
@@ -119,27 +280,27 @@ class Plotter(FigureCanvas):
 			x_fromWhere = 0
 			x_toWhere   = book['originalData'].shape[2]
 
-			axes = fig.add_subplot(311)
-			axes.hold(False)
-			axes.plot(np.squeeze(book['originalData'][which[0],which[1],:]) , 'k')
-			axes.set_title('Original signal')
-			axes.set_xlim([x_fromWhere , x_toWhere])
+			self.ax1 = fig.add_subplot(311)
+			self.ax1.hold(False)
+			self.ax1.plot(np.squeeze(book['originalData'][which[0],which[1],:]) , 'k')
+			self.ax1.set_title('Original signal')
+			self.ax1.set_xlim([x_fromWhere , x_toWhere])
 
-			(y_fromWhere,y_toWhere) = axes.get_ylim()
+			(y_fromWhere,y_toWhere) = self.ax1.get_ylim()
 
-			axes = fig.add_subplot(312)
-			axes.hold(False)
-			axes.plot(np.squeeze(book['book'][which[0],which[1]]['reconstruction'].sum()).real , 'k')
-			axes.set_title('Reconstruction')
-			axes.set_xlim([x_fromWhere , x_toWhere])
-			axes.set_ylim([y_fromWhere , y_toWhere])
+			self.ax2 = fig.add_subplot(312)
+			self.ax2.hold(False)
+			self.ax2.plot(np.squeeze(book['book'][which[0],which[1]]['reconstruction'].sum()).real , 'k')
+			self.ax2.set_title('Reconstruction')
+			self.ax2.set_xlim([x_fromWhere , x_toWhere])
+			self.ax2.set_ylim([y_fromWhere , y_toWhere])
 
-			axes = fig.add_subplot(313)
-			axes.hold(False)
-			axes.plot(np.squeeze(book['book'][which[0],which[1]]['reconstruction'][which[2]].real) , 'k')
-			axes.set_title('Single function')
-			axes.set_xlim([x_fromWhere , x_toWhere])
-			axes.set_ylim([y_fromWhere , y_toWhere])
+			self.ax3 = fig.add_subplot(313)
+			self.ax3.hold(False)
+			self.ax3.plot(np.squeeze(book['book'][which[0],which[1]]['reconstruction'][which[2]].real) , 'k')
+			self.ax3.set_title('Single function')
+			self.ax3.set_xlim([x_fromWhere , x_toWhere])
+			self.ax3.set_ylim([y_fromWhere , y_toWhere])
 
 
     def binding_plotter_with_ui(self,where):

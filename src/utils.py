@@ -136,8 +136,8 @@ def determineDictionaryConfig(dictionaryConfig , energyLimit , dataInfo):
 	if dictionaryConfig == {}:
 		dictionaryConfig['useAsym']      = 0
 		dictionaryConfig['useRect']      = 0
-		dictionaryConfig['minS_samples'] = int((dataInfo['numberOfSeconds']/8)*dataInfo['samplingFreq'])
-		dictionaryConfig['minS_seconds'] = float(dataInfo['numberOfSeconds']/8)
+		dictionaryConfig['minS_samples'] = int((dataInfo['numberOfSeconds']/16)*dataInfo['samplingFreq'])
+		dictionaryConfig['minS_seconds'] = float(dataInfo['numberOfSeconds']/16)
 		dictionaryConfig['maxS_samples'] = int(dataInfo['numberOfSamples'])
 		dictionaryConfig['maxS_seconds'] = float(dataInfo['numberOfSeconds'])
 		dictionaryConfig['dictionaryDensity'] = density
@@ -147,8 +147,8 @@ def determineDictionaryConfig(dictionaryConfig , energyLimit , dataInfo):
 			dictionaryConfig['maxS_seconds'] = float(dataInfo['numberOfSamples'] / dataInfo['samplingFreq'])
 
 		if (dataInfo['numberOfSeconds']/8)*dataInfo['samplingFreq'] < dictionaryConfig['minS_samples']:
-			dictionaryConfig['minS_samples'] = int((dataInfo['numberOfSeconds']/8)*dataInfo['samplingFreq'])
-			dictionaryConfig['minS_seconds'] = float(dataInfo['numberOfSeconds']/8)
+			dictionaryConfig['minS_samples'] = int((dataInfo['numberOfSeconds']/16)*dataInfo['samplingFreq'])
+			dictionaryConfig['minS_seconds'] = float(dataInfo['numberOfSeconds']/16)
 		
 		if dictionaryConfig['dictionaryDensity'] > density:
 			dictionaryConfig['dictionaryDensity'] = density
