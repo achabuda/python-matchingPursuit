@@ -21,7 +21,6 @@ author: Tomasz Spustek
 e-mail: tomasz@spustek.pl
 University of Warsaw, July 06, 2015
 '''
-import numpy as np
 
 import matplotlib
 matplotlib.use('Qt4Agg')
@@ -45,14 +44,13 @@ import pandas    as pd
 # gui imports #
 from visGraphics import visWindowUI
 
-# modules imports #
-from src.utils      import generateRangeFromString, generateFinalConfig , retranslateDictionaryConfig
-from src.dictionary import generateDictionary
-from src.processing import calculateMP
+# # modules imports #
+# from src.utils      import generateRangeFromString, generateFinalConfig , retranslateDictionaryConfig
+# from src.dictionary import generateDictionary
+# from src.processing import calculateMP
 
 class visWindow(QtGui.QMainWindow):
 	sig_windowClosed   = QtCore.Signal()
-	# sig_windowClosed   = QtCore.pyqtSignal()
 
 	def __init__(self , inputs=[] , parent=None):
 		QtGui.QMainWindow.__init__(self, parent)
