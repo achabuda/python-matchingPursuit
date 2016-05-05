@@ -65,14 +65,14 @@ class visWindow(QtGui.QMainWindow):
 				self.books[item] = inputs[item]
 			self.ui.lst_books.setCurrentRow(0)
 
-			self.setWidgetsState(0)
-
 			self.decompositionPlot = PlotterDecomposition(self.ui , self.books[str(self.ui.lst_books.currentItem().text())])
+			self.setWidgetsState(0)
 		else:
 			self.decompositionPlot = PlotterDecomposition(self.ui)
 		
 		self.decompositionPlot.binding_plotter_with_ui(1)
 		self.setConnections()
+
 	def setConnections(self):
 		self.ui.btn_atomNext.clicked.connect(self.nextAtom)
 		self.ui.btn_atomPrev.clicked.connect(self.prevAtom)
@@ -89,6 +89,7 @@ class visWindow(QtGui.QMainWindow):
 			self.channel   = 0
 			self.atom      = 0
 			self.whichBook = 0
+			self.ui.lst_books.setCurrentRow(self.whichBook)
 
 		self.ui.led_trial.setText(str(self.trial+1))
 		self.ui.led_channel.setText(str(self.channel+1))
@@ -109,6 +110,7 @@ class visWindow(QtGui.QMainWindow):
 		self.ui.led_atomLatency.setText( str(whereMax / self.books[self.ui.lst_books.item(self.whichBook).text()]['config']['samplingFrequency']) )
 
 		self.changeButtonsState()
+		self.replot()
 
 	def changeButtonsState(self):
 		(maxTrial,maxChannel) = self.books[self.ui.lst_books.item(self.whichBook).text()]['book'].shape
@@ -152,107 +154,43 @@ class visWindow(QtGui.QMainWindow):
 	def nextAtom(self):
 		self.atom += 1
 		self.setWidgetsState(1)
-		func = np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'][self.atom].real)
-		(y_fromWhere,y_toWhere) = self.decompositionPlot.ax1.get_ylim()
-		(x_fromWhere,x_toWhere) = self.decompositionPlot.ax1.get_xlim()
-		self.decompositionPlot.ax3.plot(func , 'k')
-		self.decompositionPlot.ax3.set_xlim([x_fromWhere , x_toWhere])
-		self.decompositionPlot.ax3.set_ylim([y_fromWhere , y_toWhere])
-		self.decompositionPlot.draw()
 
 	def prevAtom(self):
 		self.atom -= 1
 		self.setWidgetsState(1)
-
-		func = np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'][self.atom].real)
-		(y_fromWhere,y_toWhere) = self.decompositionPlot.ax1.get_ylim()
-		(x_fromWhere,x_toWhere) = self.decompositionPlot.ax1.get_xlim()
-
-		self.decompositionPlot.ax3.plot(func , 'k')
-		self.decompositionPlot.ax3.set_xlim([x_fromWhere , x_toWhere])
-		self.decompositionPlot.ax3.set_ylim([y_fromWhere , y_toWhere])
-
-		self.decompositionPlot.draw()
 
 	def nextChannel(self):
 		self.channel += 1
 		self.atom     = 0
 		self.setWidgetsState(1)
 
-		self.decompositionPlot.ax1.plot(np.squeeze(self.books[self.ui.lst_books.item(0).text()]['originalData'][self.trial,self.channel,:]) , 'k')
-		x_fromWhere = 0
-		x_toWhere   = self.books[self.ui.lst_books.item(0).text()]['originalData'].shape[2]
-		self.decompositionPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
-		(y_fromWhere,y_toWhere) = self.decompositionPlot.ax1.get_ylim()
-
-		self.decompositionPlot.ax2.plot(np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'].sum()).real , 'k')
-		self.decompositionPlot.ax2.set_xlim([x_fromWhere , x_toWhere])
-		self.decompositionPlot.ax2.set_ylim([y_fromWhere , y_toWhere])
-
-		func = np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'][self.atom].real)
-		self.decompositionPlot.ax3.plot(func , 'k')
-		self.decompositionPlot.ax3.set_xlim([x_fromWhere , x_toWhere])
-		self.decompositionPlot.ax3.set_ylim([y_fromWhere , y_toWhere])
-		self.decompositionPlot.draw()
-
 	def prevChannel(self):
 		self.channel -= 1
 		self.atom     = 0
 		self.setWidgetsState(1)
-
-		self.decompositionPlot.ax1.plot(np.squeeze(self.books[self.ui.lst_books.item(0).text()]['originalData'][self.trial,self.channel,:]) , 'k')
-		x_fromWhere = 0
-		x_toWhere   = self.books[self.ui.lst_books.item(0).text()]['originalData'].shape[2]
-		self.decompositionPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
-		(y_fromWhere,y_toWhere) = self.decompositionPlot.ax1.get_ylim()
-
-		self.decompositionPlot.ax2.plot(np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'].sum()).real , 'k')
-		self.decompositionPlot.ax2.set_xlim([x_fromWhere , x_toWhere])
-		self.decompositionPlot.ax2.set_ylim([y_fromWhere , y_toWhere])
-
-		func = np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'][self.atom].real)
-		self.decompositionPlot.ax3.plot(func , 'k')
-		self.decompositionPlot.ax3.set_xlim([x_fromWhere , x_toWhere])
-		self.decompositionPlot.ax3.set_ylim([y_fromWhere , y_toWhere])
-		self.decompositionPlot.draw()
 
 	def nextTrial(self):
 		self.trial += 1
 		self.atom   = 0
 		self.setWidgetsState(1)
 
-		self.decompositionPlot.ax1.plot(np.squeeze(self.books[self.ui.lst_books.item(0).text()]['originalData'][self.trial,self.channel,:]) , 'k')
-		x_fromWhere = 0
-		x_toWhere   = self.books[self.ui.lst_books.item(0).text()]['originalData'].shape[2]
-		self.decompositionPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
-		(y_fromWhere,y_toWhere) = self.decompositionPlot.ax1.get_ylim()
-
-		self.decompositionPlot.ax2.plot(np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'].sum()).real , 'k')
-		self.decompositionPlot.ax2.set_xlim([x_fromWhere , x_toWhere])
-		self.decompositionPlot.ax2.set_ylim([y_fromWhere , y_toWhere])
-
-		func = np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'][self.atom].real)
-		self.decompositionPlot.ax3.plot(func , 'k')
-		self.decompositionPlot.ax3.set_xlim([x_fromWhere , x_toWhere])
-		self.decompositionPlot.ax3.set_ylim([y_fromWhere , y_toWhere])
-		self.decompositionPlot.draw()
-
 	def prevTrial(self):
 		self.trial -= 1
 		self.atom   = 0
 		self.setWidgetsState(1)
 
-		self.decompositionPlot.ax1.plot(np.squeeze(self.books[self.ui.lst_books.item(0).text()]['originalData'][self.trial,self.channel,:]) , 'k')
+	def replot(self):
+		self.decompositionPlot.ax1.plot(np.squeeze(self.books[self.ui.lst_books.item(self.whichBook).text()]['originalData'][self.trial,self.channel,:]) , 'k')
 		x_fromWhere = 0
-		x_toWhere   = self.books[self.ui.lst_books.item(0).text()]['originalData'].shape[2]
+		x_toWhere   = self.books[self.ui.lst_books.item(self.whichBook).text()]['originalData'].shape[2]
 		self.decompositionPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
 		(y_fromWhere,y_toWhere) = self.decompositionPlot.ax1.get_ylim()
 
-		self.decompositionPlot.ax2.plot(np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'].sum()).real , 'k')
+		self.decompositionPlot.ax2.plot(np.squeeze(self.books[self.ui.lst_books.item(self.whichBook).text()]['book'][self.trial,self.channel]['reconstruction'].sum()).real , 'k')
 		self.decompositionPlot.ax2.set_xlim([x_fromWhere , x_toWhere])
 		self.decompositionPlot.ax2.set_ylim([y_fromWhere , y_toWhere])
 
-		func = np.squeeze(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['reconstruction'][self.atom].real)
+		func = np.squeeze(self.books[self.ui.lst_books.item(self.whichBook).text()]['book'][self.trial,self.channel]['reconstruction'][self.atom].real)
 		self.decompositionPlot.ax3.plot(func , 'k')
 		self.decompositionPlot.ax3.set_xlim([x_fromWhere , x_toWhere])
 		self.decompositionPlot.ax3.set_ylim([y_fromWhere , y_toWhere])
@@ -279,10 +217,7 @@ class visWindow(QtGui.QMainWindow):
 			else:
 				return
 
-		self.ui.lst_books.setCurrentRow(0)
 		self.setWidgetsState(0)
-
-
 	
 #######################################################################
 #######################################################################
