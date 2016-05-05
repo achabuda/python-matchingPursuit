@@ -66,15 +66,38 @@ class visWindow(QtGui.QMainWindow):
 				self.books[item] = inputs[item]
 			self.ui.lst_books.setCurrentRow(0)
 
+			self.setWidgetsState(0)
+
 			self.plotter = Plotter(self.ui , self.books[str(self.ui.lst_books.currentItem().text())])
 		else:
 			self.plotter = Plotter(self.ui)
 		self.plotter.binding_plotter_with_ui(1)
 
-		if inputs != []:
-			self.ui.led_trial.setText('1')
-			self.ui.led_channel.setText('1')
-			self.ui.led_atom.setText('1')
+	def setWidgetsState(self , flag=0):
+		if flag == 0:
+			self.trial   = 0
+			self.channel = 0
+			self.atom    = 0
+
+			self.ui.led_trial.setText(str(self.trial+1))
+			self.ui.led_channel.setText(str(self.channel+1))
+			self.ui.led_atom.setText(str(self.atom+1))
+
+			self.ui.led_atomWidth.setText(str(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['width'][self.atom]))
+			self.ui.led_atomFrequency.setText(str(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['freq'][self.atom]))
+			self.ui.led_atomAmplitude.setText(str(self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['amplitude'][self.atom]))
+			
+			# print self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel].columns
+
+			envelope  = self.books[self.ui.lst_books.item(0).text()]['book'][self.trial,self.channel]['envelope'][self.atom]
+			whereMax  = np.argmax(envelope)
+			threshold = 0.5
+			where     =  np.where(envelope > threshold * envelope.max())[0] / self.books[self.ui.lst_books.item(0).text()]['config']['samplingFrequency']
+
+			self.ui.led_atomStart.setText(str(where[0]))
+			self.ui.led_atomEnd.setText(str(where[-1]))
+
+			self.ui.led_atomLatency.setText( str(whereMax / self.books[self.ui.lst_books.item(0).text()]['config']['samplingFrequency']) )
 
 	def closeEvent(self, event):
 		self.sig_windowClosed.emit()

@@ -163,11 +163,9 @@ class visWindowUI(object):
         self.statusLayout.addWidget(self.lbl_atomEnd,2,2)
         self.statusLayout.addWidget(self.led_atomEnd,2,3)
 
+        self.statusLayout.setColumnStretch(4,1)
+
         self.groupBoxStatus.setLayout(self.statusLayout)
-
-
-
-
 
 # GROUPBOX BOOKS:
         booksLayout = QtGui.QVBoxLayout()
