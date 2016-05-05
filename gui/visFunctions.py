@@ -31,15 +31,14 @@ from matplotlib.backends.backend_qt4agg import (
 from matplotlib.figure import Figure
 
 from PySide import QtGui, QtCore
-# from PyQt4 import QtCore, QtGui
-
-import random
 
 from weakref import proxy
 
 # libraries imports #
 import numpy     as np
 import pandas    as pd
+import pickle
+from os.path   import expanduser
 
 # gui imports #
 from visGraphics import visWindowUI
@@ -67,13 +66,13 @@ class visWindow(QtGui.QMainWindow):
 			self.ui.lst_books.setCurrentRow(0)
 
 			self.setWidgetsState(0)
-			self.setConnections()
 
 			self.decompositionPlot = PlotterDecomposition(self.ui , self.books[str(self.ui.lst_books.currentItem().text())])
 		else:
 			self.decompositionPlot = PlotterDecomposition(self.ui)
+		
 		self.decompositionPlot.binding_plotter_with_ui(1)
-
+		self.setConnections()
 	def setConnections(self):
 		self.ui.btn_atomNext.clicked.connect(self.nextAtom)
 		self.ui.btn_atomPrev.clicked.connect(self.prevAtom)
@@ -260,7 +259,28 @@ class visWindow(QtGui.QMainWindow):
 		self.decompositionPlot.draw()
 
 	def addBooks(self):
-		pass
+		dialog = QtGui.QFileDialog.getOpenFileNames(self , 'Open book files' , expanduser('~') , 'Python pickles (*.p)')
+		if len(dialog) == 0:
+			return
+
+		for filePath in dialog[0]:
+			if filePath != '':
+				if self.ui.lst_books.findItems(str(filePath) , QtCore.Qt.MatchExactly) != []:
+					continue
+
+				if filePath[-2:] == '.p':
+					with open(filePath,'rb') as f:
+						result = pickle.load(f)
+					self.books[str(filePath)] = result
+					self.ui.lst_books.addItem(str(filePath))
+				else:
+					pass
+
+			else:
+				return
+
+		self.ui.lst_books.setCurrentRow(0)
+		self.setWidgetsState(0)
 
 
 	

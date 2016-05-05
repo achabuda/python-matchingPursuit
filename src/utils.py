@@ -35,8 +35,6 @@ def saveBookAsMat(book , data , config , nameOfFile):
 	for indTrial in np.arange(data.shape[0]):
 		for indChannel in np.arange(data.shape[1]):
 	 		partialBook = book[indTrial,indChannel]
-
-	 		print partialBook
 	 		
 	 		nameOfStruct = 'trial_' + str(indTrial) + 'channel_' + str(indChannel)
 			
