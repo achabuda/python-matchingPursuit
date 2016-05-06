@@ -83,6 +83,8 @@ class visWindow(QtGui.QMainWindow):
 
 		self.ui.btn_add.clicked.connect(self.addBooks)
 
+		self.ui.lst_books.currentItemChanged.connect(self.selectBook)
+
 	def setWidgetsState(self , flag=0):
 		if flag == 0:
 			self.trial     = 0
@@ -150,6 +152,16 @@ class visWindow(QtGui.QMainWindow):
 
 	def closeEvent(self, event):
 		self.sig_windowClosed.emit()
+
+	def selectBook(self):
+		# self.filePath = str(self.ui.lst_data.currentItem().text())
+		self.whichBook = self.ui.lst_books.currentRow()
+		self.atom    = 1
+		self.channel = 1
+		self.trial   = 1
+		self.setWidgetsState(1)
+		self.changeButtonsState()
+
 
 	def nextAtom(self):
 		self.atom += 1
