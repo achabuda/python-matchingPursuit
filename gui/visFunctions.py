@@ -80,6 +80,11 @@ class visWindow(QtGui.QMainWindow):
 		self.atom      = 0
 		self.whichBook = 0
 
+		self.atomTypes = {}
+		self.atomTypes['11'] = 'Gabor function'
+		self.atomTypes['21'] = 'Asymetric function'
+		self.atomTypes['32'] = 'Tukey-based function'
+
 		self.channelsCalculated = self.books[self.ui.lst_books.item(self.whichBook).text()]['config']['channels2calc']
 		self.trialsCalculated   = self.books[self.ui.lst_books.item(self.whichBook).text()]['config']['trials2calc']
 
@@ -97,11 +102,9 @@ class visWindow(QtGui.QMainWindow):
 
 	def setWidgetsState(self , flag=0):
 		if flag == 0:
-			# self.trial     = 0
-			# self.channel   = 0
-			# self.atom      = 0
-			# self.whichBook = 0
 			self.ui.lst_books.setCurrentRow(self.whichBook)
+
+		self.ui.led_atomType.setText( self.atomTypes[str( self.books[self.ui.lst_books.item(self.whichBook).text()]['book'][self.trial,self.channel]['shapeType'][self.atom]) ])
 
 		self.ui.led_trial.setText(str(self.trialsCalculated[self.trial]))
 		self.ui.led_channel.setText(str(self.channelsCalculated[self.channel]))

@@ -91,79 +91,88 @@ class visWindowUI(object):
 # GROUPBOX STATUS:
         self.statusLayout = QtGui.QGridLayout()
 
+        self.lbl_atomType = QtGui.QLabel()
+        self.lbl_atomType.setObjectName(_fromUtf8("lbl_atomType"))
+
+        self.led_atomType = QtGui.QLineEdit()
+        self.led_atomType.setObjectName(_fromUtf8("led_atomType"))
+        self.led_atomType.setReadOnly(True)
+        self.led_atomType.setAlignment(QtCore.Qt.AlignCenter)
+        self.led_atomType.setStyleSheet("font: bold;")
+
         self.lbl_atomAmplitude = QtGui.QLabel()
         self.lbl_atomAmplitude.setObjectName(_fromUtf8("lbl_atomAmplitude"))
 
         self.led_atomAmplitude = QtGui.QLineEdit()
         self.led_atomAmplitude.setObjectName(_fromUtf8("led_atomAmplitude"))
-        self.led_atomAmplitude.setEnabled(False)
+        self.led_atomAmplitude.setReadOnly(True)
         self.led_atomAmplitude.setAlignment(QtCore.Qt.AlignCenter)
-
+        self.led_atomAmplitude.setStyleSheet("font: bold;")
 
         self.lbl_atomWidth = QtGui.QLabel()
         self.lbl_atomWidth.setObjectName(_fromUtf8("lbl_atomWidth"))
 
         self.led_atomWidth = QtGui.QLineEdit()
         self.led_atomWidth.setObjectName(_fromUtf8("led_atomWidth"))
-        self.led_atomWidth.setEnabled(False)
+        self.led_atomWidth.setReadOnly(True)
         self.led_atomWidth.setAlignment(QtCore.Qt.AlignCenter)
-
-
+        self.led_atomWidth.setStyleSheet("font: bold;")
 
         self.lbl_atomFrequency = QtGui.QLabel()
         self.lbl_atomFrequency.setObjectName(_fromUtf8("lbl_atomFrequency"))
 
         self.led_atomFrequency = QtGui.QLineEdit()
         self.led_atomFrequency.setObjectName(_fromUtf8("led_atomFrequency"))
-        self.led_atomFrequency.setEnabled(False)
+        self.led_atomFrequency.setReadOnly(True)
         self.led_atomFrequency.setAlignment(QtCore.Qt.AlignCenter)
-
-
+        self.led_atomFrequency.setStyleSheet("font: bold;")
 
         self.lbl_atomLatency = QtGui.QLabel()
         self.lbl_atomLatency.setObjectName(_fromUtf8("lbl_atomLatency"))
 
         self.led_atomLatency = QtGui.QLineEdit()
         self.led_atomLatency.setObjectName(_fromUtf8("led_atomLatency"))
-        self.led_atomLatency.setEnabled(False)
+        self.led_atomLatency.setReadOnly(True)
         self.led_atomLatency.setAlignment(QtCore.Qt.AlignCenter)
-
-
-
+        self.led_atomLatency.setStyleSheet("font: bold;")
 
         self.lbl_atomStart = QtGui.QLabel()
         self.lbl_atomStart.setObjectName(_fromUtf8("lbl_atomStart"))
 
         self.led_atomStart = QtGui.QLineEdit()
         self.led_atomStart.setObjectName(_fromUtf8("led_atomStart"))
-        self.led_atomStart.setEnabled(False)
+        self.led_atomStart.setReadOnly(True)
         self.led_atomStart.setAlignment(QtCore.Qt.AlignCenter)
-
-
+        self.led_atomStart.setStyleSheet("font: bold;")
 
         self.lbl_atomEnd = QtGui.QLabel()
         self.lbl_atomEnd.setObjectName(_fromUtf8("lbl_atomEnd"))
 
         self.led_atomEnd = QtGui.QLineEdit()
         self.led_atomEnd.setObjectName(_fromUtf8("led_atomEnd"))
-        self.led_atomEnd.setEnabled(False)
+        self.led_atomEnd.setReadOnly(True)
         self.led_atomEnd.setAlignment(QtCore.Qt.AlignCenter)
+        self.led_atomEnd.setStyleSheet("font: bold;")
 
-        self.statusLayout.addWidget(self.lbl_atomAmplitude,0,0)
-        self.statusLayout.addWidget(self.led_atomAmplitude,0,1)
-        self.statusLayout.addWidget(self.lbl_atomWidth,1,0)
-        self.statusLayout.addWidget(self.led_atomWidth,1,1)
-        self.statusLayout.addWidget(self.lbl_atomFrequency,2,0)
-        self.statusLayout.addWidget(self.led_atomFrequency,2,1)
 
-        self.statusLayout.addWidget(self.lbl_atomStart,0,2)
-        self.statusLayout.addWidget(self.led_atomStart,0,3)
-        self.statusLayout.addWidget(self.lbl_atomLatency,1,2)
-        self.statusLayout.addWidget(self.led_atomLatency,1,3)
-        self.statusLayout.addWidget(self.lbl_atomEnd,2,2)
-        self.statusLayout.addWidget(self.led_atomEnd,2,3)
+        self.statusLayout.addWidget(self.lbl_atomType,1,0)
+        self.statusLayout.addWidget(self.led_atomType,1,1)        
 
-        self.statusLayout.setColumnStretch(4,1)
+        self.statusLayout.addWidget(self.lbl_atomAmplitude,0,2)
+        self.statusLayout.addWidget(self.led_atomAmplitude,0,3)
+        self.statusLayout.addWidget(self.lbl_atomWidth,1,2)
+        self.statusLayout.addWidget(self.led_atomWidth,1,3)
+        self.statusLayout.addWidget(self.lbl_atomFrequency,2,2)
+        self.statusLayout.addWidget(self.led_atomFrequency,2,3)
+
+        self.statusLayout.addWidget(self.lbl_atomStart,0,4)
+        self.statusLayout.addWidget(self.led_atomStart,0,5)
+        self.statusLayout.addWidget(self.lbl_atomLatency,1,4)
+        self.statusLayout.addWidget(self.led_atomLatency,1,5)
+        self.statusLayout.addWidget(self.lbl_atomEnd,2,4)
+        self.statusLayout.addWidget(self.led_atomEnd,2,5)
+
+        self.statusLayout.setColumnStretch(6,1)
 
         self.groupBoxStatus.setLayout(self.statusLayout)
 
@@ -491,6 +500,8 @@ class visWindowUI(object):
         self.lbl_structWidthRangeMinN.setText(_translate("visWindow", "xx", None))
         self.lbl_structWidthRangeMax.setText(_translate("visWindow", "Upper limit [s]:", None))
         self.lbl_structWidthRangeMaxN.setText(_translate("visWindow", "yy", None))
+
+        self.lbl_atomType.setText(_translate("visWindow", "Atom type:", None))
         self.lbl_atomAmplitude.setText(_translate("visWindow", "Amplitude [au]:", None))
         self.lbl_atomWidth.setText(_translate("visWindow", "Width [s]:", None))
         self.lbl_atomFrequency.setText(_translate("visWindow", "Frequency [Hz]:", None))
