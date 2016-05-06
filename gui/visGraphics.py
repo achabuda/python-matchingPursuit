@@ -69,8 +69,8 @@ class visWindowUI(object):
         self.groupBoxStatus = QtGui.QGroupBox()
         self.groupBoxStatus.setObjectName(_fromUtf8("groupBoxStatus"))
 
-        # self.groupBoxSubControlls= QtGui.QGroupBox()
-        # self.groupBoxSubControlls.setObjectName(_fromUtf8("groupBoxSubControlls"))
+        self.groupBoxSubControlls = QtGui.QGroupBox()
+        self.groupBoxSubControlls.setObjectName(_fromUtf8("groupBoxSubControlls"))
 
 # GLOBAL BUTTONS & OTHER CONTROLLS:
         self.btn_saveDecomp = QtGui.QPushButton()
@@ -176,6 +176,53 @@ class visWindowUI(object):
 
         self.groupBoxStatus.setLayout(self.statusLayout)
 
+# GROUPBOX SUBCONTROLLS:
+        subControllsLayout = QtGui.QGridLayout()
+
+        self.lbl_mapFreqRange = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_mapFreqRange.setStyleSheet('font-weight: bold;')
+        self.lbl_mapFreqRange.setObjectName(_fromUtf8("lbl_mapFreqRange"))
+
+
+        self.lbl_mapFreqRangeMin = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_mapFreqRangeMin.setObjectName(_fromUtf8("lbl_mapFreqRangeMin"))
+
+        self.hsb_mapFreqRangeMin = QtGui.QScrollBar(self.groupBoxSettings)
+        self.hsb_mapFreqRangeMin.setOrientation(QtCore.Qt.Horizontal)
+        self.hsb_mapFreqRangeMin.setMinimum(0)
+        self.hsb_mapFreqRangeMin.setMaximum(100)
+        self.hsb_mapFreqRangeMin.setObjectName(_fromUtf8("hsb_mapFreqRangeMin"))
+
+        self.lbl_mapFreqRangeMinN = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_mapFreqRangeMinN.setObjectName(_fromUtf8("lbl_mapFreqRangeMinN"))
+
+
+        self.lbl_mapFreqRangeMax = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_mapFreqRangeMax.setObjectName(_fromUtf8("lbl_mapFreqRangeMax"))
+
+        self.hsb_mapFreqRangeMax = QtGui.QScrollBar(self.groupBoxSettings)
+        self.hsb_mapFreqRangeMax.setOrientation(QtCore.Qt.Horizontal)
+        self.hsb_mapFreqRangeMax.setObjectName(_fromUtf8("hsb_mapFreqRangeMax"))
+
+        self.lbl_mapFreqRangeMaxN = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_mapFreqRangeMaxN.setObjectName(_fromUtf8("lbl_mapFreqRangeMaxN"))
+
+        subControllsLayout.addWidget(self.lbl_mapFreqRange , 0 , 1)
+        subControllsLayout.addWidget(self.lbl_mapFreqRangeMin , 1 , 0)
+        subControllsLayout.addWidget(self.hsb_mapFreqRangeMin , 1 , 1)
+        subControllsLayout.addWidget(self.lbl_mapFreqRangeMinN , 1 , 2)
+        subControllsLayout.addWidget(self.lbl_mapFreqRangeMax , 2 , 0)
+        subControllsLayout.addWidget(self.hsb_mapFreqRangeMax , 2 , 1)
+        subControllsLayout.addWidget(self.lbl_mapFreqRangeMaxN , 2 , 2)
+
+        subControllsLayout.setColumnStretch(0,1)
+        subControllsLayout.setColumnStretch(1,3)
+        subControllsLayout.setColumnStretch(2,1)
+        subControllsLayout.setColumnStretch(3,5)
+
+
+        self.groupBoxSubControlls.setLayout(subControllsLayout)
+
 # GROUPBOX BOOKS:
         booksLayout = QtGui.QVBoxLayout()
         booksButtonsLayout = QtGui.QHBoxLayout()
@@ -266,46 +313,88 @@ class visWindowUI(object):
         settingsControllsLayout.addLayout(settingsControllsSubLayout)
 
 
+
         settingsFiltersLayout.addSpacing(50)
 
-        self.lbl_mapFreqRange = QtGui.QLabel(self.groupBoxSettings)
-        self.lbl_mapFreqRange.setStyleSheet('font-weight: bold;')
-        self.lbl_mapFreqRange.setObjectName(_fromUtf8("lbl_mapFreqRange"))
+        self.lbl_structAmplitudeRange = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_structAmplitudeRange.setStyleSheet('font-weight: bold;')
+        self.lbl_structAmplitudeRange.setObjectName(_fromUtf8("lbl_structAmplitudeRange"))
 
-        settingsFiltersLayout.addWidget(self.lbl_mapFreqRange)
+        settingsFiltersLayout.addWidget(self.lbl_structAmplitudeRange)
 
-        self.lbl_mapFreqRangeMin = QtGui.QLabel(self.groupBoxSettings)
-        self.lbl_mapFreqRangeMin.setObjectName(_fromUtf8("lbl_mapFreqRangeMin"))
+        self.lbl_structAmplitudeRangeMin = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_structAmplitudeRangeMin.setObjectName(_fromUtf8("lbl_structAmplitudeRangeMin"))
 
-        self.hsb_mapFreqRangeMin = QtGui.QScrollBar(self.groupBoxSettings)
-        self.hsb_mapFreqRangeMin.setOrientation(QtCore.Qt.Horizontal)
-        self.hsb_mapFreqRangeMin.setMinimum(0)
-        self.hsb_mapFreqRangeMin.setMaximum(100)
-        self.hsb_mapFreqRangeMin.setObjectName(_fromUtf8("hsb_mapFreqRangeMin"))
+        self.hsb_structAmplitudeRangeMin = QtGui.QScrollBar(self.groupBoxSettings)
+        self.hsb_structAmplitudeRangeMin.setOrientation(QtCore.Qt.Horizontal)
+        self.hsb_structAmplitudeRangeMin.setMinimum(0)
+        self.hsb_structAmplitudeRangeMin.setMaximum(100)
+        self.hsb_structAmplitudeRangeMin.setObjectName(_fromUtf8("hsb_structAmplitudeRangeMin"))
 
-        self.lbl_mapFreqRangeMinN = QtGui.QLabel(self.groupBoxSettings)
-        self.lbl_mapFreqRangeMinN.setObjectName(_fromUtf8("lbl_mapFreqRangeMinN"))
+        self.lbl_structAmplitudeRangeMinN = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_structAmplitudeRangeMinN.setObjectName(_fromUtf8("lbl_structAmplitudeRangeMinN"))
 
         settingsFiltersSubLayout = QtGui.QHBoxLayout()
-        settingsFiltersSubLayout.addWidget(self.lbl_mapFreqRangeMin)
-        settingsFiltersSubLayout.addWidget(self.hsb_mapFreqRangeMin)
-        settingsFiltersSubLayout.addWidget(self.lbl_mapFreqRangeMinN)
+        settingsFiltersSubLayout.addWidget(self.lbl_structAmplitudeRangeMin)
+        settingsFiltersSubLayout.addWidget(self.hsb_structAmplitudeRangeMin)
+        settingsFiltersSubLayout.addWidget(self.lbl_structAmplitudeRangeMinN)
         settingsFiltersLayout.addLayout(settingsFiltersSubLayout)
 
-        self.lbl_mapFreqRangeMax = QtGui.QLabel(self.groupBoxSettings)
-        self.lbl_mapFreqRangeMax.setObjectName(_fromUtf8("lbl_mapFreqRangeMax"))
+        self.lbl_structAmplitudeRangeMax = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_structAmplitudeRangeMax.setObjectName(_fromUtf8("lbl_structAmplitudeRangeMax"))
 
-        self.hsb_mapFreqRangeMax = QtGui.QScrollBar(self.groupBoxSettings)
-        self.hsb_mapFreqRangeMax.setOrientation(QtCore.Qt.Horizontal)
-        self.hsb_mapFreqRangeMax.setObjectName(_fromUtf8("hsb_mapFreqRangeMax"))
+        self.hsb_structAmplitudeRangeMax = QtGui.QScrollBar(self.groupBoxSettings)
+        self.hsb_structAmplitudeRangeMax.setOrientation(QtCore.Qt.Horizontal)
+        self.hsb_structAmplitudeRangeMax.setObjectName(_fromUtf8("hsb_structAmplitudeRangeMax"))
 
-        self.lbl_mapFreqRangeMaxN = QtGui.QLabel(self.groupBoxSettings)
-        self.lbl_mapFreqRangeMaxN.setObjectName(_fromUtf8("lbl_mapFreqRangeMaxN"))
+        self.lbl_structAmplitudeRangeMaxN = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_structAmplitudeRangeMaxN.setObjectName(_fromUtf8("lbl_structAmplitudeRangeMaxN"))
 
         settingsFiltersSubLayout = QtGui.QHBoxLayout()
-        settingsFiltersSubLayout.addWidget(self.lbl_mapFreqRangeMax)
-        settingsFiltersSubLayout.addWidget(self.hsb_mapFreqRangeMax)
-        settingsFiltersSubLayout.addWidget(self.lbl_mapFreqRangeMaxN)
+        settingsFiltersSubLayout.addWidget(self.lbl_structAmplitudeRangeMax)
+        settingsFiltersSubLayout.addWidget(self.hsb_structAmplitudeRangeMax)
+        settingsFiltersSubLayout.addWidget(self.lbl_structAmplitudeRangeMaxN)
+        settingsFiltersLayout.addLayout(settingsFiltersSubLayout)
+        settingsFiltersLayout.addSpacing(20)
+
+        self.lbl_structPositionRange = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_structPositionRange.setStyleSheet('font-weight: bold;')
+        self.lbl_structPositionRange.setObjectName(_fromUtf8("lbl_structPositionRange"))
+
+        settingsFiltersLayout.addWidget(self.lbl_structPositionRange)
+
+        self.lbl_structPositionRangeMin = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_structPositionRangeMin.setObjectName(_fromUtf8("lbl_structPositionRangeMin"))
+
+        self.hsb_structPositionRangeMin = QtGui.QScrollBar(self.groupBoxSettings)
+        self.hsb_structPositionRangeMin.setOrientation(QtCore.Qt.Horizontal)
+        self.hsb_structPositionRangeMin.setMinimum(0)
+        self.hsb_structPositionRangeMin.setMaximum(100)
+        self.hsb_structPositionRangeMin.setObjectName(_fromUtf8("hsb_structPositionRangeMin"))
+
+        self.lbl_structPositionRangeMinN = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_structPositionRangeMinN.setObjectName(_fromUtf8("lbl_structPositionRangeMinN"))
+
+        settingsFiltersSubLayout = QtGui.QHBoxLayout()
+        settingsFiltersSubLayout.addWidget(self.lbl_structPositionRangeMin)
+        settingsFiltersSubLayout.addWidget(self.hsb_structPositionRangeMin)
+        settingsFiltersSubLayout.addWidget(self.lbl_structPositionRangeMinN)
+        settingsFiltersLayout.addLayout(settingsFiltersSubLayout)
+
+        self.lbl_structPositionRangeMax = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_structPositionRangeMax.setObjectName(_fromUtf8("lbl_structPositionRangeMax"))
+
+        self.hsb_structPositionRangeMax = QtGui.QScrollBar(self.groupBoxSettings)
+        self.hsb_structPositionRangeMax.setOrientation(QtCore.Qt.Horizontal)
+        self.hsb_structPositionRangeMax.setObjectName(_fromUtf8("hsb_structPositionRangeMax"))
+
+        self.lbl_structPositionRangeMaxN = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_structPositionRangeMaxN.setObjectName(_fromUtf8("lbl_structPositionRangeMaxN"))
+
+        settingsFiltersSubLayout = QtGui.QHBoxLayout()
+        settingsFiltersSubLayout.addWidget(self.lbl_structPositionRangeMax)
+        settingsFiltersSubLayout.addWidget(self.hsb_structPositionRangeMax)
+        settingsFiltersSubLayout.addWidget(self.lbl_structPositionRangeMaxN)
         settingsFiltersLayout.addLayout(settingsFiltersSubLayout)
         settingsFiltersLayout.addSpacing(20)
 
@@ -414,16 +503,17 @@ class visWindowUI(object):
         self.layout1.addLayout(subLayout1)
         self.tabSpace.addTab(tab_decomposition, "Decomposition")
 
-        tab_wvRepresentation = QtGui.QWidget()
-        self.layout2 = QtGui.QVBoxLayout(tab_wvRepresentation)
-        subLayout2 = QtGui.QHBoxLayout()
-        subLayout2.addWidget(self.btn_saveWigner)
-        subLayout2.addStretch(1)
-        self.layout2.addLayout(subLayout2)
-        self.tabSpace.addTab(tab_wvRepresentation, "Wigner-Ville map")
+        # tab_wvRepresentation = QtGui.QWidget()
+        # self.layout2 = QtGui.QVBoxLayout(tab_wvRepresentation)
+        # subLayout2 = QtGui.QHBoxLayout()
+        # subLayout2.addWidget(self.btn_saveWigner)
+        # subLayout2.addStretch(1)
+        # self.layout2.addLayout(subLayout2)
+        # self.tabSpace.addTab(tab_wvRepresentation, "Wigner-Ville map")
 
         tab_amplitudeRepresentation = QtGui.QWidget()
         self.layout3 = QtGui.QVBoxLayout(tab_amplitudeRepresentation)
+        self.layout3.addWidget(self.groupBoxSubControlls)
         subLayout3 = QtGui.QHBoxLayout()
         subLayout3.addWidget(self.btn_saveAmplitude)
         subLayout3.addWidget(self.btn_complex)
@@ -431,13 +521,13 @@ class visWindowUI(object):
         self.layout3.addLayout(subLayout3)
         self.tabSpace.addTab(tab_amplitudeRepresentation, "Amplitude map")
 
-        tab_topographicalRepresentation = QtGui.QWidget()
-        self.layout4 = QtGui.QVBoxLayout(tab_topographicalRepresentation)
-        subLayout4 = QtGui.QHBoxLayout()
-        subLayout4.addWidget(self.btn_saveTopography)
-        subLayout4.addStretch(1)
-        self.layout4.addLayout(subLayout4)
-        self.tabSpace.addTab(tab_topographicalRepresentation, "Topography")
+        # tab_topographicalRepresentation = QtGui.QWidget()
+        # self.layout4 = QtGui.QVBoxLayout(tab_topographicalRepresentation)
+        # subLayout4 = QtGui.QHBoxLayout()
+        # subLayout4.addWidget(self.btn_saveTopography)
+        # subLayout4.addStretch(1)
+        # self.layout4.addLayout(subLayout4)
+        # self.tabSpace.addTab(tab_topographicalRepresentation, "Topography")
 
 
 # SET ALL THINGS UP:
@@ -463,9 +553,9 @@ class visWindowUI(object):
         visWindow.setWindowTitle(_translate("visWindow", "python-MatchingPursuit -- visualiser", None))
 
         self.groupBoxBooks.setTitle(_translate("visWindow"  , "Books", None))
-        # self.groupBoxStatus.setTitle(_translate("visWindow"  , "Status", None))
+        self.groupBoxStatus.setTitle(_translate("visWindow"  , "Atom parmeters", None))
         self.groupBoxSettings.setTitle(_translate("visWindow"  , "Settings", None))
-        # self.groupBoxSubControlls.setTitle(_translate("visWindow"  , "", None))
+        self.groupBoxSubControlls.setTitle(_translate("visWindow"  , "", None))
 
         self.btn_saveDecomp.setText(_translate("visWindow", "Save Picture", None))
         self.btn_saveAmplitude.setText(_translate("visWindow", "Save", None))
@@ -495,12 +585,21 @@ class visWindowUI(object):
         self.lbl_structFreqRangeMinN.setText(_translate("visWindow", "xx", None))
         self.lbl_structFreqRangeMax.setText(_translate("visWindow", "Upper limit [Hz]:", None))
         self.lbl_structFreqRangeMaxN.setText(_translate("visWindow", "yy", None))
-        self.lbl_structWidthRange.setText(_translate("visWindow", "Structures width range", None))
+        self.lbl_structWidthRange.setText(_translate("visWindow", "Structures widths range", None))
         self.lbl_structWidthRangeMin.setText(_translate("visWindow", "Lower limit [s]:", None))
         self.lbl_structWidthRangeMinN.setText(_translate("visWindow", "xx", None))
         self.lbl_structWidthRangeMax.setText(_translate("visWindow", "Upper limit [s]:", None))
         self.lbl_structWidthRangeMaxN.setText(_translate("visWindow", "yy", None))
-
+        self.lbl_structAmplitudeRange.setText(_translate("visWindow", "Structures amplitudes range", None))
+        self.lbl_structAmplitudeRangeMin.setText(_translate("visWindow", "Lower limit [au]:", None))
+        self.lbl_structAmplitudeRangeMinN.setText(_translate("visWindow", "xx", None))
+        self.lbl_structAmplitudeRangeMax.setText(_translate("visWindow", "Upper limit [au]:", None))
+        self.lbl_structAmplitudeRangeMaxN.setText(_translate("visWindow", "yy", None))
+        self.lbl_structPositionRange.setText(_translate("visWindow", "Structures positions range", None))
+        self.lbl_structPositionRangeMin.setText(_translate("visWindow", "Lower limit [s]:", None))
+        self.lbl_structPositionRangeMinN.setText(_translate("visWindow", "xx", None))
+        self.lbl_structPositionRangeMax.setText(_translate("visWindow", "Upper limit [s]:", None))
+        self.lbl_structPositionRangeMaxN.setText(_translate("visWindow", "yy", None))
         self.lbl_atomType.setText(_translate("visWindow", "Atom type:", None))
         self.lbl_atomAmplitude.setText(_translate("visWindow", "Amplitude [au]:", None))
         self.lbl_atomWidth.setText(_translate("visWindow", "Width [s]:", None))

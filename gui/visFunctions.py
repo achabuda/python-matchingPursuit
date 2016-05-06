@@ -66,12 +66,15 @@ class visWindow(QtGui.QMainWindow):
 			self.ui.lst_books.setCurrentRow(0)
 
 			self.decompositionPlot = PlotterDecomposition(self.ui , self.books[str(self.ui.lst_books.currentItem().text())])
+			self.amplitudeMapPlot  = PlotterAmplitudeMap(self.ui)
 			self.setVariables()
 			self.setWidgetsState(0)
 		else:
 			self.decompositionPlot = PlotterDecomposition(self.ui)
+			self.amplitudeMapPlot  = PlotterAmplitudeMap(self.ui)
 		
 		self.decompositionPlot.binding_plotter_with_ui(1)
+		self.amplitudeMapPlot.binding_plotter_with_ui()
 		self.setConnections()
 
 	def setVariables(self):
@@ -206,6 +209,7 @@ class visWindow(QtGui.QMainWindow):
 
 	def replot(self):
 		self.decompositionPlot.ax1.plot(np.squeeze(self.books[self.ui.lst_books.item(self.whichBook).text()]['originalData'][self.trialsCalculated[self.trial]-1,self.channelsCalculated[self.channel]-1,:]) , 'k')
+		self.decompositionPlot.ax1.set_title('Original signal')
 		x_fromWhere = 0
 		x_toWhere   = self.books[self.ui.lst_books.item(self.whichBook).text()]['originalData'].shape[2]
 		self.decompositionPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
@@ -214,11 +218,14 @@ class visWindow(QtGui.QMainWindow):
 		self.decompositionPlot.ax2.plot(np.squeeze(self.books[self.ui.lst_books.item(self.whichBook).text()]['book'][self.trial,self.channel]['reconstruction'].sum()).real , 'k')
 		self.decompositionPlot.ax2.set_xlim([x_fromWhere , x_toWhere])
 		self.decompositionPlot.ax2.set_ylim([y_fromWhere , y_toWhere])
+		self.decompositionPlot.ax2.set_title('Decomposition')
 
 		func = np.squeeze(self.books[self.ui.lst_books.item(self.whichBook).text()]['book'][self.trial,self.channel]['reconstruction'][self.atom].real)
 		self.decompositionPlot.ax3.plot(func , 'k')
 		self.decompositionPlot.ax3.set_xlim([x_fromWhere , x_toWhere])
 		self.decompositionPlot.ax3.set_ylim([y_fromWhere , y_toWhere])
+		self.decompositionPlot.ax3.set_title('Single function')
+		
 		self.decompositionPlot.draw()
 
 	def addBooks(self):
@@ -292,3 +299,22 @@ class PlotterDecomposition(FigureCanvas):
         	self.parent.layout3.insertWidget(0, self)
         elif where == 4:
         	self.parent.layout4.insertWidget(0, self)
+
+
+
+
+
+class PlotterAmplitudeMap(FigureCanvas):
+    def __init__(self, parent , book=[] , which=[0,0,0]):
+		self.parent = proxy(parent)
+		fig = Figure()
+		super(PlotterAmplitudeMap,self).__init__(fig)
+
+		FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
+		FigureCanvas.updateGeometry(self)
+
+		if book != []:
+			pass
+
+    def binding_plotter_with_ui(self):
+        self.parent.layout3.insertWidget(0, self)
