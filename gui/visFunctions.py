@@ -66,12 +66,22 @@ class visWindow(QtGui.QMainWindow):
 			self.ui.lst_books.setCurrentRow(0)
 
 			self.decompositionPlot = PlotterDecomposition(self.ui , self.books[str(self.ui.lst_books.currentItem().text())])
+			self.setVariables()
 			self.setWidgetsState(0)
 		else:
 			self.decompositionPlot = PlotterDecomposition(self.ui)
 		
 		self.decompositionPlot.binding_plotter_with_ui(1)
 		self.setConnections()
+
+	def setVariables(self):
+		self.trial     = 0
+		self.channel   = 0
+		self.atom      = 0
+		self.whichBook = 0
+
+		self.channelsCalculated = self.books[self.ui.lst_books.item(self.whichBook).text()]['config']['channels2calc']
+		self.trialsCalculated   = self.books[self.ui.lst_books.item(self.whichBook).text()]['config']['trials2calc']
 
 	def setConnections(self):
 		self.ui.btn_atomNext.clicked.connect(self.nextAtom)
@@ -87,14 +97,14 @@ class visWindow(QtGui.QMainWindow):
 
 	def setWidgetsState(self , flag=0):
 		if flag == 0:
-			self.trial     = 0
-			self.channel   = 0
-			self.atom      = 0
-			self.whichBook = 0
+			# self.trial     = 0
+			# self.channel   = 0
+			# self.atom      = 0
+			# self.whichBook = 0
 			self.ui.lst_books.setCurrentRow(self.whichBook)
 
-		self.ui.led_trial.setText(str(self.trial+1))
-		self.ui.led_channel.setText(str(self.channel+1))
+		self.ui.led_trial.setText(str(self.trialsCalculated[self.trial]))
+		self.ui.led_channel.setText(str(self.channelsCalculated[self.channel]))
 		self.ui.led_atom.setText(str(self.atom+1))
 
 		self.ui.led_atomWidth.setText(str(self.books[self.ui.lst_books.item(self.whichBook).text()]['book'][self.trial,self.channel]['width'][self.atom]))
@@ -104,7 +114,7 @@ class visWindow(QtGui.QMainWindow):
 		envelope  = self.books[self.ui.lst_books.item(self.whichBook).text()]['book'][self.trial,self.channel]['envelope'][self.atom]
 		whereMax  = np.argmax(envelope)
 		threshold = 0.5
-		where     =  np.where(envelope > threshold * envelope.max())[0] / self.books[self.ui.lst_books.item(0).text()]['config']['samplingFrequency']
+		where     =  np.where(envelope > threshold * envelope.max())[0] / self.books[self.ui.lst_books.item(self.whichBook).text()]['config']['samplingFrequency']
 
 		self.ui.led_atomStart.setText(str(where[0]))
 		self.ui.led_atomEnd.setText(str(where[-1]))
@@ -159,7 +169,7 @@ class visWindow(QtGui.QMainWindow):
 		self.atom    = 1
 		self.channel = 1
 		self.trial   = 1
-		self.setWidgetsState(1)
+		self.setWidgetsState(0)
 		self.changeButtonsState()
 
 
@@ -192,7 +202,7 @@ class visWindow(QtGui.QMainWindow):
 		self.setWidgetsState(1)
 
 	def replot(self):
-		self.decompositionPlot.ax1.plot(np.squeeze(self.books[self.ui.lst_books.item(self.whichBook).text()]['originalData'][self.trial,self.channel,:]) , 'k')
+		self.decompositionPlot.ax1.plot(np.squeeze(self.books[self.ui.lst_books.item(self.whichBook).text()]['originalData'][self.trialsCalculated[self.trial]-1,self.channelsCalculated[self.channel]-1,:]) , 'k')
 		x_fromWhere = 0
 		x_toWhere   = self.books[self.ui.lst_books.item(self.whichBook).text()]['originalData'].shape[2]
 		self.decompositionPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
