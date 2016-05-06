@@ -45,6 +45,10 @@ def calculateMP(dictionary , signal , config):
 	'''
 
 	book           = []
+	if signal.sum() == 0:
+		zerosFlag = 1
+	else:
+		zerosFlag = 0
 	
 	if config['algorithm'] == 'smp':
 		partialResults = []
@@ -57,6 +61,11 @@ def calculateMP(dictionary , signal , config):
 			(bookElement , partialResults , signalRest) = makeOneIteration(dictionary , partialResults , signalRest , signalLength , config , iteration)
 			
 			book.append(pd.Series(bookElement))
+
+			if zerosFlag == 1:
+				if config['flags']['displayInfo'] != 0:
+					print 'Signal contained only zeros!'
+				return pd.DataFrame(book)
 
 			energyExplained    = np.abs(1 - calculateSignalEnergy(signalRest) / signalEnergy)
 			minEnergyExplained = config['minEnergyExplained'] - config['density'] * (calculateSignalEnergy(bookElement['reconstruction']) / calculateSignalEnergy(signalRest))
