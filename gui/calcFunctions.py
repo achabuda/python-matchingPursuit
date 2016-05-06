@@ -37,7 +37,6 @@ from src.dictionary import generateDictionary
 from src.processing import calculateMP
 
 class calcWindow(QtGui.QMainWindow):
-#class calcWindow(QtGui.QDialog):
 	sig_singleBookDone       = QtCore.pyqtSignal(np.ndarray , dict , str)
 
 	sig_calculationsStoped   = QtCore.pyqtSignal()
@@ -196,7 +195,7 @@ class thr_MP(QtCore.QThread):
 				self.sig_prb_trial_update.emit(ind_trial)
 				self.sig_lbl_trial_update.emit('Trials - (' + str(ind_trial) + ' / ' + str(len(config['trials2calc'])) + ')')
 				for trial in config['trials2calc']:
-					book[trial-1 , channel-1] = calculateMP(self.dictionary , np.squeeze(dataMatrix[trial-1,channel-1,:]) , config)
+					book[ind_trial , ind_channel] = calculateMP(self.dictionary , np.squeeze(dataMatrix[trial-1,channel-1,:]) , config)
 					ind_trial += 1
 					self.sig_prb_trial_update.emit(ind_trial)
 					self.sig_lbl_trial_update.emit('Trials - (' + str(ind_trial) + ' / ' + str(len(config['trials2calc'])) + ')')
