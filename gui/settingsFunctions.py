@@ -373,7 +373,7 @@ class mainWindow(QtGui.QMainWindow):
             
     def trialsRangeChanged(self):
         text      = self.ui.led_trials2calc.text()
-        possible  = ['1','2','3','4','5','6','7','8','9','0',':',';','-',' ']
+        possible  = ['1','2','3','4','5','6','7','8','9','0',':',';','-',' ',',']
         forbidden = ['::',':;',';;',';:','-:',':-',';-','-;','--']
         if any(x not in possible for x in text):
             self.ui.led_trials2calc.setStyleSheet("color: rgb(255, 0, 0);")
