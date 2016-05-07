@@ -73,7 +73,7 @@ class visWindow(QtGui.QMainWindow):
 			self.decompositionPlot = PlotterDecomposition(self.ui)
 			self.amplitudeMapPlot  = PlotterAmplitudeMap(self.ui)
 		
-		self.decompositionPlot.binding_plotter_with_ui(1)
+		self.decompositionPlot.binding_plotter_with_ui()
 		self.amplitudeMapPlot.binding_plotter_with_ui()
 		self.setConnections()
 
@@ -251,8 +251,6 @@ class visWindow(QtGui.QMainWindow):
 				self.setWidgetsState()
 			else:
 				return
-
-		# self.setWidgetsState()
 	
 #######################################################################
 #######################################################################
@@ -294,15 +292,8 @@ class PlotterDecomposition(FigureCanvas):
 			self.ax3.set_ylim([y_fromWhere , y_toWhere])
 
 
-    def binding_plotter_with_ui(self,where):
-    	if where == 1:
-        	self.parent.layout1.insertWidget(0, self)
-        elif where == 2:
-        	self.parent.layout2.insertWidget(0, self)
-        elif where == 3:
-        	self.parent.layout3.insertWidget(0, self)
-        elif where == 4:
-        	self.parent.layout4.insertWidget(0, self)
+    def binding_plotter_with_ui(self):
+        self.parent.layout1.insertWidget(0, self)
 
 
 
@@ -321,4 +312,4 @@ class PlotterAmplitudeMap(FigureCanvas):
 			pass
 
     def binding_plotter_with_ui(self):
-        self.parent.layout3.insertWidget(0, self)
+        self.parent.layout2.insertWidget(0, self)
