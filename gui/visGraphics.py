@@ -82,6 +82,9 @@ class visWindowUI(object):
         self.btn_saveAmplitude = QtGui.QPushButton()
         self.btn_saveAmplitude.setObjectName(_fromUtf8("btn_saveAmplitude"))
 
+        self.btn_saveAmplitudeAsArray = QtGui.QPushButton()
+        self.btn_saveAmplitudeAsArray.setObjectName(_fromUtf8("btn_saveAmplitudeAsArray"))
+
         self.btn_saveTopography = QtGui.QPushButton()
         self.btn_saveTopography.setObjectName(_fromUtf8("btn_saveTopography"))
 
@@ -264,10 +267,13 @@ class visWindowUI(object):
 
         settingsControllsSubLayout = QtGui.QHBoxLayout()
         settingsControllsSubLayout.addWidget(self.lbl_channel)
-        settingsControllsSubLayout.addStretch(1)
         settingsControllsSubLayout.addWidget(self.btn_channelPrev)
         settingsControllsSubLayout.addWidget(self.led_channel)
         settingsControllsSubLayout.addWidget(self.btn_channelNext)
+        settingsControllsSubLayout.setStretch(0,1)
+        settingsControllsSubLayout.setStretch(1,1)
+        settingsControllsSubLayout.setStretch(2,1)
+        settingsControllsSubLayout.setStretch(3,1)
         settingsControllsLayout.addLayout(settingsControllsSubLayout)
 
         self.lbl_trial = QtGui.QLabel(self.groupBoxSettings)
@@ -285,11 +291,14 @@ class visWindowUI(object):
 
         settingsControllsSubLayout = QtGui.QHBoxLayout()
         settingsControllsSubLayout.addWidget(self.lbl_trial)
-        settingsControllsSubLayout.addStretch(1)
         settingsControllsSubLayout.addWidget(self.btn_trialPrev)
         settingsControllsSubLayout.addWidget(self.led_trial)
         settingsControllsSubLayout.addWidget(self.btn_trialNext)
         settingsControllsLayout.addLayout(settingsControllsSubLayout)
+        settingsControllsSubLayout.setStretch(0,1)
+        settingsControllsSubLayout.setStretch(1,1)
+        settingsControllsSubLayout.setStretch(2,1)
+        settingsControllsSubLayout.setStretch(3,1)
 
         self.lbl_atom = QtGui.QLabel(self.groupBoxSettings)
         self.lbl_atom.setObjectName(_fromUtf8("lbl_atom"))
@@ -306,13 +315,16 @@ class visWindowUI(object):
 
         settingsControllsSubLayout = QtGui.QHBoxLayout()
         settingsControllsSubLayout.addWidget(self.lbl_atom)
-        settingsControllsSubLayout.addStretch(1)
         settingsControllsSubLayout.addWidget(self.btn_atomPrev)
         settingsControllsSubLayout.addWidget(self.led_atom)
         settingsControllsSubLayout.addWidget(self.btn_atomNext)
         settingsControllsLayout.addLayout(settingsControllsSubLayout)
+        settingsControllsSubLayout.setStretch(0,1)
+        settingsControllsSubLayout.setStretch(1,1)
+        settingsControllsSubLayout.setStretch(2,1)
+        settingsControllsSubLayout.setStretch(3,1)
 
-
+        
 
         settingsFiltersLayout.addSpacing(50)
 
@@ -508,6 +520,7 @@ class visWindowUI(object):
         self.layout2.addWidget(self.groupBoxSubControlls)
         subLayout2 = QtGui.QHBoxLayout()
         subLayout2.addWidget(self.btn_saveAmplitude)
+        subLayout2.addWidget(self.btn_saveAmplitudeAsArray)
         subLayout2.addWidget(self.btn_complex)
         subLayout2.addStretch(1)
         self.layout2.addLayout(subLayout2)
@@ -536,12 +549,11 @@ class visWindowUI(object):
         leftPanel.addWidget(self.groupBoxSettings)
 
         rightPanel.addWidget(self.tabSpace)
-        # rightPanel.addWidget(self.groupBoxSubControlls)
-        # rightPanel.addWidget(self.groupBoxStatus)
 
         mainLayout.addLayout(leftPanel)
         mainLayout.addLayout(rightPanel)
-        mainLayout.setStretch(1,3)
+        mainLayout.setStretch(0,1)
+        mainLayout.setStretch(1,5)
 
         self.centralwidget.setLayout(mainLayout)
         visWindow.setCentralWidget(self.centralwidget)
@@ -558,10 +570,11 @@ class visWindowUI(object):
         self.groupBoxSubControlls.setTitle(_translate("visWindow"  , "", None))
 
         self.btn_saveDecomp.setText(_translate("visWindow", "Save Picture", None))
-        self.btn_saveAmplitude.setText(_translate("visWindow", "Save", None))
+        self.btn_saveAmplitude.setText(_translate("visWindow", "Save Picture", None))
+        self.btn_saveAmplitudeAsArray.setText(_translate("visWindow", "Save Array", None))
         self.btn_saveWigner.setText(_translate("visWindow", "Save", None))
         self.btn_saveTopography.setText(_translate("visWindow", "Save", None))
-        self.btn_complex.setText(_translate("visWindow", "ComplexMap", None))
+        self.btn_complex.setText(_translate("visWindow", "Draw complex maps", None))
         self.btn_add.setText(_translate("visWindow", "Add", None))
         self.btn_remove.setText(_translate("visWindow", "Remove", None))
         self.btn_trialNext.setText(_translate("visWindow", ">", None))

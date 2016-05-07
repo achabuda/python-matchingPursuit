@@ -29,6 +29,7 @@ from matplotlib.backends.backend_qt4agg import (
     FigureCanvasQTAgg as FigureCanvas,
     NavigationToolbar2QT as NavigationToolbar)
 from matplotlib.figure import Figure
+from matplotlib        import gridspec, ticker
 
 from PySide import QtGui, QtCore
 
@@ -44,6 +45,7 @@ from os.path   import expanduser
 from visGraphics import visWindowUI
 
 # # modules imports #
+from src.drawing      import calculateTFMap
 # from src.utils      import generateRangeFromString, generateFinalConfig , retranslateDictionaryConfig
 # from src.dictionary import generateDictionary
 # from src.processing import calculateMP
@@ -308,8 +310,32 @@ class PlotterAmplitudeMap(FigureCanvas):
 		FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
 		FigureCanvas.updateGeometry(self)
 
+		gs = gridspec.GridSpec(3,1,height_ratios=[3,1,1])
+
+		self.ax0 = fig.add_subplot(gs[0])
+		self.ax1 = fig.add_subplot(gs[1])
+		self.ax2 = fig.add_subplot(gs[2])
+
+		fig.subplots_adjust(left=0.1, right=0.9)
+
 		if book != []:
 			pass
+
+			# m   = ax0.imshow(np.abs(TFmap) , aspect='auto' , origin='lower' , extent=[0.0,4.0 , 0.0,64.0])
+			# ax0.set_xlabel(r'Time [s]')
+			# ax0.set_ylabel(r'Frequency [Hz]')
+			# ax0.set_ylim(config['mapFreqRange'])
+
+			# ax1.plot(time,signal)
+			# ax1.set_xlabel(r'Time [s]')
+			# ax1.set_ylabel(r'Amplitude [uV]')
+
+			# ax2.plot(time,book['reconstruction'].sum().real)
+			# ax2.set_xlabel(r'Time [s]')
+			# ax2.set_ylabel(r'Amplitude [uV]')
+
+			# self.cbar = fig.add_axes([0.92, 0.5, 0.02, 0.4])
+			# fig.colorbar(m, cax=self.cbar)
 
     def binding_plotter_with_ui(self):
         self.parent.layout2.insertWidget(0, self)
