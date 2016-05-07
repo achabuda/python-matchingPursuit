@@ -324,8 +324,6 @@ class visWindowUI(object):
         settingsControllsSubLayout.setStretch(2,1)
         settingsControllsSubLayout.setStretch(3,1)
 
-        
-
         settingsFiltersLayout.addSpacing(50)
 
         self.lbl_structAmplitudeRange = QtGui.QLabel(self.groupBoxSettings)
@@ -350,6 +348,9 @@ class visWindowUI(object):
         settingsFiltersSubLayout.addWidget(self.lbl_structAmplitudeRangeMin)
         settingsFiltersSubLayout.addWidget(self.hsb_structAmplitudeRangeMin)
         settingsFiltersSubLayout.addWidget(self.lbl_structAmplitudeRangeMinN)
+        settingsFiltersSubLayout.setStretch(0,2)
+        settingsFiltersSubLayout.setStretch(1,3)
+        settingsFiltersSubLayout.setStretch(2,1)
         settingsFiltersLayout.addLayout(settingsFiltersSubLayout)
 
         self.lbl_structAmplitudeRangeMax = QtGui.QLabel(self.groupBoxSettings)
@@ -366,7 +367,11 @@ class visWindowUI(object):
         settingsFiltersSubLayout.addWidget(self.lbl_structAmplitudeRangeMax)
         settingsFiltersSubLayout.addWidget(self.hsb_structAmplitudeRangeMax)
         settingsFiltersSubLayout.addWidget(self.lbl_structAmplitudeRangeMaxN)
+        settingsFiltersSubLayout.setStretch(0,2)
+        settingsFiltersSubLayout.setStretch(1,3)
+        settingsFiltersSubLayout.setStretch(2,1)
         settingsFiltersLayout.addLayout(settingsFiltersSubLayout)
+
         settingsFiltersLayout.addSpacing(20)
 
         self.lbl_structPositionRange = QtGui.QLabel(self.groupBoxSettings)
@@ -391,6 +396,9 @@ class visWindowUI(object):
         settingsFiltersSubLayout.addWidget(self.lbl_structPositionRangeMin)
         settingsFiltersSubLayout.addWidget(self.hsb_structPositionRangeMin)
         settingsFiltersSubLayout.addWidget(self.lbl_structPositionRangeMinN)
+        settingsFiltersSubLayout.setStretch(0,2)
+        settingsFiltersSubLayout.setStretch(1,3)
+        settingsFiltersSubLayout.setStretch(2,1)
         settingsFiltersLayout.addLayout(settingsFiltersSubLayout)
 
         self.lbl_structPositionRangeMax = QtGui.QLabel(self.groupBoxSettings)
@@ -407,6 +415,9 @@ class visWindowUI(object):
         settingsFiltersSubLayout.addWidget(self.lbl_structPositionRangeMax)
         settingsFiltersSubLayout.addWidget(self.hsb_structPositionRangeMax)
         settingsFiltersSubLayout.addWidget(self.lbl_structPositionRangeMaxN)
+        settingsFiltersSubLayout.setStretch(0,2)
+        settingsFiltersSubLayout.setStretch(1,3)
+        settingsFiltersSubLayout.setStretch(2,1)
         settingsFiltersLayout.addLayout(settingsFiltersSubLayout)
         settingsFiltersLayout.addSpacing(20)
 
@@ -430,6 +441,9 @@ class visWindowUI(object):
         settingsFiltersSubLayout.addWidget(self.lbl_structFreqRangeMin)
         settingsFiltersSubLayout.addWidget(self.hsb_structFreqRangeMin)
         settingsFiltersSubLayout.addWidget(self.lbl_structFreqRangeMinN)
+        settingsFiltersSubLayout.setStretch(0,2)
+        settingsFiltersSubLayout.setStretch(1,3)
+        settingsFiltersSubLayout.setStretch(2,1)
         settingsFiltersLayout.addLayout(settingsFiltersSubLayout)
 
         self.lbl_structFreqRangeMax = QtGui.QLabel(self.groupBoxSettings)
@@ -446,6 +460,9 @@ class visWindowUI(object):
         settingsFiltersSubLayout.addWidget(self.lbl_structFreqRangeMax)
         settingsFiltersSubLayout.addWidget(self.hsb_structFreqRangeMax)
         settingsFiltersSubLayout.addWidget(self.lbl_structFreqRangeMaxN)
+        settingsFiltersSubLayout.setStretch(0,2)
+        settingsFiltersSubLayout.setStretch(1,3)
+        settingsFiltersSubLayout.setStretch(2,1)
         settingsFiltersLayout.addLayout(settingsFiltersSubLayout)
         settingsFiltersLayout.addSpacing(20)
 
@@ -469,6 +486,9 @@ class visWindowUI(object):
         settingsFiltersSubLayout.addWidget(self.lbl_structWidthRangeMin)
         settingsFiltersSubLayout.addWidget(self.hsb_structWidthRangeMin)
         settingsFiltersSubLayout.addWidget(self.lbl_structWidthRangeMinN)
+        settingsFiltersSubLayout.setStretch(0,2)
+        settingsFiltersSubLayout.setStretch(1,3)
+        settingsFiltersSubLayout.setStretch(2,1)
         settingsFiltersLayout.addLayout(settingsFiltersSubLayout)
 
         self.lbl_structWidthRangeMax = QtGui.QLabel(self.groupBoxSettings)
@@ -485,14 +505,22 @@ class visWindowUI(object):
         settingsFiltersSubLayout.addWidget(self.lbl_structWidthRangeMax)
         settingsFiltersSubLayout.addWidget(self.hsb_structWidthRangeMax)
         settingsFiltersSubLayout.addWidget(self.lbl_structWidthRangeMaxN)
+        settingsFiltersSubLayout.setStretch(0,2)
+        settingsFiltersSubLayout.setStretch(1,3)
+        settingsFiltersSubLayout.setStretch(2,1)
         settingsFiltersLayout.addLayout(settingsFiltersSubLayout)
 
         self.btn_apply = QtGui.QPushButton(self.groupBoxSettings)
         self.btn_apply.setObjectName(_fromUtf8("btn_apply"))
 
+        self.btn_reset = QtGui.QPushButton(self.groupBoxSettings)
+        self.btn_reset.setObjectName(_fromUtf8("btn_reset"))
+
         settingsFiltersSubLayout = QtGui.QHBoxLayout()
         settingsFiltersSubLayout.addStretch(1)
         settingsFiltersSubLayout.addWidget(self.btn_apply)
+        settingsFiltersSubLayout.addStretch(1)
+        settingsFiltersSubLayout.addWidget(self.btn_reset)
         settingsFiltersSubLayout.addStretch(1)
         settingsFiltersLayout.addSpacing(20)
         settingsFiltersLayout.addLayout(settingsFiltersSubLayout)
@@ -584,6 +612,7 @@ class visWindowUI(object):
         self.btn_atomNext.setText(_translate("visWindow", ">", None))
         self.btn_atomPrev.setText(_translate("visWindow", "<", None))
         self.btn_apply.setText(_translate("visWindow", "Apply", None))
+        self.btn_reset.setText(_translate("visWindow", "Reset", None))
 
         self.lbl_trial.setText(_translate("visWindow", "Trial:", None))
         self.lbl_channel.setText(_translate("visWindow", "Channel:", None))

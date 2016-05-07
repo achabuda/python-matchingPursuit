@@ -63,8 +63,6 @@ def calculateTFMap(book,time,samplingFrequency,mapType,*argv):
 	else:
 		timeFinal = (time[-1] - time[0]) / samplingFrequency * np.linspace(0,1,mapTsize)
 
-	print timeFinal.shape
-
 	frequenciesFinal = samplingFrequency / 2 * np.linspace(0,1,mapFsize)
 
 	if mapType == 0:

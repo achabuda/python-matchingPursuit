@@ -68,7 +68,7 @@ class visWindow(QtGui.QMainWindow):
 			self.ui.lst_books.setCurrentRow(0)
 
 			self.decompositionPlot = PlotterDecomposition(self.ui , self.books[str(self.ui.lst_books.currentItem().text())])
-			self.amplitudeMapPlot  = PlotterAmplitudeMap(self.ui)
+			self.amplitudeMapPlot  = PlotterAmplitudeMap(self.ui , self.books[str(self.ui.lst_books.currentItem().text())])
 			self.setVariables()
 			self.setWidgetsState()
 		else:
@@ -204,28 +204,64 @@ class visWindow(QtGui.QMainWindow):
 		self.setWidgetsState(1)
 
 	def replot(self):
-		self.decompositionPlot.ax1.plot(np.squeeze(self.books[self.nameOfBook]['originalData'][self.trialsCalculated[self.trial]-1,self.channelsCalculated[self.channel]-1,:]) , 'k')
+		time = np.arange(0,self.books[self.nameOfBook]['originalData'].shape[2]) / self.books[self.nameOfBook]['config']['samplingFrequency']
+
+		self.decompositionPlot.ax1.plot(time , np.squeeze(self.books[self.nameOfBook]['originalData'][self.trialsCalculated[self.trial]-1,self.channelsCalculated[self.channel]-1,:]) , 'k')
 		self.decompositionPlot.ax1.set_title('Original signal')
 		self.decompositionPlot.ax1.hold(False)
+		self.decompositionPlot.ax1.set_ylabel(r'Amplitude [au]')
 		x_fromWhere = 0
-		x_toWhere   = self.books[self.nameOfBook]['originalData'].shape[2]
+		x_toWhere   = self.books[self.nameOfBook]['originalData'].shape[2] / self.books[self.nameOfBook]['config']['samplingFrequency']
 		self.decompositionPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
 		(y_fromWhere,y_toWhere) = self.decompositionPlot.ax1.get_ylim()
 
-		self.decompositionPlot.ax2.plot(np.squeeze(self.books[self.nameOfBook]['book'][self.trial,self.channel]['reconstruction'].sum()).real , 'k')
+		self.decompositionPlot.ax2.plot(time , np.squeeze(self.books[self.nameOfBook]['book'][self.trial,self.channel]['reconstruction'].sum()).real , 'k')
 		self.decompositionPlot.ax2.set_xlim([x_fromWhere , x_toWhere])
 		self.decompositionPlot.ax2.set_ylim([y_fromWhere , y_toWhere])
 		self.decompositionPlot.ax2.set_title('Decomposition')
 		self.decompositionPlot.ax2.hold(False)
+		self.decompositionPlot.ax2.set_ylabel(r'Amplitude [au]')
 
 		func = np.squeeze(self.books[self.nameOfBook]['book'][self.trial,self.channel]['reconstruction'][self.atom].real)
-		self.decompositionPlot.ax3.plot(func , 'k')
+		self.decompositionPlot.ax3.plot(time , func , 'k')
 		self.decompositionPlot.ax3.set_xlim([x_fromWhere , x_toWhere])
 		self.decompositionPlot.ax3.set_ylim([y_fromWhere , y_toWhere])
 		self.decompositionPlot.ax3.set_title('Single function')
 		self.decompositionPlot.ax3.hold(False)
+		self.decompositionPlot.ax3.set_ylabel(r'Amplitude [au]')
+		self.decompositionPlot.ax3.set_xlabel(r'Time [s]')
 		
 		self.decompositionPlot.draw()
+
+
+		tmp_time = np.arange(0,self.books[self.nameOfBook]['originalData'].shape[2])
+
+		(T,F,TFmap) = calculateTFMap(self.books[self.nameOfBook]['book'][self.trial,self.channel] , tmp_time , self.books[self.nameOfBook]['config']['samplingFrequency'] , 0)
+
+		self.amplitudeMapPlot.ax0.imshow(np.abs(TFmap) , aspect='auto' , origin='lower' , extent=[x_fromWhere,x_toWhere , 0.0,self.books[self.nameOfBook]['config']['samplingFrequency']/2.])
+		self.amplitudeMapPlot.ax0.hold(False)
+		# self.amplitudeMapPlot.ax0.set_xlabel(r'Time [s]')
+		self.amplitudeMapPlot.ax0.set_ylabel(r'Frequency [Hz]')
+
+		# self.amplitudeMapPlot.ax0.set_ylim(mapConfig['mapFreqRange'])
+
+		self.amplitudeMapPlot.ax1.clear()
+		self.amplitudeMapPlot.ax1.plot(time , np.squeeze(self.books[self.nameOfBook]['originalData'][self.trialsCalculated[self.trial]-1,self.channelsCalculated[self.channel]-1,:]) , 'k')
+		self.amplitudeMapPlot.ax1.plot(time , self.books[self.nameOfBook]['book'][self.trial,self.channel]['reconstruction'].sum().real , 'r')			
+		self.amplitudeMapPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
+		# self.amplitudeMapPlot.ax1.set_xlabel(r'Time [s]')
+		self.amplitudeMapPlot.ax1.set_ylabel(r'Amplitude [au]')
+
+		(y_fromWhere,y_toWhere) = self.amplitudeMapPlot.ax1.get_ylim()
+
+		self.amplitudeMapPlot.ax2.plot(time , func , 'r')
+		self.amplitudeMapPlot.ax2.set_xlim([x_fromWhere , x_toWhere])
+		self.amplitudeMapPlot.ax2.set_ylim([y_fromWhere , y_toWhere])
+		self.amplitudeMapPlot.ax2.hold(False)
+		self.amplitudeMapPlot.ax2.set_xlabel(r'Time [s]')
+		self.amplitudeMapPlot.ax2.set_ylabel(r'Amplitude [au]')
+
+		self.amplitudeMapPlot.draw()
 
 	def addBooks(self):
 		dialog = QtGui.QFileDialog.getOpenFileNames(self , 'Open book files' , expanduser('~') , 'Python pickles (*.p)')
@@ -270,29 +306,34 @@ class PlotterDecomposition(FigureCanvas):
 		self.ax2 = fig.add_subplot(312)
 		self.ax3 = fig.add_subplot(313)
 
-		if book != []:
-			x_fromWhere = 0
-			x_toWhere   = book['originalData'].shape[2]
+		# if book != []:
+		# 	time = np.arange(0,book['originalData'].shape[2]) / book['config']['samplingFrequency']
 
-			self.ax1.hold(False)
-			self.ax1.plot(np.squeeze(book['originalData'][which[0],which[1],:]) , 'k')
-			self.ax1.set_title('Original signal')
-			self.ax1.set_xlim([x_fromWhere , x_toWhere])
+		# 	x_fromWhere = 0
+		# 	x_toWhere   = book['originalData'].shape[2] / book['config']['samplingFrequency']
 
-			(y_fromWhere,y_toWhere) = self.ax1.get_ylim()
+		# 	self.ax1.hold(False)
+		# 	self.ax1.plot(time , np.squeeze(book['originalData'][which[0],which[1],:]) , 'k')
+		# 	self.ax1.set_title('Original signal')
+		# 	self.ax1.set_xlim([x_fromWhere , x_toWhere])
+		# 	self.ax1.set_ylabel(r'Amplitude [au]')
 
-			self.ax2.hold(False)
-			self.ax2.plot(np.squeeze(book['book'][which[0],which[1]]['reconstruction'].sum()).real , 'k')
-			self.ax2.set_title('Reconstruction')
-			self.ax2.set_xlim([x_fromWhere , x_toWhere])
-			self.ax2.set_ylim([y_fromWhere , y_toWhere])
+		# 	(y_fromWhere,y_toWhere) = self.ax1.get_ylim()
 
-			self.ax3.hold(False)
-			self.ax3.plot(np.squeeze(book['book'][which[0],which[1]]['reconstruction'][which[2]].real) , 'k')
-			self.ax3.set_title('Single function')
-			self.ax3.set_xlim([x_fromWhere , x_toWhere])
-			self.ax3.set_ylim([y_fromWhere , y_toWhere])
+		# 	self.ax2.hold(False)
+		# 	self.ax2.plot(time , np.squeeze(book['book'][which[0],which[1]]['reconstruction'].sum()).real , 'k')
+		# 	self.ax2.set_title('Reconstruction')
+		# 	self.ax2.set_xlim([x_fromWhere , x_toWhere])
+		# 	self.ax2.set_ylim([y_fromWhere , y_toWhere])
+		# 	self.ax2.set_ylabel(r'Amplitude [au]')
 
+		# 	self.ax3.hold(False)
+		# 	self.ax3.plot(time , np.squeeze(book['book'][which[0],which[1]]['reconstruction'][which[2]].real) , 'k')
+		# 	self.ax3.set_title('Single function')
+		# 	self.ax3.set_xlim([x_fromWhere , x_toWhere])
+		# 	self.ax3.set_ylim([y_fromWhere , y_toWhere])
+		# 	self.ax3.set_ylabel(r'Amplitude [au]')
+		# 	self.ax3.set_xlabel(r'Time [s]')
 
     def binding_plotter_with_ui(self):
         self.parent.layout1.insertWidget(0, self)
@@ -310,7 +351,7 @@ class PlotterAmplitudeMap(FigureCanvas):
 		FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
 		FigureCanvas.updateGeometry(self)
 
-		gs = gridspec.GridSpec(3,1,height_ratios=[3,1,1])
+		gs = gridspec.GridSpec(3,1,height_ratios=[4,1,1])
 
 		self.ax0 = fig.add_subplot(gs[0])
 		self.ax1 = fig.add_subplot(gs[1])
@@ -318,24 +359,28 @@ class PlotterAmplitudeMap(FigureCanvas):
 
 		fig.subplots_adjust(left=0.1, right=0.9)
 
-		if book != []:
-			pass
+		# if book != []:
+		# 	time = np.arange(0,book['originalData'].shape[2])	#,1./book['config']['samplingFrequency'])
 
-			# m   = ax0.imshow(np.abs(TFmap) , aspect='auto' , origin='lower' , extent=[0.0,4.0 , 0.0,64.0])
-			# ax0.set_xlabel(r'Time [s]')
-			# ax0.set_ylabel(r'Frequency [Hz]')
-			# ax0.set_ylim(config['mapFreqRange'])
+		# 	(T,F,TFmap) = calculateTFMap(book['book'][which[0],which[1]] , time , book['config']['samplingFrequency'] , 0)
 
-			# ax1.plot(time,signal)
-			# ax1.set_xlabel(r'Time [s]')
-			# ax1.set_ylabel(r'Amplitude [uV]')
+		# 	self.ax0.imshow(np.abs(TFmap) , aspect='auto' , origin='lower' , extent=[0.0,4.0 , 0.0,64.0])
+		# 	self.ax0.set_xlabel(r'Time [s]')
+		# 	self.ax0.set_ylabel(r'Frequency [Hz]')
 
-			# ax2.plot(time,book['reconstruction'].sum().real)
-			# ax2.set_xlabel(r'Time [s]')
-			# ax2.set_ylabel(r'Amplitude [uV]')
+		# 	# self.ax0.set_ylim(config['mapFreqRange'])
 
-			# self.cbar = fig.add_axes([0.92, 0.5, 0.02, 0.4])
-			# fig.colorbar(m, cax=self.cbar)
+		# 	self.ax1.plot(time / book['config']['samplingFrequency'] , np.squeeze(book['originalData'][which[0],which[1],:]) , 'k')
+		# 	self.ax1.plot(time / book['config']['samplingFrequency'] , book['book'][which[0],which[1]]['reconstruction'].sum().real , 'r')			
+		# 	self.ax1.set_xlabel(r'Time [s]')
+		# 	self.ax1.set_ylabel(r'Amplitude [au]')
+
+		# 	# ax2.plot(time,book['reconstruction'].sum().real)
+		# 	# ax2.set_xlabel(r'Time [s]')
+		# 	# ax2.set_ylabel(r'Amplitude [uV]')
+
+		# 	# self.cbar = fig.add_axes([0.92, 0.5, 0.02, 0.4])
+		# 	# fig.colorbar(m, cax=self.cbar)
 
     def binding_plotter_with_ui(self):
         self.parent.layout2.insertWidget(0, self)
