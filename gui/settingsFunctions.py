@@ -626,13 +626,15 @@ class mainWindow(QtGui.QMainWindow):
         item = None
         
         del self.dataMatrixes[path]
-        del self.books[nameOfBook]
 
-        item = self.ui.lst_books.findItems(nameOfBook , QtCore.Qt.MatchExactly)[0]
-        item = self.ui.lst_books.takeItem( self.ui.lst_books.row(item) )
-        itme = None
-
-        self.ui.lst_books.setCurrentRow(0)
+        try:
+            del self.books[nameOfBook]
+            item = self.ui.lst_books.findItems(nameOfBook , QtCore.Qt.MatchExactly)[0]
+            item = self.ui.lst_books.takeItem( self.ui.lst_books.row(item) )
+            item = None
+            self.ui.lst_books.setCurrentRow(0)
+        except KeyError:
+            pass
 
         if self.ui.lst_data.count() < 1:
             if self.flags['groupBoxDataResized'] == 1:
