@@ -114,6 +114,10 @@ class visWindow(QtGui.QMainWindow):
 		self.ui.led_channel.setText(str(self.channelsCalculated[self.channel]))
 		self.ui.led_atom.setText(str(self.atom+1))
 
+		self.ui.lbl_trialMax.setText( '/ '+str(  self.books[self.nameOfBook]['book'].shape[0] ) )
+		self.ui.lbl_channelMax.setText( '/ '+str(  self.books[self.nameOfBook]['book'].shape[1] ) )
+		self.ui.lbl_atomMax.setText( '/ '+str(  self.books[self.nameOfBook]['book'][self.trial,self.channel].shape[0] ) )
+
 		self.ui.led_atomWidth.setText(str(self.books[self.nameOfBook]['book'][self.trial,self.channel]['width'][self.atom]))
 		self.ui.led_atomFrequency.setText(str(self.books[self.nameOfBook]['book'][self.trial,self.channel]['freq'][self.atom]))
 		self.ui.led_atomAmplitude.setText(str(self.books[self.nameOfBook]['book'][self.trial,self.channel]['amplitude'][self.atom]))
@@ -133,7 +137,7 @@ class visWindow(QtGui.QMainWindow):
 
 	def changeButtonsState(self):
 		(maxTrial,maxChannel) = self.books[self.nameOfBook]['book'].shape
-		maxAtom               = self.books[self.nameOfBook]['book'][self.trial,self.channel]['envelope'].shape[0]
+		maxAtom               = self.books[self.nameOfBook]['book'][self.trial,self.channel].shape[0]
 
 		if self.atom == 0:
 			self.ui.btn_atomPrev.setEnabled(False)
@@ -177,31 +181,31 @@ class visWindow(QtGui.QMainWindow):
 
 	def nextAtom(self):
 		self.atom += 1
-		self.setWidgetsState(1)
+		self.setWidgetsState()
 
 	def prevAtom(self):
 		self.atom -= 1
-		self.setWidgetsState(1)
+		self.setWidgetsState()
 
 	def nextChannel(self):
 		self.channel += 1
 		self.atom     = 0
-		self.setWidgetsState(1)
+		self.setWidgetsState()
 
 	def prevChannel(self):
 		self.channel -= 1
 		self.atom     = 0
-		self.setWidgetsState(1)
+		self.setWidgetsState()
 
 	def nextTrial(self):
 		self.trial += 1
 		self.atom   = 0
-		self.setWidgetsState(1)
+		self.setWidgetsState()
 
 	def prevTrial(self):
 		self.trial -= 1
 		self.atom   = 0
-		self.setWidgetsState(1)
+		self.setWidgetsState()
 
 	def replot(self):
 		time = np.arange(0,self.books[self.nameOfBook]['originalData'].shape[2]) / self.books[self.nameOfBook]['config']['samplingFrequency']

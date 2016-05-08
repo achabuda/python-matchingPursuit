@@ -281,7 +281,7 @@ class visWindowUI(object):
 
 # GROUPBOX SETTINGS:
         settingsLayout             = QtGui.QVBoxLayout()
-        settingsControllsLayout    = QtGui.QVBoxLayout()
+        settingsControllsLayout    = QtGui.QGridLayout()
         settingsFiltersLayout      = QtGui.QVBoxLayout()
         
 
@@ -295,19 +295,17 @@ class visWindowUI(object):
         self.led_channel.setAlignment(QtCore.Qt.AlignCenter)
         self.led_channel.setObjectName(_fromUtf8("led_channel"))
 
+        self.lbl_channelMax = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_channelMax.setObjectName(_fromUtf8("lbl_channelMax"))
+
         self.btn_channelNext = QtGui.QPushButton(self.groupBoxSettings)
         self.btn_channelNext.setObjectName(_fromUtf8("btn_channelNext"))
 
-        settingsControllsSubLayout = QtGui.QHBoxLayout()
-        settingsControllsSubLayout.addWidget(self.lbl_channel)
-        settingsControllsSubLayout.addWidget(self.btn_channelPrev)
-        settingsControllsSubLayout.addWidget(self.led_channel)
-        settingsControllsSubLayout.addWidget(self.btn_channelNext)
-        settingsControllsSubLayout.setStretch(0,1)
-        settingsControllsSubLayout.setStretch(1,1)
-        settingsControllsSubLayout.setStretch(2,1)
-        settingsControllsSubLayout.setStretch(3,1)
-        settingsControllsLayout.addLayout(settingsControllsSubLayout)
+        settingsControllsLayout.addWidget(self.lbl_channel ,0,0)
+        settingsControllsLayout.addWidget(self.btn_channelPrev ,0,1)
+        settingsControllsLayout.addWidget(self.led_channel ,0,2)
+        settingsControllsLayout.addWidget(self.lbl_channelMax ,0,3)
+        settingsControllsLayout.addWidget(self.btn_channelNext ,0,4)
 
         self.lbl_trial = QtGui.QLabel(self.groupBoxSettings)
         self.lbl_trial.setObjectName(_fromUtf8("lbl_trial"))
@@ -319,19 +317,17 @@ class visWindowUI(object):
         self.led_trial.setAlignment(QtCore.Qt.AlignCenter)
         self.led_trial.setObjectName(_fromUtf8("led_trial"))
 
+        self.lbl_trialMax = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_trialMax.setObjectName(_fromUtf8("lbl_trialMax"))
+
         self.btn_trialNext = QtGui.QPushButton(self.groupBoxSettings)
         self.btn_trialNext.setObjectName(_fromUtf8("btn_trialNext"))
 
-        settingsControllsSubLayout = QtGui.QHBoxLayout()
-        settingsControllsSubLayout.addWidget(self.lbl_trial)
-        settingsControllsSubLayout.addWidget(self.btn_trialPrev)
-        settingsControllsSubLayout.addWidget(self.led_trial)
-        settingsControllsSubLayout.addWidget(self.btn_trialNext)
-        settingsControllsLayout.addLayout(settingsControllsSubLayout)
-        settingsControllsSubLayout.setStretch(0,1)
-        settingsControllsSubLayout.setStretch(1,1)
-        settingsControllsSubLayout.setStretch(2,1)
-        settingsControllsSubLayout.setStretch(3,1)
+        settingsControllsLayout.addWidget(self.lbl_trial ,1,0)
+        settingsControllsLayout.addWidget(self.btn_trialPrev ,1,1)
+        settingsControllsLayout.addWidget(self.led_trial ,1,2)
+        settingsControllsLayout.addWidget(self.lbl_trialMax ,1,3)
+        settingsControllsLayout.addWidget(self.btn_trialNext ,1,4)
 
         self.lbl_atom = QtGui.QLabel(self.groupBoxSettings)
         self.lbl_atom.setObjectName(_fromUtf8("lbl_atom"))
@@ -343,19 +339,19 @@ class visWindowUI(object):
         self.led_atom.setAlignment(QtCore.Qt.AlignCenter)
         self.led_atom.setObjectName(_fromUtf8("led_atom"))
 
+        self.lbl_atomMax = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_atomMax.setObjectName(_fromUtf8("lbl_atomMax"))
+
         self.btn_atomNext = QtGui.QPushButton(self.groupBoxSettings)
         self.btn_atomNext.setObjectName(_fromUtf8("btn_atomNext"))
 
-        settingsControllsSubLayout = QtGui.QHBoxLayout()
-        settingsControllsSubLayout.addWidget(self.lbl_atom)
-        settingsControllsSubLayout.addWidget(self.btn_atomPrev)
-        settingsControllsSubLayout.addWidget(self.led_atom)
-        settingsControllsSubLayout.addWidget(self.btn_atomNext)
-        settingsControllsLayout.addLayout(settingsControllsSubLayout)
-        settingsControllsSubLayout.setStretch(0,1)
-        settingsControllsSubLayout.setStretch(1,1)
-        settingsControllsSubLayout.setStretch(2,1)
-        settingsControllsSubLayout.setStretch(3,1)
+        settingsControllsLayout.addWidget(self.lbl_atom ,2,0)
+        settingsControllsLayout.addWidget(self.btn_atomPrev ,2,1)
+        settingsControllsLayout.addWidget(self.led_atom ,2,2)
+        settingsControllsLayout.addWidget(self.lbl_atomMax ,2,3)
+        settingsControllsLayout.addWidget(self.btn_atomNext ,2,4)
+
+
 
         settingsFiltersLayout.addSpacing(50)
 
@@ -659,8 +655,11 @@ class visWindowUI(object):
         self.btn_reset.setText(_translate("visWindow", "Reset", None))
 
         self.lbl_trial.setText(_translate("visWindow", "Trial:", None))
+        self.lbl_trialMax.setText(_translate("visWindow", "/tr", None))
         self.lbl_channel.setText(_translate("visWindow", "Channel:", None))
+        self.lbl_channelMax.setText(_translate("visWindow", "/ch", None))
         self.lbl_atom.setText(_translate("visWindow", "Atom:", None))
+        self.lbl_atomMax.setText(_translate("visWindow", "/at", None))
         self.lbl_mapFreqRange.setText(_translate("visWindow", "Map frequency range", None))
         self.lbl_mapFreqRangeMin.setText(_translate("visWindow", "Lower limit [Hz]:", None))
         self.lbl_mapFreqRangeMinN.setText(_translate("visWindow", "xx", None))
