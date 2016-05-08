@@ -23,8 +23,8 @@ University of Warsaw, July 06, 2015
 '''
 
 from PyQt4 import QtCore, QtGui
-import time
-from platform import system
+# import time
+# from platform import system
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -70,7 +70,7 @@ class mainWindowUI(object):
         # icon.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         # mainWindow.setWindowIcon(icon)
         
-        self.screenSize = QtGui.QDesktopWidget().screenGeometry()
+        # self.screenSize = QtGui.QDesktopWidget().screenGeometry()
         #print screenSize.width(), screenSize.height()
 
 # CENTRAL WIDGET:
@@ -112,10 +112,7 @@ class mainWindowUI(object):
 
         self.btn_addData = QtGui.QPushButton(self.groupBoxData)
         icon1 = QtGui.QIcon()
-        if system() == 'Windows':
-            icon1path = _fromUtf8("./pictures/add.png")
-        else:
-            icon1path = _fromUtf8("./pictures/add.svg")
+        icon1path = _fromUtf8("./pictures/icon_add.png")
         icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.btn_addData.setIcon(icon1)
         self.btn_addData.setIconSize(QtCore.QSize(24, 24))
@@ -124,10 +121,7 @@ class mainWindowUI(object):
 
         self.btn_removeData = QtGui.QPushButton(self.groupBoxData)
         icon1 = QtGui.QIcon()
-        if system() == 'Windows':
-            icon1path = _fromUtf8("./pictures/clear.png")
-        else:
-            icon1path = _fromUtf8("./pictures/clear.svg")
+        icon1path = _fromUtf8("./pictures/icon_remove.png")
         icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.btn_removeData.setIcon(icon1)
         self.btn_removeData.setIconSize(QtCore.QSize(24, 24))
@@ -136,10 +130,7 @@ class mainWindowUI(object):
 
         self.btn_settingsData = QtGui.QPushButton(self.groupBoxData)
         icon1 = QtGui.QIcon()
-        if system() == 'Windows':
-            icon1path = _fromUtf8("./pictures/settings.png")
-        else:
-            icon1path = _fromUtf8("./pictures/settings.svg")
+        icon1path = _fromUtf8("./pictures/icon_settings.png")
         icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.btn_settingsData.setIcon(icon1)
         self.btn_settingsData.setIconSize(QtCore.QSize(24, 24))
@@ -335,96 +326,64 @@ class mainWindowUI(object):
 
         dictionaryGrid.setRowStretch(6,1)
 
-        # self.lbl_dictionaryH2 = QtGui.QLabel(self.groupBoxDictionary)
-        # self.lbl_dictionaryH2.setStyleSheet('font-weight: bold;')
-        # self.lbl_dictionaryH2.setObjectName(_fromUtf8("lbl_dictionaryH2"))
-        # dictionaryGrid.addWidget(self.lbl_dictionaryH2,8,0,2,0)
-
-        # self.lbl_dictionaryFileName = QtGui.QLabel(self.groupBoxDictionary)
-        # self.lbl_dictionaryFileName.setStyleSheet("border: 1px solid gray; background-color: white;")
-        # self.lbl_dictionaryFileName.setObjectName(_fromUtf8("lbl_dictionaryFileName"))
-        # dictionaryGrid.addWidget(self.lbl_dictionaryFileName,9,0,1,0)
-
-        # self.btn_openDictionary = QtGui.QPushButton(self.groupBoxDictionary)
-        # icon1 = QtGui.QIcon()
-        # if system() == 'Windows':
-        #     icon1path = _fromUtf8("./pictures/file.png")
-        # else:
-        #     icon1path = _fromUtf8("./pictures/file.svg")
-        # icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)        
-        # self.btn_openDictionary.setIcon(icon1)
-        # self.btn_openDictionary.setIconSize(QtCore.QSize(24, 24))
-        # self.btn_openDictionary.setObjectName(_fromUtf8("btn_openDictionary"))
-        # dictionaryGrid.addWidget(self.btn_openDictionary,9,2)
-
 
 # GROUPBOX - SAVING
         savingGrid = QtGui.QGridLayout()
         self.groupBoxSaving.setLayout(savingGrid)
 
         self.btn_dictionarySave = QtGui.QPushButton(self.groupBoxSaving)
-        # icon1 = QtGui.QIcon()
-        # if system() == 'Windows':
-        #     icon1path = _fromUtf8("./pictures/add.png")
-        # else:
-        #     icon1path = _fromUtf8("./pictures/add.svg")
-        # icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        # self.btn_dictionarySave.setIcon(icon1)
-        # self.btn_dictionarySave.setIconSize(QtCore.QSize(24, 24))
+        icon1 = QtGui.QIcon()
+        icon1path = _fromUtf8("./pictures/icon_save.png")
+        icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_dictionarySave.setIcon(icon1)
+        self.btn_dictionarySave.setIconSize(QtCore.QSize(24, 24))
         self.btn_dictionarySave.setObjectName(_fromUtf8("btn_dictionarySave"))
+        self.btn_dictionarySave.setStyleSheet("text-align: left")
+
         savingGrid.addWidget(self.btn_dictionarySave,0,0)
 
         self.btn_configSave = QtGui.QPushButton(self.groupBoxSaving)
-        # icon1 = QtGui.QIcon()
-        # if system() == 'Windows':
-        #     icon1path = _fromUtf8("./pictures/add.png")
-        # else:
-        #     icon1path = _fromUtf8("./pictures/add.svg")
-        # icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        # self.btn_dictionarySave.setIcon(icon1)
-        # self.btn_dictionarySave.setIconSize(QtCore.QSize(24, 24))
+        icon1 = QtGui.QIcon()
+        icon1path = _fromUtf8("./pictures/icon_save.png")
+        icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_configSave.setIcon(icon1)
+        self.btn_configSave.setIconSize(QtCore.QSize(24, 24))
         self.btn_configSave.setObjectName(_fromUtf8("btn_configSave"))
+        self.btn_configSave.setStyleSheet("text-align: left")
+
         savingGrid.addWidget(self.btn_configSave,1,0)
 
-        savingGrid.setRowStretch(3,1)
+        savingGrid.setColumnStretch(1,1)
+        savingGrid.setRowStretch(2,1)
 
 # GROUPBOX - BOOKS
         booksGrid = QtGui.QGridLayout()
         self.groupBoxBooks.setLayout(booksGrid)
 
         self.btn_calculate = QtGui.QPushButton(self.groupBoxBooks)
-        # icon1 = QtGui.QIcon()
-        # if system() == 'Windows':
-        #     icon1path = _fromUtf8("./pictures/add.png")
-        # else:
-        #     icon1path = _fromUtf8("./pictures/add.svg")
-        # icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        # self.btn_calculate.setIcon(icon1)
-        # self.btn_calculate.setIconSize(QtCore.QSize(24, 24))
+        icon1 = QtGui.QIcon()
+        icon1path = _fromUtf8("./pictures/icon_run.png")
+        icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_calculate.setIcon(icon1)
+        self.btn_calculate.setIconSize(QtCore.QSize(24, 24))
         self.btn_calculate.setObjectName(_fromUtf8("btn_calculate"))
         booksGrid.addWidget(self.btn_calculate,0,0)
 
         self.btn_saveSelectedBooks = QtGui.QPushButton(self.groupBoxBooks)
-        # icon1 = QtGui.QIcon()
-        # if system() == 'Windows':
-        #     icon1path = _fromUtf8("./pictures/add.png")
-        # else:
-        #     icon1path = _fromUtf8("./pictures/add.svg")
-        # icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        # self.btn_saveSelectedBooks.setIcon(icon1)
-        # self.btn_saveSelectedBooks.setIconSize(QtCore.QSize(24, 24))
+        icon1 = QtGui.QIcon()
+        icon1path = _fromUtf8("./pictures/icon_save.png")
+        icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_saveSelectedBooks.setIcon(icon1)
+        self.btn_saveSelectedBooks.setIconSize(QtCore.QSize(24, 24))
         self.btn_saveSelectedBooks.setObjectName(_fromUtf8("btn_saveSelectedBooks"))
         booksGrid.addWidget(self.btn_saveSelectedBooks,0,1)
 
         self.btn_openVisualisationTool = QtGui.QPushButton(self.groupBoxBooks)
-        # icon1 = QtGui.QIcon()
-        # if system() == 'Windows':
-        #     icon1path = _fromUtf8("./pictures/add.png")
-        # else:
-        #     icon1path = _fromUtf8("./pictures/add.svg")
-        # icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        # self.btn_openVisualisationTool.setIcon(icon1)
-        # self.btn_openVisualisationTool.setIconSize(QtCore.QSize(24, 24))
+        icon1 = QtGui.QIcon()
+        icon1path = _fromUtf8("./pictures/icon_visualize.png")
+        icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_openVisualisationTool.setIcon(icon1)
+        self.btn_openVisualisationTool.setIconSize(QtCore.QSize(24, 24))
         self.btn_openVisualisationTool.setObjectName(_fromUtf8("btn_openVisualisationTool"))
         booksGrid.addWidget(self.btn_openVisualisationTool,0,2)
 
@@ -481,24 +440,21 @@ class mainWindowUI(object):
         self.lbl_energyLimit.setText(_translate("mainWindow", "Energy percentage:", None))
         self.lbl_nfft.setText(_translate("mainWindow", "NFFT:", None))
         self.lbl_displayInfo.setText(_translate("mainWindow", "Display informations:", None))
-        # self.lbl_dictionaryH1.setText(_translate("mainWindow", "Generate a dictionary:", None))
         self.lbl_dictonaryDensity.setText(_translate("mainWindow", "Dictionary density:", None))
         self.lbl_minS.setText(_translate("mainWindow", "Min. width:", None))
         self.lbl_maxS.setText(_translate("mainWindow", "Max. width:", None))
         self.lbl_useAsym.setText(_translate("mainWindow", "Include asymetrics:", None))
         self.lbl_useRect.setText(_translate("mainWindow", "Include rectangularities:", None))
-        # self.lbl_dictionaryH2.setText(_translate("mainWindow", "Or load dictionary from a file:", None))
         self.lbl_errors.setText(_translate("mainWindow", "Some error", None))
 
         self.btn_addData.setText(_translate("mainWindow", "Add", None))
         self.btn_removeData.setText(_translate("mainWindow", "Remove", None))
         self.btn_settingsData.setText(_translate("mainWindow", "", None))
-        self.btn_calculate.setText(_translate("mainWindow", "Run MP", None))
-        self.btn_saveSelectedBooks.setText(_translate("mainWindow", "Save selected", None))
-        self.btn_openVisualisationTool.setText(_translate("mainWindow", "Visualise", None))
-        
-        self.btn_dictionarySave.setText(_translate("mainWindow", "Save dictionary", None))
-        self.btn_configSave.setText(_translate("mainWindow", "Save config", None))
+        self.btn_calculate.setText(_translate("mainWindow", "Run", None))
+        self.btn_saveSelectedBooks.setText(_translate("mainWindow", "", None))
+        self.btn_openVisualisationTool.setText(_translate("mainWindow", "", None))
+        self.btn_dictionarySave.setText(_translate("mainWindow", "Save the dictionary", None))
+        self.btn_configSave.setText(_translate("mainWindow", "Save current configuration", None))
 
 
 ###################################################################################################################################################
