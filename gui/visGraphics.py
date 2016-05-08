@@ -73,23 +73,37 @@ class visWindowUI(object):
         self.groupBoxSubControlls.setObjectName(_fromUtf8("groupBoxSubControlls"))
 
 # GLOBAL BUTTONS & OTHER CONTROLLS:
+        icon1 = QtGui.QIcon()
+        icon1path = _fromUtf8("./pictures/icon_save.png")
+        icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+
         self.btn_saveDecomp = QtGui.QPushButton()
+        self.btn_saveDecomp.setIcon(icon1)
+        self.btn_saveDecomp.setIconSize(QtCore.QSize(24, 24))
         self.btn_saveDecomp.setObjectName(_fromUtf8("btn_saveDecomp"))
 
         self.btn_saveWigner = QtGui.QPushButton()
+        self.btn_saveWigner.setIcon(icon1)
+        self.btn_saveWigner.setIconSize(QtCore.QSize(24, 24))
         self.btn_saveWigner.setObjectName(_fromUtf8("btn_saveWigner"))
 
         self.btn_saveAmplitude = QtGui.QPushButton()
+        self.btn_saveAmplitude.setIcon(icon1)
+        self.btn_saveAmplitude.setIconSize(QtCore.QSize(24, 24))
         self.btn_saveAmplitude.setObjectName(_fromUtf8("btn_saveAmplitude"))
 
         self.btn_saveAmplitudeAsArray = QtGui.QPushButton()
+        self.btn_saveAmplitudeAsArray.setIcon(icon1)
+        self.btn_saveAmplitudeAsArray.setIconSize(QtCore.QSize(24, 24))
         self.btn_saveAmplitudeAsArray.setObjectName(_fromUtf8("btn_saveAmplitudeAsArray"))
 
         self.btn_saveTopography = QtGui.QPushButton()
+        self.btn_saveTopography.setIcon(icon1)
+        self.btn_saveTopography.setIconSize(QtCore.QSize(24, 24))
         self.btn_saveTopography.setObjectName(_fromUtf8("btn_saveTopography"))
 
-        self.btn_complex = QtGui.QPushButton()
-        self.btn_complex.setObjectName(_fromUtf8("btn_complex"))
+        # self.btn_complex = QtGui.QPushButton()
+        # self.btn_complex.setObjectName(_fromUtf8("btn_complex"))
 
 # GROUPBOX STATUS:
         self.statusLayout = QtGui.QGridLayout()
@@ -233,13 +247,32 @@ class visWindowUI(object):
         self.lst_books = QtGui.QListWidget(self.groupBoxBooks)
         
         self.btn_add = QtGui.QPushButton(self.groupBoxBooks)
+        icon1 = QtGui.QIcon()
+        icon1path = _fromUtf8("./pictures/icon_add.png")
+        icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_add.setIcon(icon1)
+        self.btn_add.setIconSize(QtCore.QSize(24, 24))
         self.btn_add.setObjectName(_fromUtf8("btn_add"))
 
         self.btn_remove = QtGui.QPushButton(self.groupBoxBooks)
+        icon1 = QtGui.QIcon()
+        icon1path = _fromUtf8("./pictures/icon_remove.png")
+        icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_remove.setIcon(icon1)
+        self.btn_remove.setIconSize(QtCore.QSize(24, 24))
         self.btn_remove.setObjectName(_fromUtf8("btn_remove"))
+
+        self.btn_saveBook = QtGui.QPushButton(self.groupBoxBooks)
+        icon1 = QtGui.QIcon()
+        icon1path = _fromUtf8("./pictures/icon_save.png")
+        icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_saveBook.setIcon(icon1)
+        self.btn_saveBook.setIconSize(QtCore.QSize(24, 24))
+        self.btn_saveBook.setObjectName(_fromUtf8("btn_saveBook"))
 
         booksButtonsLayout.addWidget(self.btn_add)
         booksButtonsLayout.addWidget(self.btn_remove)
+        booksButtonsLayout.addWidget(self.btn_saveBook)
 
         booksLayout.addLayout(booksButtonsLayout)
         booksLayout.addWidget(self.lst_books)
@@ -511,9 +544,19 @@ class visWindowUI(object):
         settingsFiltersLayout.addLayout(settingsFiltersSubLayout)
 
         self.btn_apply = QtGui.QPushButton(self.groupBoxSettings)
+        icon1 = QtGui.QIcon()
+        icon1path = _fromUtf8("./pictures/icon_apply.png")
+        icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_apply.setIcon(icon1)
+        self.btn_apply.setIconSize(QtCore.QSize(24, 24))
         self.btn_apply.setObjectName(_fromUtf8("btn_apply"))
 
         self.btn_reset = QtGui.QPushButton(self.groupBoxSettings)
+        icon1 = QtGui.QIcon()
+        icon1path = _fromUtf8("./pictures/icon_reset.png")
+        icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_reset.setIcon(icon1)
+        self.btn_reset.setIconSize(QtCore.QSize(24, 24))
         self.btn_reset.setObjectName(_fromUtf8("btn_reset"))
 
         settingsFiltersSubLayout = QtGui.QHBoxLayout()
@@ -549,7 +592,7 @@ class visWindowUI(object):
         subLayout2 = QtGui.QHBoxLayout()
         subLayout2.addWidget(self.btn_saveAmplitude)
         subLayout2.addWidget(self.btn_saveAmplitudeAsArray)
-        subLayout2.addWidget(self.btn_complex)
+        # subLayout2.addWidget(self.btn_complex)
         subLayout2.addStretch(1)
         self.layout2.addLayout(subLayout2)
         self.tabSpace.addTab(tab_amplitudeRepresentation, "Amplitude map")
@@ -597,14 +640,15 @@ class visWindowUI(object):
         self.groupBoxSettings.setTitle(_translate("visWindow"  , "Settings", None))
         self.groupBoxSubControlls.setTitle(_translate("visWindow"  , "", None))
 
-        self.btn_saveDecomp.setText(_translate("visWindow", "Save Picture", None))
-        self.btn_saveAmplitude.setText(_translate("visWindow", "Save Picture", None))
-        self.btn_saveAmplitudeAsArray.setText(_translate("visWindow", "Save Array", None))
+        self.btn_saveDecomp.setText(_translate("visWindow", "Picture", None))
+        self.btn_saveAmplitude.setText(_translate("visWindow", "Picture", None))
+        self.btn_saveAmplitudeAsArray.setText(_translate("visWindow", "Array", None))
         self.btn_saveWigner.setText(_translate("visWindow", "Save", None))
         self.btn_saveTopography.setText(_translate("visWindow", "Save", None))
-        self.btn_complex.setText(_translate("visWindow", "Draw complex maps", None))
+        # self.btn_complex.setText(_translate("visWindow", "Draw complex maps", None))
         self.btn_add.setText(_translate("visWindow", "Add", None))
         self.btn_remove.setText(_translate("visWindow", "Remove", None))
+        self.btn_saveBook.setText(_translate("visWindow", "Save", None))
         self.btn_trialNext.setText(_translate("visWindow", ">", None))
         self.btn_trialPrev.setText(_translate("visWindow", "<", None))
         self.btn_channelNext.setText(_translate("visWindow", ">", None))

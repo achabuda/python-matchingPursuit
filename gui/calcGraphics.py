@@ -87,6 +87,11 @@ class calcWindowUI(object):
         layout.setRowStretch(3, 1)
         
         self.btn_stop = QtGui.QPushButton()
+        icon1 = QtGui.QIcon()
+        icon1path = _fromUtf8("./pictures/icon_cancel.png")
+        icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_stop.setIcon(icon1)
+        self.btn_stop.setIconSize(QtCore.QSize(24, 24))
         self.btn_stop.setObjectName(_fromUtf8("btn_stop"))
         
         hbox = QtGui.QHBoxLayout()
