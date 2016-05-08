@@ -29,7 +29,7 @@ import sys
 def _pythonMatchingPursuitVisualizer(params):
     app = QtGui.QApplication(params)
     myapp = visWindow()
-    myapp.showMaximized()
+    myapp.show()
     return app.exec_()
 
 if __name__ == "__main__":

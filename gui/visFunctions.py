@@ -67,13 +67,13 @@ class visWindow(QtGui.QMainWindow):
 				self.books[item] = inputs[item]
 			self.ui.lst_books.setCurrentRow(0)
 
-			self.decompositionPlot = PlotterDecomposition(self.ui)
-			self.amplitudeMapPlot  = PlotterAmplitudeMap(self.ui)
 			self.setVariables()
 			self.setWidgetsState()
 		else:
-			self.decompositionPlot = PlotterDecomposition(self.ui)
-			self.amplitudeMapPlot  = PlotterAmplitudeMap(self.ui)
+			self.enableAllButtons(False)
+
+		self.decompositionPlot = PlotterDecomposition(self.ui)
+		self.amplitudeMapPlot  = PlotterAmplitudeMap(self.ui)
 		
 		self.decompositionPlot.binding_plotter_with_ui()
 		self.amplitudeMapPlot.binding_plotter_with_ui()
@@ -84,15 +84,33 @@ class visWindow(QtGui.QMainWindow):
 		self.channel   = 0
 		self.atom      = 0
 
-		self.nameOfBook = self.ui.lst_books.currentItem().text()
-
 		self.atomTypes = {}
 		self.atomTypes['11'] = 'Gabor function'
 		self.atomTypes['21'] = 'Asymetric function'
 		self.atomTypes['32'] = 'Tukey-based function'
 
-		self.channelsCalculated = self.books[self.nameOfBook]['config']['channels2calc']
-		self.trialsCalculated   = self.books[self.nameOfBook]['config']['trials2calc']
+		try:
+			self.nameOfBook = self.ui.lst_books.currentItem().text()
+			self.channelsCalculated = self.books[self.nameOfBook]['config']['channels2calc']
+			self.trialsCalculated   = self.books[self.nameOfBook]['config']['trials2calc']
+		except AttributeError:
+			# means that last book was removed from the list
+			return
+
+	def enableAllButtons(self , flag):
+		self.ui.btn_remove.setEnabled(flag)
+		self.ui.btn_saveBook.setEnabled(flag)
+		self.ui.btn_channelNext.setEnabled(flag)
+		self.ui.btn_channelPrev.setEnabled(flag)
+		self.ui.btn_trialNext.setEnabled(flag)
+		self.ui.btn_trialPrev.setEnabled(flag)
+		self.ui.btn_atomNext.setEnabled(flag)
+		self.ui.btn_atomPrev.setEnabled(flag)
+		self.ui.btn_saveAmplitude.setEnabled(flag)
+		self.ui.btn_reset.setEnabled(flag)
+		self.ui.btn_apply.setEnabled(flag)
+		self.ui.btn_saveDecomp.setEnabled(flag)
+		self.ui.btn_saveAmplitudeAsArray.setEnabled(flag)
 
 	def setConnections(self):
 		self.ui.btn_atomNext.clicked.connect(self.nextAtom)
@@ -103,10 +121,26 @@ class visWindow(QtGui.QMainWindow):
 		self.ui.btn_channelPrev.clicked.connect(self.prevChannel)
 
 		self.ui.btn_add.clicked.connect(self.addBooks)
+		self.ui.btn_remove.clicked.connect(self.removeBook)
 
 		self.ui.lst_books.currentItemChanged.connect(self.selectBook)
 
-	def setWidgetsState(self , flag=0):
+	def setWidgetsState(self , flag=1):
+		if flag == 0:
+			self.ui.led_atomType.setText('')
+			self.ui.led_atomWidth.setText('')
+			self.ui.led_atomFrequency.setText('')
+			self.ui.led_atomAmplitude.setText('')
+			self.ui.led_atomStart.setText('')
+			self.ui.led_atomLatency.setText('')
+			self.ui.led_atomEnd.setText('')
+			self.ui.led_channel.setText('')
+			self.ui.led_trial.setText('')
+			self.ui.led_atom.setText('')
+			self.ui.lbl_channelMax.setText('/ ch')
+			self.ui.lbl_trialMax.setText('/ tr')
+			self.ui.lbl_atomMax.setText('/ at')
+			return
 
 		self.ui.led_atomType.setText( self.atomTypes[str( self.books[self.nameOfBook]['book'][self.trial,self.channel]['shapeType'][self.atom]) ])
 
@@ -136,6 +170,12 @@ class visWindow(QtGui.QMainWindow):
 		self.replot()
 
 	def changeButtonsState(self):
+		if self.ui.lst_books.count() == 0:
+			self.enableAllButtons(False)
+			return
+		else:
+			self.enableAllButtons(True)
+
 		(maxTrial,maxChannel) = self.books[self.nameOfBook]['book'].shape
 		maxAtom               = self.books[self.nameOfBook]['book'][self.trial,self.channel].shape[0]
 
@@ -293,6 +333,31 @@ class visWindow(QtGui.QMainWindow):
 				self.setWidgetsState()
 			else:
 				return
+
+	def removeBook(self):
+		nameOfBook = self.ui.lst_books.currentItem().text()
+
+		item = self.ui.lst_books.takeItem(self.ui.lst_books.currentRow())
+		item = None
+		del self.books[nameOfBook]
+
+		if self.ui.lst_books.count() > 0:
+			self.setVariables()
+			self.setWidgetsState()
+		else:
+			self.decompositionPlot.ax1.clear()
+			self.decompositionPlot.ax2.clear()
+			self.decompositionPlot.ax3.clear()
+			self.decompositionPlot.draw()
+
+			self.amplitudeMapPlot.ax0.clear()
+			self.amplitudeMapPlot.ax1.clear()
+			self.amplitudeMapPlot.ax2.clear()
+			self.amplitudeMapPlot.draw()
+
+			self.setWidgetsState(0)
+			self.enableAllButtons(False)
+
 	
 #######################################################################
 #######################################################################
@@ -300,15 +365,15 @@ class visWindow(QtGui.QMainWindow):
 class PlotterDecomposition(FigureCanvas):
     def __init__(self, parent , book=[] , which=[0,0,0]):
 		self.parent = proxy(parent)
-		fig = Figure()
-		super(PlotterDecomposition,self).__init__(fig)
+		self.fig = Figure()
+		super(PlotterDecomposition,self).__init__(self.fig)
 
 		FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
 		FigureCanvas.updateGeometry(self)
 
-		self.ax1 = fig.add_subplot(311)
-		self.ax2 = fig.add_subplot(312)
-		self.ax3 = fig.add_subplot(313)
+		self.ax1 = self.fig.add_subplot(311)
+		self.ax2 = self.fig.add_subplot(312)
+		self.ax3 = self.fig.add_subplot(313)
 
     def binding_plotter_with_ui(self):
         self.parent.layout1.insertWidget(0, self)
