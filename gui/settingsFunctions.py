@@ -617,9 +617,22 @@ class mainWindow(QtGui.QMainWindow):
         path = self.filePath
 
         item = self.ui.lst_data.currentItem()
+        
+        nameOfData = str(item.text())
+        where      = nameOfData.rfind('.')
+        nameOfBook = nameOfData[0:where] + '_BOOK' + nameOfData[where:]
+
         item = self.ui.lst_data.takeItem(self.ui.lst_data.currentRow())
         item = None
+        
         del self.dataMatrixes[path]
+        del self.books[nameOfBook]
+
+        item = self.ui.lst_books.findItems(nameOfBook , QtCore.Qt.MatchExactly)[0]
+        item = self.ui.lst_books.takeItem( self.ui.lst_books.row(item) )
+        itme = None
+
+        self.ui.lst_books.setCurrentRow(0)
 
         if self.ui.lst_data.count() < 1:
             if self.flags['groupBoxDataResized'] == 1:
@@ -777,7 +790,6 @@ class mainWindow(QtGui.QMainWindow):
     def openVisualizer(self):
         self.flags['visualizerOpened'] = 1
 
-        # books = self.getSelectedBooks()
         inputs = self.saveBooks('passing')
 
         self.visWindowHandler = visWindow(inputs)
