@@ -33,7 +33,8 @@ from matplotlib        import gridspec, ticker
 
 from PySide import QtGui, QtCore
 
-from weakref import proxy
+from weakref   import proxy
+from functools import partial
 
 # libraries imports #
 import numpy     as np
@@ -44,11 +45,8 @@ from os.path   import expanduser
 # gui imports #
 from visGraphics import visWindowUI
 
-# # modules imports #
+# modules imports #
 from src.drawing      import calculateTFMap
-# from src.utils      import generateRangeFromString, generateFinalConfig , retranslateDictionaryConfig
-# from src.dictionary import generateDictionary
-# from src.processing import calculateMP
 
 class visWindow(QtGui.QMainWindow):
 	sig_windowClosed   = QtCore.Signal()
@@ -125,7 +123,8 @@ class visWindow(QtGui.QMainWindow):
 		self.ui.btn_add.clicked.connect(self.addBooks)
 		self.ui.btn_remove.clicked.connect(self.removeBook)
 
-		self.ui.btn_saveDecomp.clicked.connect(self.saveDecompositionFigure)
+		self.ui.btn_saveDecomp.clicked.connect(partial(self.saveFigure, 'decomposition'))
+		self.ui.btn_saveAmplitude.clicked.connect(partial(self.saveFigure, 'amplitudeMap'))
 
 		self.ui.lst_books.currentItemChanged.connect(self.selectBook)
 
@@ -214,7 +213,7 @@ class visWindow(QtGui.QMainWindow):
 		else:
 			self.ui.btn_trialNext.setEnabled(True)
 
-	def saveDecompositionFigure(self):
+	def saveFigure(self , which):
 		nameOfBook = str(self.ui.lst_books.currentItem().text())
 
 		whereFrom  = nameOfBook.rfind('/')
@@ -224,13 +223,15 @@ class visWindow(QtGui.QMainWindow):
 		
 		fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save decomposition figure' , expanduser('~') + nameOfBook , 'Portable Network Graphics (*.png);;Portable Document Format (*.pdf);;')
 
-		if len(fileName) == 0:
+		if len(fileName[0]) == 0:
 			return
 		
 		fileName = str(fileName[0])
 		
-		self.decompositionPlot.fig.savefig(fileName , dpi=300)
-
+		if which == 'decomposition':
+			self.decompositionPlot.fig.savefig(fileName , dpi=300)
+		elif which == 'amplitudeMap':
+			self.amplitudeMapPlot.fig.savefig(fileName , dpi=300)
 
 	def closeEvent(self, event):
 		self.sig_windowClosed.emit()
