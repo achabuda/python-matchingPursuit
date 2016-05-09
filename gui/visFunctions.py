@@ -33,6 +33,7 @@ from matplotlib        import gridspec, ticker
 
 from PySide import QtGui, QtCore
 
+import pickle
 from weakref   import proxy
 from functools import partial
 
@@ -126,6 +127,8 @@ class visWindow(QtGui.QMainWindow):
 		self.ui.btn_saveDecomp.clicked.connect(partial(self.saveFigure, 'decomposition'))
 		self.ui.btn_saveAmplitude.clicked.connect(partial(self.saveFigure, 'amplitudeMap'))
 
+		self.ui.btn_saveAmplitudeAsArray.clicked.connect(self.saveAmplitudeMapAsMatrix)
+
 		self.ui.lst_books.currentItemChanged.connect(self.selectBook)
 
 	def setWidgetsState(self , flag=1):
@@ -212,6 +215,24 @@ class visWindow(QtGui.QMainWindow):
 			self.ui.btn_trialNext.setEnabled(False)
 		else:
 			self.ui.btn_trialNext.setEnabled(True)
+
+	def saveAmplitudeMapAsMatrix(self):
+		nameOfBook = str(self.ui.lst_books.currentItem().text())
+
+		whereFrom  = nameOfBook.rfind('/')
+		whereTo    = nameOfBook.rfind('.')
+		whereBOOK  = nameOfBook.rfind('_BOOK')
+		nameOfBook = nameOfBook[whereFrom:whereTo]
+		
+		fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save map array to file' , expanduser('~') + nameOfBook , 'Python pickles (*.p);;')
+
+		if len(fileName[0]) == 0:
+			return
+
+		fileName = str(fileName[0])
+		if fileName[-2:] == '.p':
+			with open(fileName , 'wb') as f:
+				pickle.dump({'arrayMap' : self.TFmap, 'time' : self.T , 'freqs' : self.F} , f)
 
 	def saveFigure(self , which):
 		nameOfBook = str(self.ui.lst_books.currentItem().text())
@@ -302,9 +323,9 @@ class visWindow(QtGui.QMainWindow):
 
 		tmp_time = np.arange(0,self.books[self.nameOfBook]['originalData'].shape[2])
 
-		(T,F,TFmap) = calculateTFMap(self.books[self.nameOfBook]['book'][self.trial,self.channel] , tmp_time , self.books[self.nameOfBook]['config']['samplingFrequency'] , 0)
+		(self.T,self.F,self.TFmap) = calculateTFMap(self.books[self.nameOfBook]['book'][self.trial,self.channel] , tmp_time , self.books[self.nameOfBook]['config']['samplingFrequency'] , 0)
 
-		self.amplitudeMapPlot.ax0.imshow(np.abs(TFmap) , aspect='auto' , origin='lower' , extent=[x_fromWhere,x_toWhere , 0.0,self.books[self.nameOfBook]['config']['samplingFrequency']/2.])
+		self.amplitudeMapPlot.ax0.imshow(np.abs(self.TFmap) , aspect='auto' , origin='lower' , extent=[x_fromWhere,x_toWhere , 0.0,self.books[self.nameOfBook]['config']['samplingFrequency']/2.])
 		self.amplitudeMapPlot.ax0.hold(False)
 		# self.amplitudeMapPlot.ax0.set_xlabel(r'Time [s]')
 		self.amplitudeMapPlot.ax0.set_ylabel(r'Frequency [Hz]')
