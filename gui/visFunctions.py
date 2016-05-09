@@ -242,7 +242,7 @@ class visWindow(QtGui.QMainWindow):
 		whereBOOK  = nameOfBook.rfind('_BOOK')
 		nameOfBook = nameOfBook[whereFrom:whereTo]
 		
-		fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save decomposition figure' , expanduser('~') + nameOfBook , 'Portable Network Graphics (*.png);;Portable Document Format (*.pdf);;')
+		fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save decomposition figure' , expanduser('~') + nameOfBook , 'Portable Network Graphics (*.png);;Scalable Vector Graphics (*.svg);;Portable Document Format (*.pdf);;')
 
 		if len(fileName[0]) == 0:
 			return
