@@ -154,8 +154,8 @@ class visWindow(QtGui.QMainWindow):
 		self.ui.led_channel.setText(str(self.channelsCalculated[self.channel]))
 		self.ui.led_atom.setText(str(self.atom+1))
 
-		self.ui.lbl_trialMax.setText( '/ '+str(  self.books[self.nameOfBook]['book'].shape[0] ) )
-		self.ui.lbl_channelMax.setText( '/ '+str(  self.books[self.nameOfBook]['book'].shape[1] ) )
+		self.ui.lbl_trialMax.setText( '/'+str( self.trialsCalculated[-1:][0] ) )
+		self.ui.lbl_channelMax.setText( '/'+str( self.channelsCalculated[-1:][0] ) )
 		self.ui.lbl_atomMax.setText( '/ '+str(  self.books[self.nameOfBook]['book'][self.trial,self.channel].shape[0] ) )
 
 		self.ui.led_atomWidth.setText(str(self.books[self.nameOfBook]['book'][self.trial,self.channel]['width'][self.atom]))
