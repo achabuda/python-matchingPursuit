@@ -67,13 +67,15 @@ class visWindow(QtGui.QMainWindow):
 				self.books[item] = inputs[item]
 			self.ui.lst_books.setCurrentRow(0)
 
+			self.decompositionPlot = PlotterDecomposition(self.ui)
+			self.amplitudeMapPlot  = PlotterAmplitudeMap(self.ui)
+			
 			self.setVariables()
 			self.setWidgetsState()
 		else:
 			self.enableAllButtons(False)
-
-		self.decompositionPlot = PlotterDecomposition(self.ui)
-		self.amplitudeMapPlot  = PlotterAmplitudeMap(self.ui)
+			self.decompositionPlot = PlotterDecomposition(self.ui)
+			self.amplitudeMapPlot  = PlotterAmplitudeMap(self.ui)
 		
 		self.decompositionPlot.binding_plotter_with_ui()
 		self.amplitudeMapPlot.binding_plotter_with_ui()
