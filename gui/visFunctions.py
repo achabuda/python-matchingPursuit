@@ -125,6 +125,8 @@ class visWindow(QtGui.QMainWindow):
 		self.ui.btn_add.clicked.connect(self.addBooks)
 		self.ui.btn_remove.clicked.connect(self.removeBook)
 
+		self.ui.btn_saveDecomp.clicked.connect(self.saveDecompositionFigure)
+
 		self.ui.lst_books.currentItemChanged.connect(self.selectBook)
 
 	def setWidgetsState(self , flag=1):
@@ -211,6 +213,23 @@ class visWindow(QtGui.QMainWindow):
 			self.ui.btn_trialNext.setEnabled(False)
 		else:
 			self.ui.btn_trialNext.setEnabled(True)
+
+	def saveDecompositionFigure(self):
+		nameOfBook = str(self.ui.lst_books.currentItem().text())
+
+		whereFrom  = nameOfBook.rfind('/')
+		whereTo    = nameOfBook.rfind('.')
+		whereBOOK  = nameOfBook.rfind('_BOOK')
+		nameOfBook = nameOfBook[whereFrom:whereTo]
+		
+		fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save decomposition figure' , expanduser('~') + nameOfBook , 'Portable Network Graphics (*.png);;Portable Document Format (*.pdf);;')
+
+		if len(fileName) == 0:
+			return
+		
+		fileName = str(fileName[0])
+		
+		self.decompositionPlot.fig.savefig(fileName , dpi=300)
 
 
 	def closeEvent(self, event):
@@ -387,19 +406,19 @@ class PlotterDecomposition(FigureCanvas):
 class PlotterAmplitudeMap(FigureCanvas):
     def __init__(self, parent , book=[] , which=[0,0,0]):
 		self.parent = proxy(parent)
-		fig = Figure()
-		super(PlotterAmplitudeMap,self).__init__(fig)
+		self.fig = Figure()
+		super(PlotterAmplitudeMap,self).__init__(self.fig)
 
 		FigureCanvas.setSizePolicy(self, QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
 		FigureCanvas.updateGeometry(self)
 
 		gs = gridspec.GridSpec(3,1,height_ratios=[4,1,1])
 
-		self.ax0 = fig.add_subplot(gs[0])
-		self.ax1 = fig.add_subplot(gs[1])
-		self.ax2 = fig.add_subplot(gs[2])
+		self.ax0 = self.fig.add_subplot(gs[0])
+		self.ax1 = self.fig.add_subplot(gs[1])
+		self.ax2 = self.fig.add_subplot(gs[2])
 
-		fig.subplots_adjust(left=0.1, right=0.9)
+		self.fig.subplots_adjust(left=0.1, right=0.9)
 
     def binding_plotter_with_ui(self):
         self.parent.layout2.insertWidget(0, self)
