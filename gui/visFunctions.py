@@ -36,6 +36,7 @@ from PySide import QtGui, QtCore
 import pickle
 from weakref   import proxy
 from functools import partial
+from platform  import system
 
 # libraries imports #
 import numpy     as np
@@ -130,6 +131,7 @@ class visWindow(QtGui.QMainWindow):
 		self.ui.btn_saveAmplitudeAsArray.clicked.connect(self.saveAmplitudeMapAsMatrix)
 
 		self.ui.lst_books.currentItemChanged.connect(self.selectBook)
+		self.ui.lst_books.sig_filesDropped.connect(self.dropBookFiles)
 
 	def setWidgetsState(self , flag=1):
 		if flag == 0:
@@ -147,6 +149,8 @@ class visWindow(QtGui.QMainWindow):
 			self.ui.lbl_trialMax.setText('/ tr')
 			self.ui.lbl_atomMax.setText('/ at')
 			return
+
+		self.determinRangesForHSBs()
 
 		self.ui.led_atomType.setText( self.atomTypes[str( self.books[self.nameOfBook]['book'][self.trial,self.channel]['shapeType'][self.atom]) ])
 
@@ -215,6 +219,9 @@ class visWindow(QtGui.QMainWindow):
 			self.ui.btn_trialNext.setEnabled(False)
 		else:
 			self.ui.btn_trialNext.setEnabled(True)
+
+	def determinRangesForHSBs(self):
+		pass
 
 	def saveAmplitudeMapAsMatrix(self):
 		nameOfBook = str(self.ui.lst_books.currentItem().text())
@@ -400,6 +407,29 @@ class visWindow(QtGui.QMainWindow):
 
 			self.setWidgetsState(0)
 			self.enableAllButtons(False)
+
+	def dropBookFiles(self , listOfFiles):
+		for filePath in listOfFiles:
+			if filePath != '':
+				if self.ui.lst_books.findItems(str(filePath) , QtCore.Qt.MatchExactly) != []:
+					continue
+
+				if filePath[-2:] == '.p':
+					with open(filePath,'rb') as f:
+						result = pickle.load(f)
+					
+					self.books[str(filePath)] = result
+
+					item = QtGui.QListWidgetItem(str(filePath))
+					self.ui.lst_books.addItem(item)
+					self.ui.lst_books.setCurrentItem(item)
+				else:
+					pass
+
+				self.setVariables()
+				self.setWidgetsState()
+			else:
+				return
 
 	
 #######################################################################

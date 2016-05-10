@@ -23,8 +23,8 @@ University of Warsaw, July 06, 2015
 '''
 
 from PyQt4 import QtCore, QtGui
-# import time
-# from platform import system
+
+from dragAndDropListWidget_PYQT import DragDropListWidget_PYQT
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -137,7 +137,7 @@ class mainWindowUI(object):
         self.btn_settingsData.setObjectName(_fromUtf8("btn_settingsData"))
         dataGrid.addWidget(self.btn_settingsData,0,2)
 
-        self.lst_data = DragDropListWidget(QtGui.QMainWindow)
+        self.lst_data = DragDropListWidget_PYQT(QtGui.QMainWindow)
         dataGrid.addWidget(self.lst_data,1,0,2,0)
 
 # GROUPBOX - DATAINFO
@@ -459,41 +459,6 @@ class mainWindowUI(object):
 
 ###################################################################################################################################################
 ###################################################################################################################################################
-
-class DragDropListWidget(QtGui.QListWidget):
-
-    sig_filesDropped = QtCore.pyqtSignal(list)
-
-    def __init__(self, type, parent=None):
-        super(DragDropListWidget, self).__init__(parent)
-        self.setAcceptDrops(True) 
- 
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasUrls():
-            event.accept()
-        else:
-            event.ignore()
- 
-    def dragMoveEvent(self, event):
-        if event.mimeData().hasUrls():
-            event.setDropAction(QtCore.Qt.CopyAction)
-            event.accept()
-        else:
-            event.ignore()
- 
-    def dropEvent(self, event):
-        if event.mimeData().hasUrls():
-            event.setDropAction(QtCore.Qt.CopyAction)
-            event.accept()
-            fileList = []
-            for url in event.mimeData().urls():
-                # url = url.toLocalFile()
-                fileList.append(str(url.toLocalFile()))
-            
-            self.sig_filesDropped.emit(fileList)
-        else:
-            event.ignore()
-
 ###################################################################################################################################################
 ###################################################################################################################################################
 

@@ -23,8 +23,8 @@ University of Warsaw, July 06, 2015
 '''
 
 from PySide   import QtGui, QtCore
-# from PyQt4 import QtCore, QtGui
-from platform import system
+# from platform import system
+from dragAndDropListWidget_PYSIDE import DragDropListWidget_PYSIDE
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -244,7 +244,8 @@ class visWindowUI(object):
         booksLayout = QtGui.QVBoxLayout()
         booksButtonsLayout = QtGui.QHBoxLayout()
         
-        self.lst_books = QtGui.QListWidget(self.groupBoxBooks)
+        # self.lst_books = QtGui.QListWidget(self.groupBoxBooks)
+        self.lst_books = DragDropListWidget_PYSIDE(QtGui.QMainWindow)
         
         self.btn_add = QtGui.QPushButton(self.groupBoxBooks)
         icon1 = QtGui.QIcon()

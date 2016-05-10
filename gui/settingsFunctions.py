@@ -359,6 +359,9 @@ class mainWindow(QtGui.QMainWindow):
 
     def channelsRangeChanged(self):
         text      = self.ui.led_channels2calc.text()
+        if text == ',' or text == ':' or text == ';':
+            self.ui.led_channels2calc.setText('1'+text)
+            return
         possible  = ['1','2','3','4','5','6','7','8','9','0',':',';','-',' ',',']
         forbidden = ['::',':;',';;',';:','-:',':-',';-','-;','--']
         if any(x not in possible for x in text):
@@ -373,6 +376,9 @@ class mainWindow(QtGui.QMainWindow):
             
     def trialsRangeChanged(self):
         text      = self.ui.led_trials2calc.text()
+        if text == ',' or text == ':' or text == ';':
+            self.ui.led_trials2calc.setText('1'+text)
+            return
         possible  = ['1','2','3','4','5','6','7','8','9','0',':',';','-',' ',',']
         forbidden = ['::',':;',';;',';:','-:',':-',';-','-;','--']
         if any(x not in possible for x in text):
