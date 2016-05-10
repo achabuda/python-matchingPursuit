@@ -124,6 +124,9 @@ class visWindow(QtGui.QMainWindow):
 
 		self.ui.btn_add.clicked.connect(self.addBooks)
 		self.ui.btn_remove.clicked.connect(self.removeBook)
+		self.ui.btn_saveBook.clicked.connect(self.saveBook)
+
+		self.ui.btn_reset.clicked.connect(self.resetSliders)
 
 		self.ui.btn_saveDecomp.clicked.connect(partial(self.saveFigure, 'decomposition'))
 		self.ui.btn_saveAmplitude.clicked.connect(partial(self.saveFigure, 'amplitudeMap'))
@@ -150,7 +153,7 @@ class visWindow(QtGui.QMainWindow):
 			self.ui.lbl_atomMax.setText('/ at')
 			return
 
-		self.determinRangesForHSBs()
+		self.determineRangesForHSBs()
 
 		self.ui.led_atomType.setText( self.atomTypes[str( self.books[self.nameOfBook]['book'][self.trial,self.channel]['shapeType'][self.atom]) ])
 
@@ -220,8 +223,61 @@ class visWindow(QtGui.QMainWindow):
 		else:
 			self.ui.btn_trialNext.setEnabled(True)
 
-	def determinRangesForHSBs(self):
-		pass
+	def determineRangesForHSBs(self):
+		value_min = 0
+		value_max = self.books[self.nameOfBook]['config']['samplingFrequency']
+		self.ui.hsb_mapFreqRangeMin.setMinimum(value_min)
+		self.ui.hsb_mapFreqRangeMin.setMaximum(value_max)
+		self.ui.hsb_mapFreqRangeMin.setValue(value_min)
+		self.ui.lbl_mapFreqRangeMinN.setText(str(value_min))
+		self.ui.hsb_mapFreqRangeMax.setMinimum(value_min)
+		self.ui.hsb_mapFreqRangeMax.setMaximum(value_max)
+		self.ui.hsb_mapFreqRangeMax.setValue(value_max)
+		self.ui.lbl_mapFreqRangeMaxN.setText(str(value_max))
+
+		value_min = 0
+		value_max = int(np.max(self.books[self.nameOfBook]['book'][self.trial,self.channel]['amplitude'])+1)
+		self.ui.hsb_structAmplitudeRangeMin.setMinimum(value_min)
+		self.ui.hsb_structAmplitudeRangeMin.setMaximum(value_max)
+		self.ui.hsb_structAmplitudeRangeMin.setValue(value_min)
+		self.ui.lbl_structAmplitudeRangeMinN.setText(str(value_min))
+		self.ui.hsb_structAmplitudeRangeMax.setMinimum(value_min)
+		self.ui.hsb_structAmplitudeRangeMax.setMaximum(value_max)
+		self.ui.hsb_structAmplitudeRangeMax.setValue(value_max)
+		self.ui.lbl_structAmplitudeRangeMaxN.setText(str(value_max))
+
+		value_min = 0
+		value_max = self.books[self.nameOfBook]['originalData'].shape[2] / self.books[self.nameOfBook]['config']['samplingFrequency']
+		self.ui.hsb_structPositionRangeMin.setMinimum(value_min)
+		self.ui.hsb_structPositionRangeMin.setMaximum(value_max)
+		self.ui.hsb_structPositionRangeMin.setValue(value_min)
+		self.ui.lbl_structPositionRangeMinN.setText(str(value_min))
+		self.ui.hsb_structPositionRangeMax.setMinimum(value_min)
+		self.ui.hsb_structPositionRangeMax.setMaximum(value_max)
+		self.ui.hsb_structPositionRangeMax.setValue(value_max)
+		self.ui.lbl_structPositionRangeMaxN.setText(str(value_max))
+
+		value_min = 0
+		value_max = self.books[self.nameOfBook]['config']['samplingFrequency']
+		self.ui.hsb_structFreqRangeMin.setMinimum(value_min)
+		self.ui.hsb_structFreqRangeMin.setMaximum(value_max)
+		self.ui.hsb_structFreqRangeMin.setValue(value_min)
+		self.ui.lbl_structFreqRangeMinN.setText(str(value_min))
+		self.ui.hsb_structFreqRangeMax.setMinimum(value_min)
+		self.ui.hsb_structFreqRangeMax.setMaximum(value_max)
+		self.ui.hsb_structFreqRangeMax.setValue(value_max)
+		self.ui.lbl_structFreqRangeMaxN.setText(str(value_max))
+
+		value_min = self.books[self.nameOfBook]['config']['minS'] / self.books[self.nameOfBook]['config']['samplingFrequency']
+		value_max = self.books[self.nameOfBook]['config']['maxS'] / self.books[self.nameOfBook]['config']['samplingFrequency']
+		self.ui.hsb_structWidthRangeMin.setMinimum(value_min)
+		self.ui.hsb_structWidthRangeMin.setMaximum(value_max)
+		self.ui.hsb_structWidthRangeMin.setValue(value_min)
+		self.ui.lbl_structWidthRangeMinN.setText(str(value_min))
+		self.ui.hsb_structWidthRangeMax.setMinimum(value_min)
+		self.ui.hsb_structWidthRangeMax.setMaximum(value_max)
+		self.ui.hsb_structWidthRangeMax.setValue(value_max)
+		self.ui.lbl_structWidthRangeMaxN.setText(str(value_max))
 
 	def saveAmplitudeMapAsMatrix(self):
 		nameOfBook = str(self.ui.lst_books.currentItem().text())
@@ -260,6 +316,10 @@ class visWindow(QtGui.QMainWindow):
 			self.decompositionPlot.fig.savefig(fileName , dpi=300)
 		elif which == 'amplitudeMap':
 			self.amplitudeMapPlot.fig.savefig(fileName , dpi=300)
+
+	def resetSliders(self):
+		self.determineRangesForHSBs()
+		self.replot()
 
 	def closeEvent(self, event):
 		self.sig_windowClosed.emit()
@@ -407,6 +467,28 @@ class visWindow(QtGui.QMainWindow):
 
 			self.setWidgetsState(0)
 			self.enableAllButtons(False)
+
+	def saveBook(self):
+		data = self.books[self.nameOfBook]['originalData']
+		book = self.books[self.nameOfBook]['book']
+		conf = self.books[self.nameOfBook]['config']
+
+		whereDot = self.nameOfBook.rfind('.')
+
+		fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save book file' , expanduser('~')+self.nameOfBook[:whereDot] , 'Python pickle (*.p);;Matlab file (*.mat);;')
+		
+		if len(fileName[0]) == 0:
+			return
+
+		bookFileName = str(fileName[0])
+		whereDot = bookFileName.rfind('.')
+		bookFileName = bookFileName[:whereDot]
+
+		if fileName[1][-3:-1] == '.p':
+			with open(bookFileName+'.p' , 'wb') as f:
+				pickle.dump({'book':book,'config':conf,'originalData':data} , f)
+		elif fileName[1][-5:-1] == '.mat':
+			msg = saveBookAsMat(book , data , conf , bookFileName+'.mat')
 
 	def dropBookFiles(self , listOfFiles):
 		for filePath in listOfFiles:

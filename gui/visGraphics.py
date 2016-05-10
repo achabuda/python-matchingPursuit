@@ -200,19 +200,15 @@ class visWindowUI(object):
         self.lbl_mapFreqRange.setStyleSheet('font-weight: bold;')
         self.lbl_mapFreqRange.setObjectName(_fromUtf8("lbl_mapFreqRange"))
 
-
         self.lbl_mapFreqRangeMin = QtGui.QLabel(self.groupBoxSettings)
         self.lbl_mapFreqRangeMin.setObjectName(_fromUtf8("lbl_mapFreqRangeMin"))
 
         self.hsb_mapFreqRangeMin = QtGui.QScrollBar(self.groupBoxSettings)
         self.hsb_mapFreqRangeMin.setOrientation(QtCore.Qt.Horizontal)
-        self.hsb_mapFreqRangeMin.setMinimum(0)
-        self.hsb_mapFreqRangeMin.setMaximum(100)
         self.hsb_mapFreqRangeMin.setObjectName(_fromUtf8("hsb_mapFreqRangeMin"))
 
         self.lbl_mapFreqRangeMinN = QtGui.QLabel(self.groupBoxSettings)
         self.lbl_mapFreqRangeMinN.setObjectName(_fromUtf8("lbl_mapFreqRangeMinN"))
-
 
         self.lbl_mapFreqRangeMax = QtGui.QLabel(self.groupBoxSettings)
         self.lbl_mapFreqRangeMax.setObjectName(_fromUtf8("lbl_mapFreqRangeMax"))
@@ -237,14 +233,12 @@ class visWindowUI(object):
         subControllsLayout.setColumnStretch(2,1)
         subControllsLayout.setColumnStretch(3,5)
 
-
         self.groupBoxSubControlls.setLayout(subControllsLayout)
 
 # GROUPBOX BOOKS:
         booksLayout = QtGui.QVBoxLayout()
         booksButtonsLayout = QtGui.QHBoxLayout()
         
-        # self.lst_books = QtGui.QListWidget(self.groupBoxBooks)
         self.lst_books = DragDropListWidget_PYSIDE(QtGui.QMainWindow)
         
         self.btn_add = QtGui.QPushButton(self.groupBoxBooks)
@@ -285,7 +279,6 @@ class visWindowUI(object):
         settingsControllsLayout    = QtGui.QGridLayout()
         settingsFiltersLayout      = QtGui.QVBoxLayout()
         
-
         self.lbl_channel = QtGui.QLabel(self.groupBoxSettings)
         self.lbl_channel.setObjectName(_fromUtf8("lbl_channel"))
 
