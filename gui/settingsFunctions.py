@@ -24,14 +24,15 @@ University of Warsaw, July 06, 2015
 
 # libraries imports #
 import os
-import time
+# import time
 import numpy as np
 from platform  import system
-# from functools import partial
 from scipy.io  import savemat
 from os.path   import expanduser
 from PyQt4     import QtCore, QtGui
+
 from pickle    import dump
+# from dill      import dump
 
 # gui imports #
 from settingsGraphics import mainWindowUI
@@ -40,6 +41,8 @@ from visFunctions     import visWindow
 
 # modules imports #
 import data.dataLoader as dl
+# from bookDef        import clsBook
+#from data.bookClassDefinition import clsBook
 from src.utils      import determineAlgorithmConfig, determineDictionaryConfig, generateRangeFromString, generateFinalConfig, saveBookAsMat
 from src.dictionary import generateDictionary
 
@@ -837,8 +840,13 @@ class mainWindow(QtGui.QMainWindow):
         
         whereTo    = key.rfind('.')
         nameOfBook = key[:whereTo] + '_BOOK' + key[whereTo:]
+        
+        data = self.dataMatrixes[str(self.ui.lst_data.findItems(key , QtCore.Qt.MatchExactly)[0].text())][0]
+
+        # book   = clsBook(book , config , data)
 
         self.books[nameOfBook] = [book , config]
+
         item = QtGui.QListWidgetItem(nameOfBook)
         self.ui.lst_books.addItem(item)
 
@@ -877,7 +885,8 @@ class mainWindow(QtGui.QMainWindow):
                 fileName = str(fileName)
                 if fileName[-2:] == '.p':
                     with open(fileName , 'wb') as f:
-                        dump({'book':book,'config':conf,'originalData':data} , f)
+                        dump({'book':book , 'originalData':data,'config':conf} , f)
+
                         msg = 'ok'
                 elif fileName[-4:] == '.mat':
                     msg = saveBookAsMat(book , data , conf , fileName)

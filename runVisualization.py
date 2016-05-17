@@ -30,6 +30,7 @@ def _pythonMatchingPursuitVisualizer(params):
     app = QtGui.QApplication(params)
     myapp = visWindow()
     myapp.show()
+    myapp.move(100,50)
     return app.exec_()
 
 if __name__ == "__main__":

@@ -49,7 +49,6 @@ class calcWindow(QtGui.QMainWindow):
 		self.ui = calcWindowUI()
 		self.ui.setupUi(self)
 
-		
 		self.initializeFlags()
 		self.initializeVariables(dataMatrixes , dictionaryConfig)
 

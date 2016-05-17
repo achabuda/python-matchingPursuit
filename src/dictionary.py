@@ -23,7 +23,6 @@ University of Warsaw, July 06, 2015
 '''
 from __future__ import division
 from scipy.optimize import fmin
-#from math import floor
 import numpy  as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -121,7 +120,7 @@ def genericEnvelope(sigma , time , shapeType , cutOutput , *argv):
 	subShapeType  = int(shapeType % 10)
 
 	if mainShapeType == 1:
-			alpha = -0.5
+		alpha = -0.5
 	elif mainShapeType == 2:
 		alpha = 0
 	elif mainShapeType == 3:

@@ -31,7 +31,7 @@ import pandas            as pd
 from scipy.signal import resample
 from scipy        import interpolate
 
-from dictionary   import tukey
+from dictionary   import tukey , genericEnvelope
 
 
 def plotIter(book,signal,time,number):
@@ -74,9 +74,9 @@ def calculateTFMap(book,time,samplingFrequency,mapType,*argv):
 
 	for index, atom in book.iterrows():
 
-		if (atom['freq'] >= mapStructFreqs[0] and atom['freq'] <= mapStructFreqs[1]) and (atom['width'] >= mapStructWidths[0] and atom['width'] <= mapStructWidths[1]):
+		if (atom['frequency'] >= mapStructFreqs[0] and atom['frequency'] <= mapStructFreqs[1]) and (atom['width'] >= mapStructWidths[0] and atom['width'] <= mapStructWidths[1]):
 			if mapType == 0:
-				timeCourse = atom['reconstruction'][:].real
+				timeCourse = getAtomReconstruction(atom , time)
 				signal2fft = timeCourse * smoothingWindow
 
 				zz = np.fft.fft(signal2fft)
@@ -92,13 +92,13 @@ def calculateTFMap(book,time,samplingFrequency,mapType,*argv):
 
 				z  = z / z.max()
 
-				envelope = np.abs(atom['envelope']) * np.abs(atom['modulus'])
+				envelope = getAtomEnvelope(atom , time) * np.abs(atom['modulus']['complex'])
 				envelope = resample(envelope , timeFinal.shape[0])
 
 				timeFreqMap += np.outer(z , envelope)
 
 			elif mapType == 1:
-				totalTimeCourse = atom['reconstruction'][:]
+				totalTimeCourse = getAtomReconstruction(atom , time)
 				
 				signal2fft = totalTimeCourse * smoothingWindow
 				zz = np.fft.fft(signal2fft)
@@ -117,6 +117,20 @@ def calculateTFMap(book,time,samplingFrequency,mapType,*argv):
 				timeFreqMap += np.outer(z , totalTimeCourse)
 
 	return (timeFinal , frequenciesFinal , timeFreqMap)
+
+def getAtomReconstruction(atom , time):
+	envelope = getAtomEnvelope(atom , time)
+	reconstruction = atom['modulus']['complex'] * envelope * np.exp(1j * atom['omega'] * time)
+
+	return reconstruction.real
+
+def getAtomEnvelope(atom , time):
+	mi       = atom['mi']
+	increase = atom['increase']
+	decay    = atom['decay']
+	sigma    = atom['sigma']
+	envelope = genericEnvelope(sigma , time , atom['shapeType'] , 0 , mi , increase , decay)[0]
+	return envelope
 
 def halfWidthGauss(z):
 	mz  = z.max()

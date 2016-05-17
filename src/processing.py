@@ -29,7 +29,6 @@ import pandas as pd
 from scipy.signal      import hilbert
 from numpy.linalg      import norm
 from scipy.optimize    import fmin, minimize
-# from collections       import deque
 
 import dictionary as dic
 
@@ -58,17 +57,16 @@ def calculateMP(dictionary , signal , config):
 		signalLength   = signal.shape[0]
 
 		for iteration in np.arange(0 , config['maxNumberOfIterations']):
-			(bookElement , partialResults , signalRest) = makeOneIteration(dictionary , partialResults , signalRest , signalLength , config , iteration)
-			
+			(bookElement , reconstruction , partialResults , signalRest) = makeOneIteration(dictionary , partialResults , signalRest , signalLength , config , iteration)
 			book.append(pd.Series(bookElement))
 
 			if zerosFlag == 1:
 				if config['flags']['displayInfo'] != 0:
-					print 'Signal contained only zeros!'
+					print 'Signal contained only zeros - skipping.'
 				return pd.DataFrame(book)
 
 			energyExplained    = np.abs(1 - calculateSignalEnergy(signalRest) / signalEnergy)
-			minEnergyExplained = config['minEnergyExplained'] - config['density'] * (calculateSignalEnergy(bookElement['reconstruction']) / calculateSignalEnergy(signalRest))
+			minEnergyExplained = config['minEnergyExplained'] - config['density'] * (calculateSignalEnergy(reconstruction) / calculateSignalEnergy(signalRest))
 			
 			msg = 'Iteration {} done, energy explained: {}.'.format(iteration , energyExplained)
 
@@ -77,6 +75,9 @@ def calculateMP(dictionary , signal , config):
 			
 			if energyExplained > minEnergyExplained:
 				return pd.DataFrame(book)
+
+
+	
 	
 
 	elif config['algorithm'] == 'mmp':
@@ -125,10 +126,6 @@ def calculateMP(dictionary , signal , config):
 			print a
 			print '---'
 			
-
-
-
-
 
 	return pd.DataFrame(book)
 
@@ -179,9 +176,8 @@ def makeOneIteration(dictionary , partialResults , signalRest , signalLength , c
 	bookElement['amplitude']      = subMaxDOT[whereMax]
 	bookElement['sigma']          = partialResults['sigma'][whereMax]
 	bookElement['shapeType']      = partialResults['shapeType'][whereMax]
-		
+
 	bookElement['envelope']       = np.zeros((signalLength))
-	
 	if isinstance(bookElement['time'], (np.ndarray, np.generic)):
 		envelopeBeginIndex = bookElement['time'][0]
 		envelopeEndIndex   = bookElement['time'][-1]+1
@@ -193,13 +189,19 @@ def makeOneIteration(dictionary , partialResults , signalRest , signalLength , c
 	bookElement['envelope'][envelopeBeginIndex:envelopeEndIndex] = partialResults['timeCourse'][whereMax]
 	bookElement['reconstruction'] = np.zeros(signalLength,dtype='complex')
 	bookElement['reconstruction'][envelopeBeginIndex:envelopeEndIndex] = bookElement['amplitude']*partialResults['timeCourse'][whereMax]*np.exp(1j*bookElement['freq']*time)
+	
+	where_mi   = partialResults['timeCourse'][whereMax].argmax()
+	mi_0       = partialResults['time'][whereMax][where_mi]
+	sigma_0    = partialResults['sigma'][whereMax]
+	increase_0 = partialResults['increase'][whereMax]
+	decay_0    = partialResults['decay'][whereMax]
+
+	bookElement['mi'] = mi_0
+	bookElement['increase'] = increase_0
+	bookElement['decay']    = decay_0
+	bookElement['sigma']    = sigma_0
 
 	if config['flags']['useGradientOptimization'] == 1:
-		where_mi   = partialResults['timeCourse'][whereMax].argmax()
-		mi_0       = partialResults['time'][whereMax][where_mi]
-		sigma_0    = partialResults['sigma'][whereMax]
-		increase_0 = partialResults['increase'][whereMax]
-		decay_0    = partialResults['decay'][whereMax]
 		whereStart = partialResults['time'][whereMax][0]
 
 		(freq,amplitude,sigma,increase,decay,mi,envelope,reconstruction,shapeTypeNew) = gradientSearch([whereStart,subMaxDOT[whereMax],mi_0,sigma_0,subMaxFreq[whereMax],increase_0,decay_0],[config['minS'],config['maxS']],signalRest,partialResults['shapeType'][whereMax],config['flags']['useAsymA'])
@@ -211,17 +213,41 @@ def makeOneIteration(dictionary , partialResults , signalRest , signalLength , c
 			bookElement['envelope']       = envelope
 			bookElement['reconstruction'] = reconstruction
 			bookElement['shapeType']      = shapeTypeNew
+			bookElement['mi']             = mi
+			bookElement['increase']       = increase
+			bookElement['decay']          = decay
 
 	signalRest = signalRest - bookElement['reconstruction']
 
-	bookElement['freq']      = (config['samplingFrequency'] * bookElement['freq']) / (2 * np.pi)
-	bookElement['width']     = dic.findWidth(bookElement['envelope'] , config['samplingFrequency'])
-	bookElement['modulus']   = bookElement['amplitude']
-	bookElement['amplitude'] = np.abs(np.max(bookElement['reconstruction']))
+	(bookElement , currentReconstruction) = retranslateBookElement(bookElement , config['samplingFrequency'])
 
 	# print 'Width = {}, sigma = {}, sampling = {}.'.format(bookElement['width'] , bookElement['sigma'] , config['samplingFrequency'])
+	return (bookElement , currentReconstruction , partialResults , signalRest)
 
-	return (bookElement , partialResults , signalRest)
+
+def retranslateBookElement(bookElement , samplingFrequency):
+	trueBookElement = {}
+	trueBookElement['shapeType']       = bookElement['shapeType']
+	trueBookElement['omega']           = bookElement['freq']
+	trueBookElement['frequency']       = (samplingFrequency * bookElement['freq']) / (2 * np.pi)
+	trueBookElement['width']           = dic.findWidth(bookElement['envelope'] , samplingFrequency)
+	trueBookElement['modulus']         = {'complex':np.complex(bookElement['amplitude']) , 'real':bookElement['amplitude'].real}
+	trueBookElement['amplitude']       = np.abs(np.max(bookElement['reconstruction']))
+	trueBookElement['sigma']           = bookElement['sigma']
+	trueBookElement['mi']              = bookElement['mi']
+	trueBookElement['increase']        = bookElement['increase']
+	trueBookElement['decay']           = bookElement['decay']
+
+	envelope = bookElement['envelope']
+	whereMax = np.argmax(envelope)
+	threshold = 0.5
+	where     = np.where(envelope > threshold * envelope.max())[0] / samplingFrequency
+
+	trueBookElement['atomStart']       = where[0]
+	trueBookElement['atomEnd']         = where[-1]
+	trueBookElement['atomLatency']     = whereMax / samplingFrequency
+
+	return (trueBookElement , bookElement['reconstruction'])
 
 
 def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetry=1):

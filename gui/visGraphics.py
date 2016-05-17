@@ -196,29 +196,37 @@ class visWindowUI(object):
 # GROUPBOX SUBCONTROLLS:
         subControllsLayout = QtGui.QGridLayout()
 
-        self.lbl_mapFreqRange = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_mapFreqRange = QtGui.QLabel()
         self.lbl_mapFreqRange.setStyleSheet('font-weight: bold;')
         self.lbl_mapFreqRange.setObjectName(_fromUtf8("lbl_mapFreqRange"))
 
-        self.lbl_mapFreqRangeMin = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_mapFreqRangeMin = QtGui.QLabel()
         self.lbl_mapFreqRangeMin.setObjectName(_fromUtf8("lbl_mapFreqRangeMin"))
 
-        self.hsb_mapFreqRangeMin = QtGui.QScrollBar(self.groupBoxSettings)
+        self.hsb_mapFreqRangeMin = QtGui.QScrollBar()
         self.hsb_mapFreqRangeMin.setOrientation(QtCore.Qt.Horizontal)
         self.hsb_mapFreqRangeMin.setObjectName(_fromUtf8("hsb_mapFreqRangeMin"))
 
-        self.lbl_mapFreqRangeMinN = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_mapFreqRangeMinN = QtGui.QLabel()
         self.lbl_mapFreqRangeMinN.setObjectName(_fromUtf8("lbl_mapFreqRangeMinN"))
 
-        self.lbl_mapFreqRangeMax = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_mapFreqRangeMax = QtGui.QLabel()
         self.lbl_mapFreqRangeMax.setObjectName(_fromUtf8("lbl_mapFreqRangeMax"))
 
-        self.hsb_mapFreqRangeMax = QtGui.QScrollBar(self.groupBoxSettings)
+        self.hsb_mapFreqRangeMax = QtGui.QScrollBar()
         self.hsb_mapFreqRangeMax.setOrientation(QtCore.Qt.Horizontal)
         self.hsb_mapFreqRangeMax.setObjectName(_fromUtf8("hsb_mapFreqRangeMax"))
 
-        self.lbl_mapFreqRangeMaxN = QtGui.QLabel(self.groupBoxSettings)
+        self.lbl_mapFreqRangeMaxN = QtGui.QLabel()
         self.lbl_mapFreqRangeMaxN.setObjectName(_fromUtf8("lbl_mapFreqRangeMaxN"))
+
+        self.btn_map2sqrt = QtGui.QPushButton()
+        self.btn_map2sqrt.setCheckable(True)
+        self.btn_map2sqrt.setObjectName(_fromUtf8("lbl_map2sqrt"))
+
+        self.btn_map2log = QtGui.QPushButton()
+        self.btn_map2log.setCheckable(True)
+        self.btn_map2log.setObjectName(_fromUtf8("lbl_map2log"))        
 
         subControllsLayout.addWidget(self.lbl_mapFreqRange , 0 , 1)
         subControllsLayout.addWidget(self.lbl_mapFreqRangeMin , 1 , 0)
@@ -228,10 +236,15 @@ class visWindowUI(object):
         subControllsLayout.addWidget(self.hsb_mapFreqRangeMax , 2 , 1)
         subControllsLayout.addWidget(self.lbl_mapFreqRangeMaxN , 2 , 2)
 
+        subControllsLayout.addWidget(self.btn_map2sqrt , 0 , 3)
+        subControllsLayout.addWidget(self.btn_map2log , 0 , 4)
+
         subControllsLayout.setColumnStretch(0,1)
-        subControllsLayout.setColumnStretch(1,3)
+        subControllsLayout.setColumnStretch(1,2)
         subControllsLayout.setColumnStretch(2,1)
-        subControllsLayout.setColumnStretch(3,5)
+        subControllsLayout.setColumnStretch(3,1)
+        subControllsLayout.setColumnStretch(4,1)
+        subControllsLayout.setColumnStretch(5,5)
 
         self.groupBoxSubControlls.setLayout(subControllsLayout)
 
@@ -360,8 +373,6 @@ class visWindowUI(object):
 
         self.hsb_structAmplitudeRangeMin = QtGui.QScrollBar(self.groupBoxSettings)
         self.hsb_structAmplitudeRangeMin.setOrientation(QtCore.Qt.Horizontal)
-        self.hsb_structAmplitudeRangeMin.setMinimum(0)
-        self.hsb_structAmplitudeRangeMin.setMaximum(100)
         self.hsb_structAmplitudeRangeMin.setObjectName(_fromUtf8("hsb_structAmplitudeRangeMin"))
 
         self.lbl_structAmplitudeRangeMinN = QtGui.QLabel(self.groupBoxSettings)
@@ -408,8 +419,6 @@ class visWindowUI(object):
 
         self.hsb_structPositionRangeMin = QtGui.QScrollBar(self.groupBoxSettings)
         self.hsb_structPositionRangeMin.setOrientation(QtCore.Qt.Horizontal)
-        self.hsb_structPositionRangeMin.setMinimum(0)
-        self.hsb_structPositionRangeMin.setMaximum(100)
         self.hsb_structPositionRangeMin.setObjectName(_fromUtf8("hsb_structPositionRangeMin"))
 
         self.lbl_structPositionRangeMinN = QtGui.QLabel(self.groupBoxSettings)
@@ -647,6 +656,8 @@ class visWindowUI(object):
         self.btn_atomPrev.setText(_translate("visWindow", "<", None))
         self.btn_apply.setText(_translate("visWindow", "Apply", None))
         self.btn_reset.setText(_translate("visWindow", "Reset", None))
+        self.btn_map2log.setText(_translate("visWindow", "> Logarithm", None))
+        self.btn_map2sqrt.setText(_translate("visWindow", "> Sqrt", None))
 
         self.lbl_trial.setText(_translate("visWindow", "Trial:", None))
         self.lbl_trialMax.setText(_translate("visWindow", "/tr", None))

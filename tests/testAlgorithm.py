@@ -100,7 +100,7 @@ class AlgorithmTest(unittest.TestCase):
 		Test for the very first iteration of the algorithm
 		working on simple synthetic signal. Frequency check.
 		'''
-		self.assertTrue( (book['freq'][0] < sinusParams[0][1]*(1+freqThreshold)) and (book['freq'][0] > sinusParams[0][1]*(1-freqThreshold)) )
+		self.assertTrue( (book['frequency'][0] < sinusParams[0][1]*(1+freqThreshold)) and (book['frequency'][0] > sinusParams[0][1]*(1-freqThreshold)) )
 	def test_simpleFirstIteration_amplitude(self):
 		'''
 		Test for the very first iteration of the algorithm
@@ -123,7 +123,7 @@ class AlgorithmTest(unittest.TestCase):
 		It should be the second Gabor function present in
 		the gaborParams set.
 		'''
-		self.assertTrue( (book['freq'][1] < gaborParams[1][5]*(1+freqThreshold)) and (book['freq'][1] > gaborParams[1][5]*(1-freqThreshold)) )
+		self.assertTrue( (book['frequency'][1] < gaborParams[1][5]*(1+freqThreshold)) and (book['frequency'][1] > gaborParams[1][5]*(1-freqThreshold)) )
 	def test_simpleFirstIteration_amplitude(self):
 		'''
 		Test for the second iteration of the algorithm
@@ -148,7 +148,7 @@ class AlgorithmTest(unittest.TestCase):
 		It should be the first Gabor function present in
 		the gaborParams set.
 		'''
-		self.assertTrue( (book['freq'][2] < gaborParams[0][5]*(1+freqThreshold)) and (book['freq'][2] > gaborParams[0][5]*(1-freqThreshold)) )
+		self.assertTrue( (book['frequency'][2] < gaborParams[0][5]*(1+freqThreshold)) and (book['frequency'][2] > gaborParams[0][5]*(1-freqThreshold)) )
 	def test_simpleThirdIteration_amplitude(self):
 		'''
 		Test for the third iteration of the algorithm
@@ -185,7 +185,7 @@ class AlgorithmTest(unittest.TestCase):
 		It should be the second asymetric function present in
 		the asymetricParamsAdvanced set.
 		'''
-		self.assertTrue( (advancedBook['freq'][0] < asymetricParamsAdvanced[1][1]*(1+freqThreshold)) and (advancedBook['freq'][0] > asymetricParamsAdvanced[1][1]*(1-freqThreshold)) )
+		self.assertTrue( (advancedBook['frequency'][0] < asymetricParamsAdvanced[1][1]*(1+freqThreshold)) and (advancedBook['frequency'][0] > asymetricParamsAdvanced[1][1]*(1-freqThreshold)) )
 	def test_advancedFirstIteration_amplitude(self):
 		'''
 		Test for the very first iteration of the algorithm
@@ -210,7 +210,7 @@ class AlgorithmTest(unittest.TestCase):
 		It should be the first asymetric function present in
 		the asymetricParamsAdvanced set.
 		'''
-		self.assertTrue( (advancedBook['freq'][1] < asymetricParamsAdvanced[0][1]*(1+freqThreshold)) and (advancedBook['freq'][1] > asymetricParamsAdvanced[0][1]*(1-freqThreshold)) )
+		self.assertTrue( (advancedBook['frequency'][1] < asymetricParamsAdvanced[0][1]*(1+freqThreshold)) and (advancedBook['frequency'][1] > asymetricParamsAdvanced[0][1]*(1-freqThreshold)) )
 	def test_advancedSecondIteration_amplitude(self):
 		'''
 		Test for the second iteration of the algorithm
@@ -234,7 +234,7 @@ class AlgorithmTest(unittest.TestCase):
 		Test for the third iteration of the algorithm
 		working on advanced synthetic signal. Frequency check.
 		'''
-		self.assertTrue( (advancedBook['freq'][2] < sinusParamsAdvanced[0][1]*(1+freqThreshold)) and (advancedBook['freq'][2] > sinusParamsAdvanced[0][1]*(1-freqThreshold)) )
+		self.assertTrue( (advancedBook['frequency'][2] < sinusParamsAdvanced[0][1]*(1+freqThreshold)) and (advancedBook['frequency'][2] > sinusParamsAdvanced[0][1]*(1-freqThreshold)) )
 	def test_advancedThirdIteration_amplitude(self):
 		'''
 		Test for the second iteration of the algorithm
@@ -265,7 +265,7 @@ class AlgorithmTest(unittest.TestCase):
 		Test for the very first iteration of the algorithm
 		working on advanced synthetic signal. Frequency check.
 		'''
-		self.assertTrue( (masterBook['freq'][0] < rectParamsMaster[0][1]*(1+freqThreshold)) and (masterBook['freq'][0] > rectParamsMaster[0][1]*(1-freqThreshold)) )
+		self.assertTrue( (masterBook['frequency'][0] < rectParamsMaster[0][1]*(1+freqThreshold)) and (masterBook['frequency'][0] > rectParamsMaster[0][1]*(1-freqThreshold)) )
 	def test_masterFirstIteration_amplitude(self):
 		'''
 		Test for the very first iteration of the algorithm
@@ -285,7 +285,7 @@ class AlgorithmTest(unittest.TestCase):
 		Test for the second iteration of the algorithm
 		working on advanced synthetic signal. Frequency check.
 		'''
-		self.assertTrue( (masterBook['freq'][1] < asymetricParamsMaster[0][1]*(1+freqThreshold)) and (masterBook['freq'][1] > asymetricParamsMaster[0][1]*(1-freqThreshold)) )
+		self.assertTrue( (masterBook['frequency'][1] < asymetricParamsMaster[0][1]*(1+freqThreshold)) and (masterBook['frequency'][1] > asymetricParamsMaster[0][1]*(1-freqThreshold)) )
 	def test_masterSecondIteration_amplitude(self):
 		'''
 		Test for the second iteration of the algorithm
@@ -308,7 +308,7 @@ class AlgorithmTest(unittest.TestCase):
 		Test for the third iteration of the algorithm
 		working on advanced synthetic signal. Frequency check.
 		'''
-		self.assertTrue( (masterBook['freq'][2] < gaborParamsMaster[0][5]*(1+freqThreshold)) and (masterBook['freq'][2] > gaborParamsMaster[0][5]*(1-freqThreshold)) )
+		self.assertTrue( (masterBook['frequency'][2] < gaborParamsMaster[0][5]*(1+freqThreshold)) and (masterBook['frequency'][2] > gaborParamsMaster[0][5]*(1-freqThreshold)) )
 	def test_masterThirdIteration_amplitude(self):
 		'''
 		Test for the third iteration of the algorithm
@@ -331,7 +331,7 @@ class AlgorithmTest(unittest.TestCase):
 		Test for the fourth iteration of the algorithm
 		working on advanced synthetic signal. Frequency check.
 		'''
-		self.assertTrue( (masterBook['freq'][3] < sinusParamsMaster[0][1]*(1+freqThreshold)) and (masterBook['freq'][3] > sinusParamsMaster[0][1]*(1-freqThreshold)) )
+		self.assertTrue( (masterBook['frequency'][3] < sinusParamsMaster[0][1]*(1+freqThreshold)) and (masterBook['frequency'][3] > sinusParamsMaster[0][1]*(1-freqThreshold)) )
 	def test_masterThirdIteration_amplitude(self):
 		'''
 		Test for the fourth iteration of the algorithm

@@ -22,6 +22,7 @@ e-mail: tomasz@spustek.pl
 University of Warsaw, July 06, 2015
 '''
 
+# drawing tools imports #
 import matplotlib
 matplotlib.use('Qt4Agg')
 matplotlib.rcParams['backend.qt4'] = 'PySide'
@@ -31,24 +32,26 @@ from matplotlib.backends.backend_qt4agg import (
 from matplotlib.figure import Figure
 from matplotlib        import gridspec, ticker
 
-from PySide import QtGui, QtCore
 
-import pickle
+# libraries imports #
+from PySide    import QtGui, QtCore
 from weakref   import proxy
 from functools import partial
 from platform  import system
-
-# libraries imports #
-import numpy     as np
-import pandas    as pd
-import pickle
 from os.path   import expanduser
+import numpy    as np
+# import pandas as pd
+import pickle
+
 
 # gui imports #
 from visGraphics import visWindowUI
 
+
 # modules imports #
-from src.drawing      import calculateTFMap
+from src.drawing import calculateTFMap , getAtomReconstruction
+from src.utils   import saveBookAsMat
+
 
 class visWindow(QtGui.QMainWindow):
 	sig_windowClosed   = QtCore.Signal()
@@ -166,18 +169,12 @@ class visWindow(QtGui.QMainWindow):
 		self.ui.lbl_atomMax.setText( '/ '+str(  self.books[self.nameOfBook]['book'][self.trial,self.channel].shape[0] ) )
 
 		self.ui.led_atomWidth.setText(str(self.books[self.nameOfBook]['book'][self.trial,self.channel]['width'][self.atom]))
-		self.ui.led_atomFrequency.setText(str(self.books[self.nameOfBook]['book'][self.trial,self.channel]['freq'][self.atom]))
+		self.ui.led_atomFrequency.setText(str(self.books[self.nameOfBook]['book'][self.trial,self.channel]['frequency'][self.atom]))
 		self.ui.led_atomAmplitude.setText(str(self.books[self.nameOfBook]['book'][self.trial,self.channel]['amplitude'][self.atom]))
 
-		envelope  = self.books[self.nameOfBook]['book'][self.trial,self.channel]['envelope'][self.atom]
-		whereMax  = np.argmax(envelope)
-		threshold = 0.5
-		where     =  np.where(envelope > threshold * envelope.max())[0] / self.books[self.nameOfBook]['config']['samplingFrequency']
-
-		self.ui.led_atomStart.setText(str(where[0]))
-		self.ui.led_atomEnd.setText(str(where[-1]))
-
-		self.ui.led_atomLatency.setText( str(whereMax / self.books[self.nameOfBook]['config']['samplingFrequency']) )
+		self.ui.led_atomLatency.setText(str(self.books[self.nameOfBook]['book'][self.trial,self.channel]['atomLatency'][self.atom]))
+		self.ui.led_atomStart.setText(str(self.books[self.nameOfBook]['book'][self.trial,self.channel]['atomStart'][self.atom]))
+		self.ui.led_atomEnd.setText(str(self.books[self.nameOfBook]['book'][self.trial,self.channel]['atomEnd'][self.atom]))
 
 		self.changeButtonsState()
 		self.replot()
@@ -369,14 +366,20 @@ class visWindow(QtGui.QMainWindow):
 		self.decompositionPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
 		(y_fromWhere,y_toWhere) = self.decompositionPlot.ax1.get_ylim()
 
-		self.decompositionPlot.ax2.plot(time , np.squeeze(self.books[self.nameOfBook]['book'][self.trial,self.channel]['reconstruction'].sum()).real , 'k')
+
+		tmp_time = np.arange(0,self.books[self.nameOfBook]['originalData'].shape[2])
+		reconstruction = np.zeros(tmp_time.shape)
+		for (index,atom) in self.books[self.nameOfBook]['book'][self.trial,self.channel].iterrows():
+			reconstruction += getAtomReconstruction(atom , tmp_time)
+
+		self.decompositionPlot.ax2.plot(time , reconstruction , 'k')
 		self.decompositionPlot.ax2.set_xlim([x_fromWhere , x_toWhere])
 		self.decompositionPlot.ax2.set_ylim([y_fromWhere , y_toWhere])
 		self.decompositionPlot.ax2.set_title('Decomposition')
 		self.decompositionPlot.ax2.hold(False)
 		self.decompositionPlot.ax2.set_ylabel(r'Amplitude [au]')
 
-		func = np.squeeze(self.books[self.nameOfBook]['book'][self.trial,self.channel]['reconstruction'][self.atom].real)
+		func = getAtomReconstruction(self.books[self.nameOfBook]['book'][self.trial,self.channel].iloc[self.atom] , tmp_time)
 		self.decompositionPlot.ax3.plot(time , func , 'k')
 		self.decompositionPlot.ax3.set_xlim([x_fromWhere , x_toWhere])
 		self.decompositionPlot.ax3.set_ylim([y_fromWhere , y_toWhere])
@@ -394,16 +397,13 @@ class visWindow(QtGui.QMainWindow):
 
 		self.amplitudeMapPlot.ax0.imshow(np.abs(self.TFmap) , aspect='auto' , origin='lower' , extent=[x_fromWhere,x_toWhere , 0.0,self.books[self.nameOfBook]['config']['samplingFrequency']/2.])
 		self.amplitudeMapPlot.ax0.hold(False)
-		# self.amplitudeMapPlot.ax0.set_xlabel(r'Time [s]')
 		self.amplitudeMapPlot.ax0.set_ylabel(r'Frequency [Hz]')
-
-		# self.amplitudeMapPlot.ax0.set_ylim(mapConfig['mapFreqRange'])
 
 		self.amplitudeMapPlot.ax1.clear()
 		self.amplitudeMapPlot.ax1.plot(time , np.squeeze(self.books[self.nameOfBook]['originalData'][self.trialsCalculated[self.trial]-1,self.channelsCalculated[self.channel]-1,:]) , 'k')
-		self.amplitudeMapPlot.ax1.plot(time , self.books[self.nameOfBook]['book'][self.trial,self.channel]['reconstruction'].sum().real , 'r')			
+		# self.amplitudeMapPlot.ax1.plot(time , self.books[self.nameOfBook]['book'][self.trial,self.channel]['reconstruction'].sum().real , 'r')			
+		self.amplitudeMapPlot.ax1.plot(time , reconstruction , 'r')			
 		self.amplitudeMapPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
-		# self.amplitudeMapPlot.ax1.set_xlabel(r'Time [s]')
 		self.amplitudeMapPlot.ax1.set_ylabel(r'Amplitude [au]')
 
 		(y_fromWhere,y_toWhere) = self.amplitudeMapPlot.ax1.get_ylim()

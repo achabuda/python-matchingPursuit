@@ -28,6 +28,7 @@ from scipy.io  import savemat
 
 from src.processing import calculateMP
 
+
 def saveBookAsMat(book , data , config , nameOfFile):
 	# matrix2save = np.zeros([data.shape[0],data.shape[1],config['maxNumberOfIterations']] , dtype='complex')	# trials x channels x iterations
 	results = {}
@@ -49,7 +50,6 @@ def generateFinalConfig(dictionaryConfig , dataInfo , algorithmConfig):
 	flags['useRectA']                = dictionaryConfig['useRect']
 	flags['useGradientOptimization'] = algorithmConfig['useGradient']
 	flags['displayInfo']             = algorithmConfig['displayInfo']
-	# flags['displayInfo'] = 1
 	
 	config = {}
 	config['flags']                 = flags
