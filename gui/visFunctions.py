@@ -370,20 +370,20 @@ class visWindow(QtGui.QMainWindow):
 		self.setWidgetsState()
 
 	def replot(self):
-		time = np.arange(0,self.books[self.nameOfBook]['originalData'].shape[2]) / self.books[self.nameOfBook]['config']['samplingFrequency']
+		time     = np.arange(0,self.books[self.nameOfBook]['originalData'].shape[2]) / self.books[self.nameOfBook]['config']['samplingFrequency']
+		tmp_time = np.arange(0,self.books[self.nameOfBook]['originalData'].shape[2])
 
+		x_fromWhere = 0
+		x_toWhere   = self.books[self.nameOfBook]['originalData'].shape[2] / self.books[self.nameOfBook]['config']['samplingFrequency']
+		
 		if self.flags['channel'] == 1 or self.flags['trial'] == 1:
 			self.decompositionPlot.ax1.plot(time , np.squeeze(self.books[self.nameOfBook]['originalData'][self.trialsCalculated[self.trial]-1,self.channelsCalculated[self.channel]-1,:]) , 'k')
 			self.decompositionPlot.ax1.set_title('Original signal')
 			self.decompositionPlot.ax1.hold(False)
 			self.decompositionPlot.ax1.set_ylabel(r'Amplitude [au]')
-			x_fromWhere = 0
-			x_toWhere   = self.books[self.nameOfBook]['originalData'].shape[2] / self.books[self.nameOfBook]['config']['samplingFrequency']
 			self.decompositionPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
 			(y_fromWhere,y_toWhere) = self.decompositionPlot.ax1.get_ylim()
 
-
-			tmp_time = np.arange(0,self.books[self.nameOfBook]['originalData'].shape[2])
 			reconstruction = np.zeros(tmp_time.shape)
 			for (index,atom) in self.books[self.nameOfBook]['book'][self.trial,self.channel].iterrows():
 				reconstruction += getAtomReconstruction(atom , tmp_time)
@@ -399,6 +399,7 @@ class visWindow(QtGui.QMainWindow):
 			func = getAtomReconstruction(self.books[self.nameOfBook]['book'][self.trial,self.channel].iloc[self.atom] , tmp_time)
 			self.decompositionPlot.ax3.plot(time , func , 'k')
 			self.decompositionPlot.ax3.set_xlim([x_fromWhere , x_toWhere])
+			(y_fromWhere,y_toWhere) = self.decompositionPlot.ax1.get_ylim()
 			self.decompositionPlot.ax3.set_ylim([y_fromWhere , y_toWhere])
 			self.decompositionPlot.ax3.set_title('Single function')
 			self.decompositionPlot.ax3.hold(False)
@@ -406,9 +407,6 @@ class visWindow(QtGui.QMainWindow):
 			self.decompositionPlot.ax3.set_xlabel(r'Time [s]')
 		
 		self.decompositionPlot.draw()
-
-
-		# tmp_time = np.arange(0,self.books[self.nameOfBook]['originalData'].shape[2])
 
 		if self.flags['channel'] == 1 or self.flags['trial'] == 1:
 			(self.T,self.F,self.TFmap) = calculateTFMap(self.books[self.nameOfBook]['book'][self.trial,self.channel] , tmp_time , self.books[self.nameOfBook]['config']['samplingFrequency'] , 0)
@@ -433,6 +431,9 @@ class visWindow(QtGui.QMainWindow):
 			self.amplitudeMapPlot.ax2.set_ylabel(r'Amplitude [au]')
 
 		self.amplitudeMapPlot.draw()
+		self.flags['atom']    = 0
+		self.flags['channel'] = 0
+		self.flags['trial']   = 0
 
 	def addBooks(self):
 		dialog = QtGui.QFileDialog.getOpenFileNames(self , 'Open book files' , expanduser('~') , 'Python pickles (*.p)')
