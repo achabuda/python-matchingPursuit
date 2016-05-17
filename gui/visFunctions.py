@@ -84,7 +84,7 @@ class visWindow(QtGui.QMainWindow):
 		self.amplitudeMapPlot.binding_plotter_with_ui()
 		self.setConnections()
 
-	def setVariables(self , flag = 0):
+	def setVariables(self):
 		self.trial     = 0
 		self.channel   = 0
 		self.atom      = 0
@@ -93,6 +93,11 @@ class visWindow(QtGui.QMainWindow):
 		self.atomTypes['11'] = 'Gabor function'
 		self.atomTypes['21'] = 'Asymetric function'
 		self.atomTypes['32'] = 'Tukey-based function'
+
+		self.flags = {}
+		self.flags['atom']    = 1
+		self.flags['trial']   = 1
+		self.flags['channel'] = 1
 
 		try:
 			self.nameOfBook = self.ui.lst_books.currentItem().text()
@@ -327,29 +332,39 @@ class visWindow(QtGui.QMainWindow):
 		self.changeButtonsState()
 
 	def nextAtom(self):
+		self.flags['atom'] = 1
 		self.atom += 1
 		self.setWidgetsState()
 
 	def prevAtom(self):
+		self.flags['atom'] = 1
 		self.atom -= 1
 		self.setWidgetsState()
 
 	def nextChannel(self):
+		self.flags['channel'] = 1
+		self.flags['atom']    = 1
 		self.channel += 1
 		self.atom     = 0
 		self.setWidgetsState()
 
 	def prevChannel(self):
+		self.flags['channel'] = 1
+		self.flags['atom']    = 1
 		self.channel -= 1
 		self.atom     = 0
 		self.setWidgetsState()
 
 	def nextTrial(self):
+		self.flags['trial'] = 1
+		self.flags['atom']  = 1
 		self.trial += 1
 		self.atom   = 0
 		self.setWidgetsState()
 
 	def prevTrial(self):
+		self.flags['trial'] = 1
+		self.flags['atom']  = 1
 		self.trial -= 1
 		self.atom   = 0
 		self.setWidgetsState()
@@ -357,63 +372,65 @@ class visWindow(QtGui.QMainWindow):
 	def replot(self):
 		time = np.arange(0,self.books[self.nameOfBook]['originalData'].shape[2]) / self.books[self.nameOfBook]['config']['samplingFrequency']
 
-		self.decompositionPlot.ax1.plot(time , np.squeeze(self.books[self.nameOfBook]['originalData'][self.trialsCalculated[self.trial]-1,self.channelsCalculated[self.channel]-1,:]) , 'k')
-		self.decompositionPlot.ax1.set_title('Original signal')
-		self.decompositionPlot.ax1.hold(False)
-		self.decompositionPlot.ax1.set_ylabel(r'Amplitude [au]')
-		x_fromWhere = 0
-		x_toWhere   = self.books[self.nameOfBook]['originalData'].shape[2] / self.books[self.nameOfBook]['config']['samplingFrequency']
-		self.decompositionPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
-		(y_fromWhere,y_toWhere) = self.decompositionPlot.ax1.get_ylim()
+		if self.flags['channel'] == 1 or self.flags['trial'] == 1:
+			self.decompositionPlot.ax1.plot(time , np.squeeze(self.books[self.nameOfBook]['originalData'][self.trialsCalculated[self.trial]-1,self.channelsCalculated[self.channel]-1,:]) , 'k')
+			self.decompositionPlot.ax1.set_title('Original signal')
+			self.decompositionPlot.ax1.hold(False)
+			self.decompositionPlot.ax1.set_ylabel(r'Amplitude [au]')
+			x_fromWhere = 0
+			x_toWhere   = self.books[self.nameOfBook]['originalData'].shape[2] / self.books[self.nameOfBook]['config']['samplingFrequency']
+			self.decompositionPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
+			(y_fromWhere,y_toWhere) = self.decompositionPlot.ax1.get_ylim()
 
 
-		tmp_time = np.arange(0,self.books[self.nameOfBook]['originalData'].shape[2])
-		reconstruction = np.zeros(tmp_time.shape)
-		for (index,atom) in self.books[self.nameOfBook]['book'][self.trial,self.channel].iterrows():
-			reconstruction += getAtomReconstruction(atom , tmp_time)
+			tmp_time = np.arange(0,self.books[self.nameOfBook]['originalData'].shape[2])
+			reconstruction = np.zeros(tmp_time.shape)
+			for (index,atom) in self.books[self.nameOfBook]['book'][self.trial,self.channel].iterrows():
+				reconstruction += getAtomReconstruction(atom , tmp_time)
 
-		self.decompositionPlot.ax2.plot(time , reconstruction , 'k')
-		self.decompositionPlot.ax2.set_xlim([x_fromWhere , x_toWhere])
-		self.decompositionPlot.ax2.set_ylim([y_fromWhere , y_toWhere])
-		self.decompositionPlot.ax2.set_title('Decomposition')
-		self.decompositionPlot.ax2.hold(False)
-		self.decompositionPlot.ax2.set_ylabel(r'Amplitude [au]')
+			self.decompositionPlot.ax2.plot(time , reconstruction , 'k')
+			self.decompositionPlot.ax2.set_xlim([x_fromWhere , x_toWhere])
+			self.decompositionPlot.ax2.set_ylim([y_fromWhere , y_toWhere])
+			self.decompositionPlot.ax2.set_title('Decomposition')
+			self.decompositionPlot.ax2.hold(False)
+			self.decompositionPlot.ax2.set_ylabel(r'Amplitude [au]')
 
-		func = getAtomReconstruction(self.books[self.nameOfBook]['book'][self.trial,self.channel].iloc[self.atom] , tmp_time)
-		self.decompositionPlot.ax3.plot(time , func , 'k')
-		self.decompositionPlot.ax3.set_xlim([x_fromWhere , x_toWhere])
-		self.decompositionPlot.ax3.set_ylim([y_fromWhere , y_toWhere])
-		self.decompositionPlot.ax3.set_title('Single function')
-		self.decompositionPlot.ax3.hold(False)
-		self.decompositionPlot.ax3.set_ylabel(r'Amplitude [au]')
-		self.decompositionPlot.ax3.set_xlabel(r'Time [s]')
+		if self.flags['atom'] == 1:
+			func = getAtomReconstruction(self.books[self.nameOfBook]['book'][self.trial,self.channel].iloc[self.atom] , tmp_time)
+			self.decompositionPlot.ax3.plot(time , func , 'k')
+			self.decompositionPlot.ax3.set_xlim([x_fromWhere , x_toWhere])
+			self.decompositionPlot.ax3.set_ylim([y_fromWhere , y_toWhere])
+			self.decompositionPlot.ax3.set_title('Single function')
+			self.decompositionPlot.ax3.hold(False)
+			self.decompositionPlot.ax3.set_ylabel(r'Amplitude [au]')
+			self.decompositionPlot.ax3.set_xlabel(r'Time [s]')
 		
 		self.decompositionPlot.draw()
 
 
-		tmp_time = np.arange(0,self.books[self.nameOfBook]['originalData'].shape[2])
+		# tmp_time = np.arange(0,self.books[self.nameOfBook]['originalData'].shape[2])
 
-		(self.T,self.F,self.TFmap) = calculateTFMap(self.books[self.nameOfBook]['book'][self.trial,self.channel] , tmp_time , self.books[self.nameOfBook]['config']['samplingFrequency'] , 0)
+		if self.flags['channel'] == 1 or self.flags['trial'] == 1:
+			(self.T,self.F,self.TFmap) = calculateTFMap(self.books[self.nameOfBook]['book'][self.trial,self.channel] , tmp_time , self.books[self.nameOfBook]['config']['samplingFrequency'] , 0)
 
-		self.amplitudeMapPlot.ax0.imshow(np.abs(self.TFmap) , aspect='auto' , origin='lower' , extent=[x_fromWhere,x_toWhere , 0.0,self.books[self.nameOfBook]['config']['samplingFrequency']/2.])
-		self.amplitudeMapPlot.ax0.hold(False)
-		self.amplitudeMapPlot.ax0.set_ylabel(r'Frequency [Hz]')
+			self.amplitudeMapPlot.ax0.imshow(np.abs(self.TFmap) , aspect='auto' , origin='lower' , extent=[x_fromWhere,x_toWhere , 0.0,self.books[self.nameOfBook]['config']['samplingFrequency']/2.])
+			self.amplitudeMapPlot.ax0.hold(False)
+			self.amplitudeMapPlot.ax0.set_ylabel(r'Frequency [Hz]')
 
-		self.amplitudeMapPlot.ax1.clear()
-		self.amplitudeMapPlot.ax1.plot(time , np.squeeze(self.books[self.nameOfBook]['originalData'][self.trialsCalculated[self.trial]-1,self.channelsCalculated[self.channel]-1,:]) , 'k')
-		# self.amplitudeMapPlot.ax1.plot(time , self.books[self.nameOfBook]['book'][self.trial,self.channel]['reconstruction'].sum().real , 'r')			
-		self.amplitudeMapPlot.ax1.plot(time , reconstruction , 'r')			
-		self.amplitudeMapPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
-		self.amplitudeMapPlot.ax1.set_ylabel(r'Amplitude [au]')
+			self.amplitudeMapPlot.ax1.clear()
+			self.amplitudeMapPlot.ax1.plot(time , np.squeeze(self.books[self.nameOfBook]['originalData'][self.trialsCalculated[self.trial]-1,self.channelsCalculated[self.channel]-1,:]) , 'k')
+			self.amplitudeMapPlot.ax1.plot(time , reconstruction , 'r')
+			self.amplitudeMapPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
+			self.amplitudeMapPlot.ax1.set_ylabel(r'Amplitude [au]')
+			(y_fromWhere,y_toWhere) = self.amplitudeMapPlot.ax1.get_ylim()
 
-		(y_fromWhere,y_toWhere) = self.amplitudeMapPlot.ax1.get_ylim()
-
-		self.amplitudeMapPlot.ax2.plot(time , func , 'r')
-		self.amplitudeMapPlot.ax2.set_xlim([x_fromWhere , x_toWhere])
-		self.amplitudeMapPlot.ax2.set_ylim([y_fromWhere , y_toWhere])
-		self.amplitudeMapPlot.ax2.hold(False)
-		self.amplitudeMapPlot.ax2.set_xlabel(r'Time [s]')
-		self.amplitudeMapPlot.ax2.set_ylabel(r'Amplitude [au]')
+		if self.flags['atom'] == 1:
+			self.amplitudeMapPlot.ax2.plot(time , func , 'r')
+			self.amplitudeMapPlot.ax2.set_xlim([x_fromWhere , x_toWhere])
+			self.amplitudeMapPlot.ax2.set_ylim([y_fromWhere , y_toWhere])
+			self.amplitudeMapPlot.ax2.hold(False)
+			self.amplitudeMapPlot.ax2.set_xlabel(r'Time [s]')
+			self.amplitudeMapPlot.ax2.set_ylabel(r'Amplitude [au]')
 
 		self.amplitudeMapPlot.draw()
 
