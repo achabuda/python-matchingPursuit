@@ -99,6 +99,26 @@ class visWindow(QtGui.QMainWindow):
 		self.flags['trial']   = 1
 		self.flags['channel'] = 1
 
+		self.hsb_lbls = {}
+		self.hsb_lbls['amplitude_min'] = self.ui.lbl_structAmplitudeRangeMinN
+		self.hsb_lbls['amplitude_max'] = self.ui.lbl_structAmplitudeRangeMaxN
+		self.hsb_lbls['width_min']     = self.ui.lbl_structWidthRangeMinN
+		self.hsb_lbls['width_max']     = self.ui.lbl_structWidthRangeMaxN
+		self.hsb_lbls['frequency_min'] = self.ui.lbl_structFreqRangeMinN
+		self.hsb_lbls['frequency_max'] = self.ui.lbl_structFreqRangeMaxN
+		self.hsb_lbls['position_min']  = self.ui.lbl_structPositionRangeMinN
+		self.hsb_lbls['position_max']  = self.ui.lbl_structPositionRangeMaxN
+
+		self.hsbs = {}
+		self.hsbs['amplitude_min'] = self.ui.hsb_structAmplitudeRangeMin
+		self.hsbs['amplitude_max'] = self.ui.hsb_structAmplitudeRangeMax
+		self.hsbs['width_min']     = self.ui.hsb_structWidthRangeMin
+		self.hsbs['width_max']     = self.ui.hsb_structWidthRangeMax
+		self.hsbs['frequency_min'] = self.ui.hsb_structFreqRangeMin
+		self.hsbs['frequency_max'] = self.ui.hsb_structFreqRangeMax
+		self.hsbs['position_min']  = self.ui.hsb_structPositionRangeMin
+		self.hsbs['position_max']  = self.ui.hsb_structPositionRangeMax		
+
 		try:
 			self.nameOfBook = self.ui.lst_books.currentItem().text()
 			self.channelsCalculated = self.books[self.nameOfBook]['config']['channels2calc']
@@ -129,17 +149,33 @@ class visWindow(QtGui.QMainWindow):
 		self.ui.btn_trialPrev.clicked.connect(self.prevTrial)
 		self.ui.btn_channelNext.clicked.connect(self.nextChannel)
 		self.ui.btn_channelPrev.clicked.connect(self.prevChannel)
-
 		self.ui.btn_add.clicked.connect(self.addBooks)
 		self.ui.btn_remove.clicked.connect(self.removeBook)
 		self.ui.btn_saveBook.clicked.connect(self.saveBook)
-
 		self.ui.btn_reset.clicked.connect(self.resetSliders)
-
 		self.ui.btn_saveDecomp.clicked.connect(partial(self.saveFigure, 'decomposition'))
 		self.ui.btn_saveAmplitude.clicked.connect(partial(self.saveFigure, 'amplitudeMap'))
-
 		self.ui.btn_saveAmplitudeAsArray.clicked.connect(self.saveAmplitudeMapAsMatrix)
+
+		hsb_callback = partial(self.structRangeChanged , "amplitude" , "min")
+		self.ui.hsb_structAmplitudeRangeMin.valueChanged[int].connect(hsb_callback)
+		hsb_callback = partial(self.structRangeChanged , "amplitude" , "max")
+		self.ui.hsb_structAmplitudeRangeMax.valueChanged[int].connect(hsb_callback)
+		
+		hsb_callback = partial(self.structRangeChanged , "position" , "min")
+		self.ui.hsb_structPositionRangeMin.valueChanged[int].connect(hsb_callback)
+		hsb_callback = partial(self.structRangeChanged , "position" , "max")
+		self.ui.hsb_structPositionRangeMax.valueChanged[int].connect(hsb_callback)
+
+		hsb_callback = partial(self.structRangeChanged , "frequency" , "min")
+		self.ui.hsb_structFreqRangeMin.valueChanged[int].connect(hsb_callback)
+		hsb_callback = partial(self.structRangeChanged , "frequency" , "max")
+		self.ui.hsb_structFreqRangeMax.valueChanged[int].connect(hsb_callback)
+
+		hsb_callback = partial(self.structRangeChanged , "width" , "min")
+		self.ui.hsb_structWidthRangeMin.valueChanged[int].connect(hsb_callback)
+		hsb_callback = partial(self.structRangeChanged , "width" , "max")
+		self.ui.hsb_structWidthRangeMax.valueChanged[int].connect(hsb_callback)
 
 		self.ui.lst_books.currentItemChanged.connect(self.selectBook)
 		self.ui.lst_books.sig_filesDropped.connect(self.dropBookFiles)
@@ -321,7 +357,18 @@ class visWindow(QtGui.QMainWindow):
 
 	def resetSliders(self):
 		self.determineRangesForHSBs()
+		self.flags['atom']    = 1
+		self.flags['channel'] = 1
+		self.flags['trial']   = 1
 		self.replot()
+
+	def structRangeChanged(self , where , what , value):
+		# print "value={}, where={}, what={}".format(value , where , what)
+		self.hsb_lbls[where+'_'+what].setText(str(value))
+		if what == 'min':
+			self.hsbs[where+'_max'].setMinimum(value)
+		else:
+			self.hsbs[where+'_min'].setMaximum(value)
 
 	def closeEvent(self, event):
 		self.sig_windowClosed.emit()
