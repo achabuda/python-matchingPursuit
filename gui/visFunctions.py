@@ -117,7 +117,10 @@ class visWindow(QtGui.QMainWindow):
 		self.hsbs['frequency_min'] = self.ui.hsb_structFreqRangeMin
 		self.hsbs['frequency_max'] = self.ui.hsb_structFreqRangeMax
 		self.hsbs['position_min']  = self.ui.hsb_structPositionRangeMin
-		self.hsbs['position_max']  = self.ui.hsb_structPositionRangeMax		
+		self.hsbs['position_max']  = self.ui.hsb_structPositionRangeMax
+
+		self.limits = {}
+		# it is filled in by determineRangesForHsbs() later on
 
 		try:
 			self.nameOfBook = self.ui.lst_books.currentItem().text()
@@ -275,6 +278,8 @@ class visWindow(QtGui.QMainWindow):
 
 		value_min = 0
 		value_max = int(np.max(self.books[self.nameOfBook]['book'][self.trial,self.channel]['amplitude'])+1)
+		self.limits['amplitude_min'] = value_min
+		self.limits['amplitude_max'] = value_max
 		self.ui.hsb_structAmplitudeRangeMin.setMinimum(value_min)
 		self.ui.hsb_structAmplitudeRangeMin.setMaximum(value_max)
 		self.ui.hsb_structAmplitudeRangeMin.setValue(value_min)
@@ -286,6 +291,8 @@ class visWindow(QtGui.QMainWindow):
 
 		value_min = 0
 		value_max = self.books[self.nameOfBook]['originalData'].shape[2] / self.books[self.nameOfBook]['config']['samplingFrequency']
+		self.limits['position_min'] = value_min
+		self.limits['position_max'] = value_max
 		self.ui.hsb_structPositionRangeMin.setMinimum(value_min)
 		self.ui.hsb_structPositionRangeMin.setMaximum(value_max)
 		self.ui.hsb_structPositionRangeMin.setValue(value_min)
@@ -297,6 +304,8 @@ class visWindow(QtGui.QMainWindow):
 
 		value_min = 0
 		value_max = self.books[self.nameOfBook]['config']['samplingFrequency']
+		self.limits['frequency_min'] = value_min
+		self.limits['frequency_max'] = value_max
 		self.ui.hsb_structFreqRangeMin.setMinimum(value_min)
 		self.ui.hsb_structFreqRangeMin.setMaximum(value_max)
 		self.ui.hsb_structFreqRangeMin.setValue(value_min)
@@ -308,6 +317,8 @@ class visWindow(QtGui.QMainWindow):
 
 		value_min = self.books[self.nameOfBook]['config']['minS'] / self.books[self.nameOfBook]['config']['samplingFrequency']
 		value_max = self.books[self.nameOfBook]['config']['maxS'] / self.books[self.nameOfBook]['config']['samplingFrequency']
+		self.limits['width_min'] = value_min
+		self.limits['width_max'] = value_max
 		self.ui.hsb_structWidthRangeMin.setMinimum(value_min)
 		self.ui.hsb_structWidthRangeMin.setMaximum(value_max)
 		self.ui.hsb_structWidthRangeMin.setValue(value_min)
@@ -363,8 +374,8 @@ class visWindow(QtGui.QMainWindow):
 		self.replot()
 
 	def structRangeChanged(self , where , what , value):
-		# print "value={}, where={}, what={}".format(value , where , what)
 		self.hsb_lbls[where+'_'+what].setText(str(value))
+		self.limits[where+'_'+what] = value
 		if what == 'min':
 			self.hsbs[where+'_max'].setMinimum(value)
 		else:
