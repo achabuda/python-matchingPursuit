@@ -153,10 +153,10 @@ class mainWindow(QtGui.QMainWindow):
     def setWidgetsInitialState(self):
         self.ui.groupBoxErrors.setHidden(True)
 
-        self.ui.groupBoxDataInfo.setMaximumWidth(0)
-        self.ui.groupBoxAlgorithm.setMaximumWidth(0)
-        self.ui.groupBoxDictionary.setMaximumWidth(0)
-        self.ui.groupBoxSaving.setMaximumWidth(0)
+        # self.ui.groupBoxDataInfo.setMaximumWidth(0)
+        # self.ui.groupBoxAlgorithm.setMaximumWidth(0)
+        # self.ui.groupBoxDictionary.setMaximumWidth(0)
+        # self.ui.groupBoxSaving.setMaximumWidth(0)
 
         algorithmTypes = {'smp':0 , 'mmp':1}
         keys = algorithmTypes.keys()
