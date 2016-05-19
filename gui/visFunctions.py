@@ -49,7 +49,7 @@ from visGraphics import visWindowUI
 
 
 # modules imports #
-from src.drawing import calculateTFMap , getAtomReconstruction
+from src.drawing import calculateTFMap , getAtomReconstruction , getReconstruction
 from src.utils   import saveBookAsMat
 
 
@@ -98,6 +98,7 @@ class visWindow(QtGui.QMainWindow):
 		self.flags['atom']    = 1
 		self.flags['trial']   = 1
 		self.flags['channel'] = 1
+		self.flags['limits']  = 0
 
 		self.hsb_lbls = {}
 		self.hsb_lbls['amplitude_min'] = self.ui.lbl_structAmplitudeRangeMinN
@@ -156,6 +157,7 @@ class visWindow(QtGui.QMainWindow):
 		self.ui.btn_remove.clicked.connect(self.removeBook)
 		self.ui.btn_saveBook.clicked.connect(self.saveBook)
 		self.ui.btn_reset.clicked.connect(self.resetSliders)
+		self.ui.btn_apply.clicked.connect(self.applySliders)
 		self.ui.btn_saveDecomp.clicked.connect(partial(self.saveFigure, 'decomposition'))
 		self.ui.btn_saveAmplitude.clicked.connect(partial(self.saveFigure, 'amplitudeMap'))
 		self.ui.btn_saveAmplitudeAsArray.clicked.connect(self.saveAmplitudeMapAsMatrix)
@@ -200,7 +202,8 @@ class visWindow(QtGui.QMainWindow):
 			self.ui.lbl_atomMax.setText('/ at')
 			return
 
-		self.determineRangesForHSBs()
+		if self.flags['limits']  == 0:
+			self.determineRangesForHSBs()
 
 		self.ui.led_atomType.setText( self.atomTypes[str( self.books[self.nameOfBook]['book'][self.trial,self.channel]['shapeType'][self.atom]) ])
 
@@ -266,7 +269,7 @@ class visWindow(QtGui.QMainWindow):
 
 	def determineRangesForHSBs(self):
 		value_min = 0
-		value_max = self.books[self.nameOfBook]['config']['samplingFrequency']
+		value_max = self.books[self.nameOfBook]['config']['samplingFrequency'] / 2.
 		self.ui.hsb_mapFreqRangeMin.setMinimum(value_min)
 		self.ui.hsb_mapFreqRangeMin.setMaximum(value_max)
 		self.ui.hsb_mapFreqRangeMin.setValue(value_min)
@@ -277,7 +280,12 @@ class visWindow(QtGui.QMainWindow):
 		self.ui.lbl_mapFreqRangeMaxN.setText(str(value_max))
 
 		value_min = 0
-		value_max = int(np.max(self.books[self.nameOfBook]['book'][self.trial,self.channel]['amplitude'])+1)
+		tmp       = []
+		(maxTrial,maxChannel) = self.books[self.nameOfBook]['book'].shape
+		for ind_trial in np.arange(0,maxTrial):
+			for ind_channel in np.arange(0,maxChannel):
+				tmp.append(np.max(self.books[self.nameOfBook]['book'][ind_trial,ind_channel]['amplitude']))
+		value_max = int(max(tmp))
 		self.limits['amplitude_min'] = value_min
 		self.limits['amplitude_max'] = value_max
 		self.ui.hsb_structAmplitudeRangeMin.setMinimum(value_min)
@@ -303,7 +311,7 @@ class visWindow(QtGui.QMainWindow):
 		self.ui.lbl_structPositionRangeMaxN.setText(str(value_max))
 
 		value_min = 0
-		value_max = self.books[self.nameOfBook]['config']['samplingFrequency']
+		value_max = self.books[self.nameOfBook]['config']['samplingFrequency'] / 2.
 		self.limits['frequency_min'] = value_min
 		self.limits['frequency_max'] = value_max
 		self.ui.hsb_structFreqRangeMin.setMinimum(value_min)
@@ -327,6 +335,8 @@ class visWindow(QtGui.QMainWindow):
 		self.ui.hsb_structWidthRangeMax.setMaximum(value_max)
 		self.ui.hsb_structWidthRangeMax.setValue(value_max)
 		self.ui.lbl_structWidthRangeMaxN.setText(str(value_max))
+
+		self.flags['limits'] = 1
 
 	def saveAmplitudeMapAsMatrix(self):
 		nameOfBook = str(self.ui.lst_books.currentItem().text())
@@ -366,12 +376,28 @@ class visWindow(QtGui.QMainWindow):
 		elif which == 'amplitudeMap':
 			self.amplitudeMapPlot.fig.savefig(fileName , dpi=300)
 
+	def integrateLimits(self):
+		limits = []
+		limits.append([self.limits['amplitude_min'] , self.limits['amplitude_max']])
+		limits.append([self.limits['position_min']  , self.limits['position_max']])
+		limits.append([self.limits['frequency_min'] , self.limits['frequency_max']])
+		limits.append([self.limits['width_min']     , self.limits['width_max']])
+		return limits
+
 	def resetSliders(self):
 		self.determineRangesForHSBs()
 		self.flags['atom']    = 1
 		self.flags['channel'] = 1
 		self.flags['trial']   = 1
+		self.flags['limits']  = 0
 		self.replot()
+
+	def applySliders(self):
+		self.flags['atom']    = 1
+		self.flags['channel'] = 1
+		self.flags['trial']   = 1
+		self.flags['limits']  = 1
+		self.replot()		
 
 	def structRangeChanged(self , where , what , value):
 		self.hsb_lbls[where+'_'+what].setText(str(value))
@@ -442,9 +468,8 @@ class visWindow(QtGui.QMainWindow):
 			self.decompositionPlot.ax1.set_xlim([x_fromWhere , x_toWhere])
 			(y_fromWhere,y_toWhere) = self.decompositionPlot.ax1.get_ylim()
 
-			reconstruction = np.zeros(tmp_time.shape)
-			for (index,atom) in self.books[self.nameOfBook]['book'][self.trial,self.channel].iterrows():
-				reconstruction += getAtomReconstruction(atom , tmp_time)
+			limits = self.integrateLimits()
+			reconstruction = getReconstruction(self.books[self.nameOfBook]['book'][self.trial,self.channel] , tmp_time , limits)
 
 			self.decompositionPlot.ax2.plot(time , reconstruction , 'k')
 			self.decompositionPlot.ax2.set_xlim([x_fromWhere , x_toWhere])

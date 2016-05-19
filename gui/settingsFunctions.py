@@ -32,7 +32,6 @@ from os.path   import expanduser
 from PyQt4     import QtCore, QtGui
 
 from pickle    import dump
-# from dill      import dump
 
 # gui imports #
 from settingsGraphics import mainWindowUI
@@ -41,8 +40,6 @@ from visFunctions     import visWindow
 
 # modules imports #
 import data.dataLoader as dl
-# from bookDef        import clsBook
-#from data.bookClassDefinition import clsBook
 from src.utils      import determineAlgorithmConfig, determineDictionaryConfig, generateRangeFromString, generateFinalConfig, saveBookAsMat
 from src.dictionary import generateDictionary
 
@@ -876,6 +873,7 @@ class mainWindow(QtGui.QMainWindow):
                 inputs[nameOfBook]= {'book':book,'config':conf,'originalData':data}
             else:
                 fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save book file' , expanduser('~')+tmpName , 'Python pickle (*.p);;Matlab file (*.mat);;')
+                print fileName
                 if len(fileName) == 0:
                     self.displayInformation('' , 'new')
                     return

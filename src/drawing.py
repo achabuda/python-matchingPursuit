@@ -80,7 +80,7 @@ def calculateTFMap(book,time,samplingFrequency,mapType,*argv):
 				signal2fft = timeCourse * smoothingWindow
 
 				zz = np.fft.fft(signal2fft)
-				z  = np.abs( zz[0 : np.floor(zz.shape[0]/2+1)] )
+				z  = np.abs( zz[0 : int(np.floor(zz.shape[0]/2+1))] )
 				z  = halfWidthGauss(z)
 
 				if z.shape[0] > frequenciesFinal.shape[0]:
@@ -117,6 +117,27 @@ def calculateTFMap(book,time,samplingFrequency,mapType,*argv):
 				timeFreqMap += np.outer(z , totalTimeCourse)
 
 	return (timeFinal , frequenciesFinal , timeFreqMap)
+
+
+
+def getReconstruction(book , time , limits=[]):
+	if limits == []:
+		reconstruction = np.zeros(time.shape)
+		for (index,atom) in book.iterrows():
+			reconstruction += getAtomReconstruction(atom , time)
+	else:
+		amplitudeLimits = limits[0]
+		positionLimits  = limits[1]
+		frequencyLimits = limits[2]
+		widthLimits     = limits[3]
+
+		reconstruction = np.zeros(time.shape)
+		for (index,atom) in book.iterrows():
+			if (atom['amplitude'] > amplitudeLimits[0] and atom['amplitude'] < amplitudeLimits[1]) and (atom['atomLatency'] > positionLimits[0] and atom['atomLatency'] < positionLimits[1]) and (atom['frequency'] > frequencyLimits[0] and atom['frequency'] < frequencyLimits[1]) and (atom['width'] > widthLimits[0] and atom['width'] < widthLimits[1]):
+				reconstruction += getAtomReconstruction(atom , time)
+	return reconstruction
+
+
 
 def getAtomReconstruction(atom , time):
 	envelope = getAtomEnvelope(atom , time)
