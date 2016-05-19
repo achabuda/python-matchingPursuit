@@ -872,25 +872,35 @@ class mainWindow(QtGui.QMainWindow):
             if flag == 'passing':
                 inputs[nameOfBook]= {'book':book,'config':conf,'originalData':data}
             else:
-                fileName = QtGui.QFileDialog.getSaveFileName(self , 'Save book file' , expanduser('~')+tmpName , 'Python pickle (*.p);;Matlab file (*.mat);;')
-                print fileName
+                (fileName , extension) = QtGui.QFileDialog.getSaveFileNameAndFilter(self , 'Save book file' , expanduser('~')+tmpName , 'Python pickle (*.p);;Matlab file (*.mat);;')
+                fileName = str(fileName)
+                extension = str(extension)
                 if len(fileName) == 0:
                     self.displayInformation('' , 'new')
                     return
 
+                t1 = extension.rfind('(')
+                t2 = extension.rfind(')')
+
                 self.displayInformation('Saving book...' , flag='new')
 
-                fileName = str(fileName)
                 if fileName[-2:] == '.p':
                     with open(fileName , 'wb') as f:
                         dump({'book':book , 'originalData':data,'config':conf} , f)
-
                         msg = 'ok'
                 elif fileName[-4:] == '.mat':
                     msg = saveBookAsMat(book , data , conf , fileName)
-                
+                elif extension == '.p':
+                    with open(fileName+extension , 'wb') as f:
+                        dump({'book':book , 'originalData':data,'config':conf} , f)
+                        msg = 'ok'
+                elif extension == '.mat':
+                    msg = saveBookAsMat(book , data , conf , fileName+extension)
+                else:
+                    msg = 'Error'
+
                 if msg != 'ok':
-                    warningCollector += msg + 'in' + nameOfBook + '\n'
+                    warningCollector += msg + ' in' + nameOfBook + '\n'
 
         if flag == 'passing':
             return inputs

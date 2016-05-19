@@ -584,6 +584,11 @@ class visWindow(QtGui.QMainWindow):
 		bookFileName = str(fileName[0])
 		whereDot = bookFileName.rfind('.')
 		bookFileName = bookFileName[:whereDot]
+		
+		# extension = str(fileName[1])
+		# t1 = extension.rfind('(')
+		# t2 = extension.rfind(')')
+		# extension = extension[t1+2:t2]
 
 		if fileName[1][-3:-1] == '.p':
 			with open(bookFileName+'.p' , 'wb') as f:
