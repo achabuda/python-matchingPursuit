@@ -881,6 +881,7 @@ class mainWindow(QtGui.QMainWindow):
 
                 t1 = extension.rfind('(')
                 t2 = extension.rfind(')')
+                extension = extension[t1+2:t2]
 
                 self.displayInformation('Saving book...' , flag='new')
 

@@ -553,6 +553,10 @@ class visWindow(QtGui.QMainWindow):
 		del self.books[nameOfBook]
 
 		if self.ui.lst_books.count() > 0:
+			self.flags['limits']  = 0
+			self.flags['atom']    = 1
+			self.flags['channel'] = 1
+			self.flags['trial']   = 1
 			self.setVariables()
 			self.setWidgetsState()
 		else:
