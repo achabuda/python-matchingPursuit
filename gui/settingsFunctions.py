@@ -141,8 +141,22 @@ class mainWindow(QtGui.QMainWindow):
             self.books            = {}
             self.dictionaryConfig = {}
 
+            self.sizes = {}
+            self.sizes['groupBoxDataInfo']   = [self.ui.groupBoxDataInfo.minimumWidth()   , self.ui.groupBoxDataInfo.maximumWidth()]
+            self.sizes['groupBoxAlgorithm']  = [self.ui.groupBoxAlgorithm.minimumWidth()  , self.ui.groupBoxAlgorithm.maximumWidth()]
+            self.sizes['groupBoxDictionary'] = [self.ui.groupBoxDictionary.minimumWidth() , self.ui.groupBoxDictionary.maximumWidth()]
+            self.sizes['groupBoxSaving']     = [self.ui.groupBoxSaving.minimumWidth()     , self.ui.groupBoxSaving.maximumWidth()]
+            self.sizes['groupBoxData']       = [self.ui.groupBoxData.minimumWidth()       , self.ui.groupBoxData.maximumWidth()]
+            self.sizes['groupBoxBooks']      = [self.ui.groupBoxBooks.minimumWidth()      , self.ui.groupBoxBooks.maximumWidth()]
+            self.sizes['window']             = [self.width()                              , self.ui.screenSize.width()]
+
     def setWidgetsInitialState(self):
         self.ui.groupBoxErrors.setHidden(True)
+
+        self.ui.groupBoxDataInfo.setMaximumWidth(0)
+        self.ui.groupBoxAlgorithm.setMaximumWidth(0)
+        self.ui.groupBoxDictionary.setMaximumWidth(0)
+        self.ui.groupBoxSaving.setMaximumWidth(0)
 
         algorithmTypes = {'smp':0 , 'mmp':1}
         keys = algorithmTypes.keys()
@@ -840,8 +854,6 @@ class mainWindow(QtGui.QMainWindow):
         
         data = self.dataMatrixes[str(self.ui.lst_data.findItems(key , QtCore.Qt.MatchExactly)[0].text())][0]
 
-        # book   = clsBook(book , config , data)
-
         self.books[nameOfBook] = [book , config]
 
         item = QtGui.QListWidgetItem(nameOfBook)
@@ -992,64 +1004,70 @@ class mainWindow(QtGui.QMainWindow):
         animationDuration = 750     # in [ms]
 
     	self.animation = QtCore.QParallelAnimationGroup(self)
-    	self.animation.finished.connect(self.setProperWindowSize)
+    	# self.animation.finished.connect(self.setProperWindowSize)
 
-    	self.animationWindow = QtCore.QPropertyAnimation(self, "size")
+        self.animationWindow = QtCore.QPropertyAnimation(self, "maximumWidth")
         self.animationWindow.setEasingCurve(QtCore.QEasingCurve.OutExpo)
         self.animationWindow.setDuration(animationDuration)
 
-        self.animationGroupBoxBooks = QtCore.QPropertyAnimation(self.ui.groupBoxBooks, "geometry")
-        self.animationGroupBoxBooks.setEasingCurve(QtCore.QEasingCurve.OutExpo)
-        self.animationGroupBoxBooks.setDuration(animationDuration)        
+        self.animationGroupBoxData = QtCore.QPropertyAnimation(self.ui.groupBoxData, "maximumWidth")
+        self.animationGroupBoxData.setEasingCurve(QtCore.QEasingCurve.OutExpo)
+        self.animationGroupBoxData.setDuration(animationDuration)
 
-        self.animationGroupBoxDataInfo = QtCore.QPropertyAnimation(self.ui.groupBoxDataInfo, "size")
+        self.animationGroupBoxBooks = QtCore.QPropertyAnimation(self.ui.groupBoxBooks, "maximumWidth")
+        self.animationGroupBoxBooks.setEasingCurve(QtCore.QEasingCurve.OutExpo)
+        self.animationGroupBoxBooks.setDuration(animationDuration)
+
+        self.animationGroupBoxDataInfo = QtCore.QPropertyAnimation(self.ui.groupBoxDataInfo, "maximumWidth")
         self.animationGroupBoxDataInfo.setEasingCurve(QtCore.QEasingCurve.OutExpo)
         self.animationGroupBoxDataInfo.setDuration(animationDuration)
 
-        self.animationGroupBoxAlgorithm = QtCore.QPropertyAnimation(self.ui.groupBoxAlgorithm, "size")
+        self.animationGroupBoxAlgorithm = QtCore.QPropertyAnimation(self.ui.groupBoxAlgorithm, "maximumWidth")
         self.animationGroupBoxAlgorithm.setEasingCurve(QtCore.QEasingCurve.OutExpo)
         self.animationGroupBoxAlgorithm.setDuration(animationDuration)
 
-        self.animationGroupBoxDictionary = QtCore.QPropertyAnimation(self.ui.groupBoxDictionary, "geometry")
+        self.animationGroupBoxDictionary = QtCore.QPropertyAnimation(self.ui.groupBoxDictionary, "maximumWidth")
         self.animationGroupBoxDictionary.setEasingCurve(QtCore.QEasingCurve.OutExpo)
         self.animationGroupBoxDictionary.setDuration(animationDuration)
 
-        self.animationGroupBoxSaving = QtCore.QPropertyAnimation(self.ui.groupBoxSaving, "geometry")
+        self.animationGroupBoxSaving = QtCore.QPropertyAnimation(self.ui.groupBoxSaving, "maximumWidth")
         self.animationGroupBoxSaving.setEasingCurve(QtCore.QEasingCurve.OutExpo)
         self.animationGroupBoxSaving.setDuration(animationDuration)
 
-        self.animationGroupBoxErrors = QtCore.QPropertyAnimation(self.ui.groupBoxErrors, "size")
+        self.animationGroupBoxErrors = QtCore.QPropertyAnimation(self.ui.groupBoxErrors, "maximumWidth")
         self.animationGroupBoxErrors.setEasingCurve(QtCore.QEasingCurve.OutExpo)
         self.animationGroupBoxErrors.setDuration(animationDuration)
 
         if self.flags['groupBoxDataResized'] == 0:
-            self.animationWindow.setEndValue(QtCore.QSize(1000,self.ui.basicWindowSize[1]))
-            self.animationGroupBoxBooks.setEndValue(QtCore.QRect(710,10,280,370))
-            self.animationGroupBoxDataInfo.setEndValue(QtCore.QSize(180,140))
-            self.animationGroupBoxAlgorithm.setEndValue(QtCore.QSize(180,220))
-            self.animationGroupBoxErrors.setEndValue(QtCore.QSize(980,160))
-            self.animationGroupBoxDictionary.setEndValue(QtCore.QRect(495,10,200,200))
-            self.animationGroupBoxSaving.setEndValue(QtCore.QRect(495,220,200,160))
-            self.setMaximumSize(QtCore.QSize(1000, self.ui.basicWindowSize[1]))
+            self.animationWindow.setEndValue(self.sizes['window'][1])
+            self.animationGroupBoxBooks.setEndValue(self.sizes['groupBoxBooks'][1])
+            self.animationGroupBoxDataInfo.setEndValue(self.sizes['groupBoxDataInfo'][1])
+            self.animationGroupBoxAlgorithm.setEndValue(self.sizes['groupBoxAlgorithm'][1])
+            self.animationGroupBoxData.setEndValue(self.sizes['groupBoxData'][1])
+            # self.animationGroupBoxErrors.setEndValue(QtCore.QSize(980,160))
+            self.animationGroupBoxDictionary.setEndValue(self.sizes['groupBoxDictionary'][1])
+            self.animationGroupBoxSaving.setEndValue(self.sizes['groupBoxSaving'][1])
+            
             self.flags['groupBoxDataResized'] = 1
         else:
-            self.animationWindow.setEndValue(QtCore.QSize(self.ui.basicWindowSize[0],self.ui.basicWindowSize[1]))
-            self.animationGroupBoxBooks.setEndValue(QtCore.QRect(310,10,280,370))
-            self.animationGroupBoxDataInfo.setEndValue(QtCore.QSize(0,140))
-            self.animationGroupBoxAlgorithm.setEndValue(QtCore.QSize(0,220))
-            self.animationGroupBoxErrors.setEndValue(QtCore.QSize(580,160))
-            self.animationGroupBoxDictionary.setEndValue(QtCore.QRect(305,10,0,200))
-            self.animationGroupBoxSaving.setEndValue(QtCore.QRect(305,220,0,160))
-            self.setMinimumSize(QtCore.QSize(self.ui.basicWindowSize[0], self.ui.basicWindowSize[1]))
+            self.animationWindow.setEndValue(self.sizes['window'][0])
+            self.animationGroupBoxBooks.setEndValue(self.sizes['groupBoxBooks'][0])
+            self.animationGroupBoxDataInfo.setEndValue(self.sizes['groupBoxDataInfo'][0])
+            self.animationGroupBoxAlgorithm.setEndValue(self.sizes['groupBoxAlgorithm'][0])
+            self.animationGroupBoxData.setEndValue(self.sizes['groupBoxData'][0])
+            # self.animationGroupBoxErrors.setEndValue(QtCore.QSize(580,160))
+            self.animationGroupBoxDictionary.setEndValue(self.sizes['groupBoxDictionary'][0])
+            self.animationGroupBoxSaving.setEndValue(self.sizes['groupBoxSaving'][0])
+            
             self.flags['groupBoxDataResized'] = 0
 
-        self.animation.addAnimation(self.animationWindow)
-        self.animation.addAnimation(self.animationGroupBoxBooks)
+        # self.animation.addAnimation(self.animationWindow)
+        # self.animation.addAnimation(self.animationGroupBoxBooks)
         self.animation.addAnimation(self.animationGroupBoxDataInfo)
         self.animation.addAnimation(self.animationGroupBoxAlgorithm)
         self.animation.addAnimation(self.animationGroupBoxDictionary)
         self.animation.addAnimation(self.animationGroupBoxSaving)
-        self.animation.addAnimation(self.animationGroupBoxErrors)
+        # self.animation.addAnimation(self.animationGroupBoxErrors)
 
         self.animation.start()
 

@@ -52,13 +52,13 @@ class mainWindowUI(object):
 
     def setupUi(self, mainWindow):
 
-        self.basicWindowSize = (600, 550)
+        # self.basicWindowSize = (600, 550)
 
         mainWindow.setObjectName(_fromUtf8("mainWindow"))
         mainWindow.setEnabled(True)
-        mainWindow.resize(self.basicWindowSize[0] , self.basicWindowSize[1])
-        mainWindow.setMinimumSize(QtCore.QSize(self.basicWindowSize[0] , self.basicWindowSize[1]))
-        mainWindow.setMaximumSize(QtCore.QSize(self.basicWindowSize[0] , self.basicWindowSize[1]))
+        # mainWindow.resize(self.basicWindowSize[0] , self.basicWindowSize[1])
+        # mainWindow.setMinimumSize(QtCore.QSize(self.basicWindowSize[0] , self.basicWindowSize[1]))
+        # mainWindow.setMaximumSize(QtCore.QSize(self.basicWindowSize[0] , self.basicWindowSize[1]))
         mainWindow.move(100,100)
         # icon = QtGui.QIcon()
         # 
@@ -70,7 +70,7 @@ class mainWindowUI(object):
         # icon.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         # mainWindow.setWindowIcon(icon)
         
-        # self.screenSize = QtGui.QDesktopWidget().screenGeometry()
+        self.screenSize = QtGui.QDesktopWidget().screenGeometry()
         #print screenSize.width(), screenSize.height()
 
 # CENTRAL WIDGET:
@@ -78,33 +78,43 @@ class mainWindowUI(object):
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
 
 # GROUPBOXES:
-        self.groupBoxData = QtGui.QGroupBox(self.centralwidget)
-        self.groupBoxData.setGeometry(QtCore.QRect(10,10,280,370))
+        self.groupBoxData = QtGui.QGroupBox()
         self.groupBoxData.setObjectName(_fromUtf8("groupBoxData"))
 
-        self.groupBoxDataInfo = QtGui.QGroupBox(self.centralwidget)
-        self.groupBoxDataInfo.setGeometry(QtCore.QRect(305,10,0,140))
+        self.groupBoxDataInfo = QtGui.QGroupBox()
+        # print self.groupBoxDataInfo.size()
+        # self.groupBoxDataInfo.setMaximumWidth(0)
         self.groupBoxDataInfo.setObjectName(_fromUtf8("groupBoxDataInfo"))
 
-        self.groupBoxAlgorithm = QtGui.QGroupBox(self.centralwidget)
-        self.groupBoxAlgorithm.setGeometry(QtCore.QRect(305,160,0,220))
-        self.groupBoxAlgorithm.setObjectName(_fromUtf8("groupBoxAlgorithm"))        
+        self.groupBoxAlgorithm = QtGui.QGroupBox()
+        # print self.groupBoxAlgorithm.geometry()
+        # self.groupBoxAlgorithm.setMaximumWidth(0)
+        self.groupBoxAlgorithm.setObjectName(_fromUtf8("groupBoxAlgorithm"))
 
-        self.groupBoxDictionary = QtGui.QGroupBox(self.centralwidget)
-        self.groupBoxDictionary.setGeometry(QtCore.QRect(305,10,0,200))
+        self.groupBoxDictionary = QtGui.QGroupBox()
+        # print self.groupBoxDictionary.geometry()
+        # self.groupBoxDictionary.setMaximumWidth(0)
         self.groupBoxDictionary.setObjectName(_fromUtf8("groupBoxDictionary"))
 
-        self.groupBoxSaving = QtGui.QGroupBox(self.centralwidget)
-        self.groupBoxSaving.setGeometry(QtCore.QRect(305,220,0,160))
-        self.groupBoxSaving.setObjectName(_fromUtf8("groupBoxSaving"))        
+        self.groupBoxSaving = QtGui.QGroupBox()
+        # print self.groupBoxSaving.geometry()
+        # self.groupBoxSaving.setMaximumWidth(0)
+        self.groupBoxSaving.setObjectName(_fromUtf8("groupBoxSaving"))
 
-        self.groupBoxBooks = QtGui.QGroupBox(self.centralwidget)
-        self.groupBoxBooks.setGeometry(QtCore.QRect(310,10,280,370))
+        self.groupBoxBooks = QtGui.QGroupBox()
         self.groupBoxBooks.setObjectName(_fromUtf8("groupBoxBooks"))
 
-        self.groupBoxErrors = QtGui.QGroupBox(self.centralwidget)
-        self.groupBoxErrors.setGeometry(QtCore.QRect(10,380,580,160))
+        self.groupBoxErrors = QtGui.QGroupBox()
         self.groupBoxErrors.setObjectName(_fromUtf8("groupBoxErrors"))
+
+        self.mainLayout = QtGui.QGridLayout()
+        self.mainLayout.addWidget(self.groupBoxData       , 0 , 0 , 0 , 1)
+        self.mainLayout.addWidget(self.groupBoxDataInfo   , 0 , 1)
+        self.mainLayout.addWidget(self.groupBoxAlgorithm  , 1 , 1)
+        self.mainLayout.addWidget(self.groupBoxDictionary , 0 , 2)
+        self.mainLayout.addWidget(self.groupBoxSaving     , 1 , 2)
+        self.mainLayout.addWidget(self.groupBoxBooks      , 0 , 3 , 0 , 1)
+        self.mainLayout.addWidget(self.groupBoxErrors     , 2 , 0 , 4 , 0)
 
 # GROUPBOX - DATA
         dataGrid = QtGui.QGridLayout()
@@ -410,6 +420,7 @@ class mainWindowUI(object):
         errorsGrid.setRowStretch(1,1)
 
 # SET ALL THINGS UP:
+        self.centralwidget.setLayout(self.mainLayout)
         mainWindow.setCentralWidget(self.centralwidget)
         self.retranslateUi(mainWindow)
         QtCore.QMetaObject.connectSlotsByName(mainWindow)
@@ -425,7 +436,6 @@ class mainWindowUI(object):
         self.groupBoxSaving.setTitle(_translate("mainWindow", "Save", None))
         self.groupBoxBooks.setTitle(_translate("mainWindow", "Results", None))
         self.groupBoxErrors.setTitle(_translate("mainWindow", "Informations", None))
-        self.groupBoxErrors.setHidden(False)
 
         self.lbl_samplingFrequency.setText(_translate("mainWindow", "Sampling:", None))
         self.lbl_samplingFrequencyUnit.setText(_translate("mainWindow", "[Hz]", None))

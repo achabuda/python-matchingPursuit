@@ -200,11 +200,12 @@ def makeOneIteration(dictionary , partialResults , signalRest , signalLength , c
 	bookElement['increase'] = increase_0
 	bookElement['decay']    = decay_0
 	bookElement['sigma']    = sigma_0
+	bookElement['time_0']   = partialResults['time'][whereMax][0]
 
 	if config['flags']['useGradientOptimization'] == 1:
 		whereStart = partialResults['time'][whereMax][0]
 
-		(freq,amplitude,sigma,increase,decay,mi,envelope,reconstruction,shapeTypeNew) = gradientSearch([whereStart,subMaxDOT[whereMax],mi_0,sigma_0,subMaxFreq[whereMax],increase_0,decay_0],[config['minS'],config['maxS']],signalRest,partialResults['shapeType'][whereMax],config['flags']['useAsymA'])
+		(freq,amplitude,sigma,increase,decay,mi,time_0,envelope,reconstruction,shapeTypeNew) = gradientSearch([whereStart,subMaxDOT[whereMax],mi_0,sigma_0,subMaxFreq[whereMax],increase_0,decay_0],[config['minS'],config['maxS']],signalRest,partialResults['shapeType'][whereMax],config['flags']['useAsymA'])
 
 		if np.abs(amplitude) > np.abs(bookElement['amplitude']):
 			bookElement['amplitude']      = amplitude
@@ -216,6 +217,7 @@ def makeOneIteration(dictionary , partialResults , signalRest , signalLength , c
 			bookElement['mi']             = mi
 			bookElement['increase']       = increase
 			bookElement['decay']          = decay
+			# bookElement['time_0']         = time_0
 
 	signalRest = signalRest - bookElement['reconstruction']
 
@@ -237,6 +239,7 @@ def retranslateBookElement(bookElement , samplingFrequency):
 	trueBookElement['mi']              = bookElement['mi']
 	trueBookElement['increase']        = bookElement['increase']
 	trueBookElement['decay']           = bookElement['decay']
+	trueBookElement['time_0']          = bookElement['time_0']
 
 	envelope = bookElement['envelope']
 	whereMax = np.argmax(envelope)
@@ -327,7 +330,7 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 			reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		else:
 			reconstruction = amplitude * envelope * np.exp(1j*freqStart*timeShifted)
-			return (freqStart,amplitude,sigma,increase,decay,mi,envelope,reconstruction,finalShapeType)
+			return (freqStart,amplitude,sigma,increase,decay,mi,timeShifted[0],envelope,reconstruction,finalShapeType)
 
 		amplitudeActual = np.abs(amplitudeStart)
 
@@ -360,7 +363,7 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 		 		reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		 	else:
 		 		reconstruction  = amplitude * envelope * np.exp(1j*freq*timeShifted)
-		 		return (freq,amplitude,sigma,increase,decay,mi,envelope,reconstruction,finalShapeType)
+		 		return (freq,amplitude,sigma,increase,decay,mi,timeShifted[0],envelope,reconstruction,finalShapeType)
 # TO HERE
 
 	elif mainShapeType == 2:
@@ -402,7 +405,7 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 			reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		else:
 			reconstruction = amplitude * envelope * np.exp(1j*freqStart*timeShifted)
-			return (freqStart,amplitude,sigma,increase,decay,mi,envelope,reconstruction,finalShapeType)
+			return (freqStart,amplitude,sigma,increase,decay,mi,timeShifted[0],envelope,reconstruction,finalShapeType)
 
 		amplitudeActual = np.abs(amplitudeStart)
 
@@ -427,7 +430,7 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 		 		reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		 	else:
 		 		reconstruction  = amplitude * envelope * np.exp(1j*freq*timeShifted)
-		 		return (freq,amplitude,sigma,increase,decay,mi,envelope,reconstruction,finalShapeType)
+		 		return (freq,amplitude,sigma,increase,decay,mi,timeShifted[0],envelope,reconstruction,finalShapeType)
 ## -- TO HERE -- ##
 
 	elif mainShapeType == 3:
@@ -477,7 +480,7 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 			# reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		else:
 			reconstruction = amplitude * envelope * np.exp(1j*freqStart*timeShifted)
-			return (freqStart,amplitude,sigma,increase,decay,mi,envelope,reconstruction,finalShapeType)
+			return (freqStart,amplitude,sigma,increase,decay,mi,timeShifted[0],envelope,reconstruction,finalShapeType)
 
 		amplitudeActual = np.abs(amplitudeStart)
 
@@ -511,11 +514,11 @@ def gradientSearch(startParams , boundParams , signal , shapeType , forceAsymetr
 		 		# reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
 		 	else:
 		 		reconstruction  = amplitude * envelope * np.exp(1j*freq*timeShifted)
-		 		return (freq,amplitude,sigma,increase,decay,mi,envelope,reconstruction,finalShapeType)
+		 		return (freq,amplitude,sigma,increase,decay,mi,timeShifted[0],envelope,reconstruction,finalShapeType)
 ## -- TO HERE -- ##
 
 	reconstruction = amplitude * envelope * np.exp(1j*freq*timeShifted)
-	return (freq,amplitude,sigma,increase,decay,mi,envelope,reconstruction,finalShapeType)
+	return (freq,amplitude,sigma,increase,decay,mi,timeShifted[0],envelope,reconstruction,finalShapeType)
 
 
 def recalculateDotProducts(dictionary , partialResults , signalRest , minNFFT , signalLength , iteration):

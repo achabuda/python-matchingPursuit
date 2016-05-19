@@ -118,8 +118,6 @@ def calculateTFMap(book,time,samplingFrequency,mapType,*argv):
 
 	return (timeFinal , frequenciesFinal , timeFreqMap)
 
-
-
 def getReconstruction(book , time , limits=[]):
 	if limits == []:
 		reconstruction = np.zeros(time.shape)
@@ -137,12 +135,12 @@ def getReconstruction(book , time , limits=[]):
 				reconstruction += getAtomReconstruction(atom , time)
 	return reconstruction
 
-
-
 def getAtomReconstruction(atom , time):
-	envelope = getAtomEnvelope(atom , time)
-	reconstruction = atom['modulus']['complex'] * envelope * np.exp(1j * atom['omega'] * time)
-
+	envelope       = getAtomEnvelope(atom , time)
+	timeShifted    = time - atom['time_0']
+	reconstruction = np.zeros(time.shape , dtype='complex')
+	reconstruction = atom['modulus']['complex'] * envelope * np.exp(1j * atom['omega'] * timeShifted)
+	# print atom['time_0']
 	return reconstruction.real
 
 def getAtomEnvelope(atom , time):
