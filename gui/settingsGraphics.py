@@ -51,14 +51,8 @@ class mainWindowUI(object):
     '''
 
     def setupUi(self, mainWindow):
-
-        # self.basicWindowSize = (600, 550)
-
         mainWindow.setObjectName(_fromUtf8("mainWindow"))
         mainWindow.setEnabled(True)
-        # mainWindow.resize(self.basicWindowSize[0] , self.basicWindowSize[1])
-        # mainWindow.setMinimumSize(QtCore.QSize(self.basicWindowSize[0] , self.basicWindowSize[1]))
-        # mainWindow.setMaximumSize(QtCore.QSize(self.basicWindowSize[0] , self.basicWindowSize[1]))
         mainWindow.move(100,100)
         # icon = QtGui.QIcon()
         # 
@@ -70,35 +64,52 @@ class mainWindowUI(object):
         # icon.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         # mainWindow.setWindowIcon(icon)
         
-        self.screenSize = QtGui.QDesktopWidget().screenGeometry()
-        #print screenSize.width(), screenSize.height()
+        # self.screenSize = QtGui.QDesktopWidget().screenGeometry()
+        # print screenSize.width(), screenSize.height()
 
 # CENTRAL WIDGET:
         self.centralwidget = QtGui.QWidget(mainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
+
+# TAB WIDGET:
+        self.tabSpace = QtGui.QTabWidget()
+        self.tabSpace.setTabsClosable(False)
+        self.tabSpace.setTabShape(0)
+        self.tabSpace.setMovable(0)
+        self.tabSpace.setIconSize(QtCore.QSize(16,16))
+
+        self.tab_dataAndBooks = QtGui.QWidget()
+        self.tab_settings     = QtGui.QWidget()
+
+        icon1 = QtGui.QIcon()
+        iconPath = _fromUtf8("./pictures/icon_folder.png")
+        icon1.addPixmap(QtGui.QPixmap(iconPath), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        
+        icon2 = QtGui.QIcon()
+        iconPath = _fromUtf8("./pictures/icon_settings.png")
+        icon2.addPixmap(QtGui.QPixmap(iconPath), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        
+        self.tabSpace.addTab(self.tab_dataAndBooks , icon1 , "Data")
+        self.tabSpace.addTab(self.tab_settings     , icon2 , "Settings")
+
+        self.lay_main = QtGui.QVBoxLayout()
+        self.lay_main.addWidget(self.tabSpace)
+        self.centralwidget.setLayout(self.lay_main)
 
 # GROUPBOXES:
         self.groupBoxData = QtGui.QGroupBox()
         self.groupBoxData.setObjectName(_fromUtf8("groupBoxData"))
 
         self.groupBoxDataInfo = QtGui.QGroupBox()
-        # print self.groupBoxDataInfo.size()
-        # self.groupBoxDataInfo.setMaximumWidth(0)
         self.groupBoxDataInfo.setObjectName(_fromUtf8("groupBoxDataInfo"))
 
         self.groupBoxAlgorithm = QtGui.QGroupBox()
-        # print self.groupBoxAlgorithm.geometry()
-        # self.groupBoxAlgorithm.setMaximumWidth(0)
         self.groupBoxAlgorithm.setObjectName(_fromUtf8("groupBoxAlgorithm"))
 
         self.groupBoxDictionary = QtGui.QGroupBox()
-        # print self.groupBoxDictionary.geometry()
-        # self.groupBoxDictionary.setMaximumWidth(0)
         self.groupBoxDictionary.setObjectName(_fromUtf8("groupBoxDictionary"))
 
         self.groupBoxSaving = QtGui.QGroupBox()
-        # print self.groupBoxSaving.geometry()
-        # self.groupBoxSaving.setMaximumWidth(0)
         self.groupBoxSaving.setObjectName(_fromUtf8("groupBoxSaving"))
 
         self.groupBoxBooks = QtGui.QGroupBox()
@@ -107,14 +118,46 @@ class mainWindowUI(object):
         self.groupBoxErrors = QtGui.QGroupBox()
         self.groupBoxErrors.setObjectName(_fromUtf8("groupBoxErrors"))
 
-        self.mainLayout = QtGui.QGridLayout()
-        self.mainLayout.addWidget(self.groupBoxData       , 0 , 0 , 0 , 1)
-        self.mainLayout.addWidget(self.groupBoxDataInfo   , 0 , 1)
-        self.mainLayout.addWidget(self.groupBoxAlgorithm  , 1 , 1)
-        self.mainLayout.addWidget(self.groupBoxDictionary , 0 , 2)
-        self.mainLayout.addWidget(self.groupBoxSaving     , 1 , 2)
-        self.mainLayout.addWidget(self.groupBoxBooks      , 0 , 3 , 0 , 1)
-        self.mainLayout.addWidget(self.groupBoxErrors     , 2 , 0 , 4 , 0)
+        self.groupBoxErrors2 = QtGui.QGroupBox()
+        self.groupBoxErrors2.setObjectName(_fromUtf8("groupBoxErrors2"))
+
+# MAIN LAYOUTS:
+        self.lay_dataAndBooks = QtGui.QGridLayout()
+        self.lay_dataAndBooks.addWidget(self.groupBoxData   , 0 , 0)
+        self.lay_dataAndBooks.addWidget(self.groupBoxBooks  , 0 , 1)
+        self.lay_dataAndBooks.addWidget(self.groupBoxErrors , 1 , 0 , 1 , 0)
+
+        self.lay_dataAndBooks.setRowStretch(0,5)
+        self.lay_dataAndBooks.setRowStretch(1,1)
+        self.tab_dataAndBooks.setLayout(self.lay_dataAndBooks)
+
+        self.lbl_nameOfDataFile = QtGui.QLabel()
+        self.lbl_nameOfDataFile.setAlignment(QtCore.Qt.AlignCenter)
+        self.lbl_nameOfDataFile.setStyleSheet('font-size: 11pt; font-weight: bold;')
+        self.lbl_nameOfDataFile.setObjectName(_fromUtf8("lbl_nameOfDataFile"))
+        
+        self.lay_settings  = QtGui.QVBoxLayout()
+        lay_settingsSub    = QtGui.QHBoxLayout()
+        lay_settingsSubSub = QtGui.QHBoxLayout()
+        
+        lay_settingsSub.addWidget(self.groupBoxDataInfo)
+        lay_settingsSub.addWidget(self.groupBoxDictionary)
+
+        lay_settingsSubSub.addWidget(self.groupBoxSaving)
+        lay_settingsSubSub.addWidget(self.groupBoxAlgorithm)
+        
+        self.lay_settings.addWidget(self.lbl_nameOfDataFile)
+        self.lay_settings.addLayout(lay_settingsSub)
+        self.lay_settings.addLayout(lay_settingsSubSub)
+        self.lay_settings.addWidget(self.groupBoxErrors2)
+        
+        self.lay_settings.setStretch(0 , 1)
+        self.lay_settings.setStretch(1 , 2)
+        self.lay_settings.setStretch(2 , 2)
+        self.lay_settings.setStretch(3 , 1)
+
+        
+        self.tab_settings.setLayout(self.lay_settings)
 
 # GROUPBOX - DATA
         dataGrid = QtGui.QGridLayout()
@@ -136,16 +179,7 @@ class mainWindowUI(object):
         self.btn_removeData.setIcon(icon1)
         self.btn_removeData.setIconSize(QtCore.QSize(24, 24))
         self.btn_removeData.setObjectName(_fromUtf8("btn_removeData"))
-        dataGrid.addWidget(self.btn_removeData,0,1)
-
-        self.btn_settingsData = QtGui.QPushButton(self.groupBoxData)
-        icon1 = QtGui.QIcon()
-        icon1path = _fromUtf8("./pictures/icon_settings.png")
-        icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_settingsData.setIcon(icon1)
-        self.btn_settingsData.setIconSize(QtCore.QSize(24, 24))
-        self.btn_settingsData.setObjectName(_fromUtf8("btn_settingsData"))
-        dataGrid.addWidget(self.btn_settingsData,0,2)
+        dataGrid.addWidget(self.btn_removeData,0,2)
 
         self.lst_data = DragDropListWidget_PYQT(QtGui.QMainWindow)
         dataGrid.addWidget(self.lst_data,1,0,2,0)
@@ -210,6 +244,7 @@ class mainWindowUI(object):
 
         self.led_channels2calc = QtGui.QLineEdit(self.groupBoxAlgorithm)
         self.led_channels2calc.setObjectName(_fromUtf8("led_channels2calc"))
+        self.led_channels2calc.setAlignment(QtCore.Qt.AlignCenter)
         configGrid.addWidget(self.led_channels2calc,0,1)
 
         self.lbl_trials2calc = QtGui.QLabel(self.groupBoxAlgorithm)
@@ -218,6 +253,7 @@ class mainWindowUI(object):
 
         self.led_trials2calc = QtGui.QLineEdit(self.groupBoxAlgorithm)
         self.led_trials2calc.setObjectName(_fromUtf8("led_trials2calc"))
+        self.led_trials2calc.setAlignment(QtCore.Qt.AlignCenter)
         configGrid.addWidget(self.led_trials2calc,1,1)
 
 
@@ -244,6 +280,7 @@ class mainWindowUI(object):
 
         self.led_iterationsLimit = QtGui.QLineEdit(self.groupBoxAlgorithm)
         self.led_iterationsLimit.setObjectName(_fromUtf8("led_iterationsLimit"))
+        self.led_iterationsLimit.setAlignment(QtCore.Qt.AlignCenter)
         configGrid.addWidget(self.led_iterationsLimit,4,1)
 
         self.lbl_energyLimit = QtGui.QLabel(self.groupBoxAlgorithm)
@@ -252,6 +289,7 @@ class mainWindowUI(object):
 
         self.led_energyLimit = QtGui.QLineEdit(self.groupBoxAlgorithm)
         self.led_energyLimit.setObjectName(_fromUtf8("led_energyLimit"))
+        self.led_energyLimit.setAlignment(QtCore.Qt.AlignCenter)
         configGrid.addWidget(self.led_energyLimit,5,1)
 
         self.lbl_nfft = QtGui.QLabel(self.groupBoxAlgorithm)
@@ -260,6 +298,7 @@ class mainWindowUI(object):
 
         self.led_nfft = QtGui.QLineEdit(self.groupBoxAlgorithm)
         self.led_nfft.setObjectName(_fromUtf8("led_nfft"))
+        self.led_nfft.setAlignment(QtCore.Qt.AlignCenter)
         configGrid.addWidget(self.led_nfft,6,1)
 
         self.lbl_displayInfo = QtGui.QLabel(self.groupBoxAlgorithm)
@@ -290,7 +329,8 @@ class mainWindowUI(object):
 
         self.led_dictonaryDensity = QtGui.QLineEdit(self.groupBoxDictionary)
         self.led_dictonaryDensity.setObjectName(_fromUtf8("led_dictonaryDensity"))
-        dictionaryGrid.addWidget(self.led_dictonaryDensity,1,2)
+        self.led_dictonaryDensity.setAlignment(QtCore.Qt.AlignCenter)
+        dictionaryGrid.addWidget(self.led_dictonaryDensity,1,1)
 
         self.lbl_minS = QtGui.QLabel(self.groupBoxDictionary)
         self.lbl_minS.setObjectName(_fromUtf8("lbl_minS"))
@@ -298,6 +338,7 @@ class mainWindowUI(object):
 
         self.led_minS = QtGui.QLineEdit(self.groupBoxDictionary)
         self.led_minS.setObjectName(_fromUtf8("led_minS"))
+        self.led_minS.setAlignment(QtCore.Qt.AlignCenter)
         dictionaryGrid.addWidget(self.led_minS,2,1)
 
         self.cmb_minS = QtGui.QComboBox(self.groupBoxDictionary)
@@ -310,6 +351,7 @@ class mainWindowUI(object):
 
         self.led_maxS = QtGui.QLineEdit(self.groupBoxDictionary)
         self.led_maxS.setObjectName(_fromUtf8("led_minS"))
+        self.led_maxS.setAlignment(QtCore.Qt.AlignCenter)
         dictionaryGrid.addWidget(self.led_maxS,3,1)
 
         self.cmb_maxS = QtGui.QComboBox(self.groupBoxDictionary)
@@ -323,7 +365,7 @@ class mainWindowUI(object):
         self.chb_useAsym = QtGui.QCheckBox(self.groupBoxDictionary)
         self.chb_useAsym.setTristate(0)
         self.chb_useAsym.setObjectName(_fromUtf8("chb_useAsym"))
-        dictionaryGrid.addWidget(self.chb_useAsym,4,2)
+        dictionaryGrid.addWidget(self.chb_useAsym,4,1)
 
         self.lbl_useRect = QtGui.QLabel(self.groupBoxDictionary)
         self.lbl_useRect.setObjectName(_fromUtf8("lbl_useRect"))
@@ -332,7 +374,11 @@ class mainWindowUI(object):
         self.chb_useRect = QtGui.QCheckBox(self.groupBoxDictionary)
         self.chb_useRect.setTristate(0)
         self.chb_useRect.setObjectName(_fromUtf8("chb_useRect"))
-        dictionaryGrid.addWidget(self.chb_useRect,5,2)
+        dictionaryGrid.addWidget(self.chb_useRect,5,1)
+
+        dictionaryGrid.setColumnStretch(0,3)
+        dictionaryGrid.setColumnStretch(1,2)
+        dictionaryGrid.setColumnStretch(2,2)
 
         dictionaryGrid.setRowStretch(6,1)
 
@@ -402,11 +448,10 @@ class mainWindowUI(object):
         booksGrid.addWidget(self.lst_books,1,0,2,0)
 
 # GROUPBOX - ERRORS
-        errorsGrid = QtGui.QGridLayout()
-        self.groupBoxErrors.setLayout(errorsGrid)
+        lay_errors = QtGui.QVBoxLayout()
+        self.groupBoxErrors.setLayout(lay_errors)
 
         self.lbl_errors = QtGui.QLabel(self.groupBoxErrors)
-        self.lbl_errors.setEnabled(True)
         self.lbl_errors.setAlignment(QtCore.Qt.AlignCenter)
         font = QtGui.QFont()
         font.setItalic(True)
@@ -415,12 +460,30 @@ class mainWindowUI(object):
         palette.setColor(QtGui.QPalette.Foreground,QtCore.Qt.red)
         self.lbl_errors.setPalette(palette)
         self.lbl_errors.setObjectName(_fromUtf8("lbl_errors"))
-        errorsGrid.addWidget(self.lbl_errors,0,0)
+        lay_errors.addWidget(self.lbl_errors)
+        lay_errors.addStretch(1)
 
-        errorsGrid.setRowStretch(1,1)
+# GROUPBOX - ERRORS - SETTINGS TAB:
+        # this groupbox is an exact copy of groupBoxData but will be added on the settings tab
+        # can't add same widget to two different layout.
+        lay_errors = QtGui.QVBoxLayout()
+        self.groupBoxErrors2.setLayout(lay_errors)
+
+        self.lbl_errors2 = QtGui.QLabel(self.groupBoxErrors)
+        self.lbl_errors2.setAlignment(QtCore.Qt.AlignCenter)
+        font = QtGui.QFont()
+        font.setItalic(True)
+        self.lbl_errors2.setFont(font)
+        palette = QtGui.QPalette()
+        palette.setColor(QtGui.QPalette.Foreground,QtCore.Qt.red)
+        self.lbl_errors2.setPalette(palette)
+        self.lbl_errors2.setObjectName(_fromUtf8("lbl_errors"))
+        lay_errors.addWidget(self.lbl_errors2)
+        lay_errors.addStretch(1)
+
+
 
 # SET ALL THINGS UP:
-        self.centralwidget.setLayout(self.mainLayout)
         mainWindow.setCentralWidget(self.centralwidget)
         self.retranslateUi(mainWindow)
         QtCore.QMetaObject.connectSlotsByName(mainWindow)
@@ -435,8 +498,10 @@ class mainWindowUI(object):
         self.groupBoxDictionary.setTitle(_translate("mainWindow", "Dictionary configuration", None))
         self.groupBoxSaving.setTitle(_translate("mainWindow", "Save", None))
         self.groupBoxBooks.setTitle(_translate("mainWindow", "Results", None))
-        self.groupBoxErrors.setTitle(_translate("mainWindow", "Informations", None))
+        self.groupBoxErrors.setTitle(_translate("mainWindow", "", None))
+        self.groupBoxErrors2.setTitle(_translate("mainWindow", "", None))
 
+        self.lbl_nameOfDataFile.setText(_translate("mainWindow", "Name of data file", None))
         self.lbl_samplingFrequency.setText(_translate("mainWindow", "Sampling:", None))
         self.lbl_samplingFrequencyUnit.setText(_translate("mainWindow", "[Hz]", None))
         self.lbl_samples.setText(_translate("mainWindow", "# of samples:", None))
@@ -456,10 +521,10 @@ class mainWindowUI(object):
         self.lbl_useAsym.setText(_translate("mainWindow", "Include asymetrics:", None))
         self.lbl_useRect.setText(_translate("mainWindow", "Include rectangularities:", None))
         self.lbl_errors.setText(_translate("mainWindow", "Some error", None))
+        self.lbl_errors2.setText(_translate("mainWindow", "Some error", None))
 
         self.btn_addData.setText(_translate("mainWindow", "Add", None))
         self.btn_removeData.setText(_translate("mainWindow", "Remove", None))
-        self.btn_settingsData.setText(_translate("mainWindow", "", None))
         self.btn_calculate.setText(_translate("mainWindow", "Run", None))
         self.btn_saveSelectedBooks.setText(_translate("mainWindow", "", None))
         self.btn_openVisualisationTool.setText(_translate("mainWindow", "", None))

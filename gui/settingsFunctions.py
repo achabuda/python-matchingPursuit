@@ -56,10 +56,6 @@ class mainWindow(QtGui.QMainWindow):
         self.ui.setupUi(self)
         print '- done'
 
-        superTimer = QtCore.QTimer()
-        superTimer.singleShot(1 , self.trueInit)
-
-    def trueInit(self):
         print 'Variables initialization...'
         self.initializeFlags()
         self.setVariablesState(0)
@@ -76,6 +72,7 @@ class mainWindow(QtGui.QMainWindow):
         print 'Application started'
         print '###################'
 
+
 # WIDGETS STATE
 ###############
     def setConnections(self):
@@ -83,7 +80,6 @@ class mainWindow(QtGui.QMainWindow):
         self.ui.lst_data.sig_filesDropped.connect(self.dropDataFiles)
         self.ui.lst_books.currentItemChanged.connect(self.changeButtonsAvailability)
 
-        self.ui.btn_settingsData.clicked.connect(self.resizeWindow)
         self.ui.btn_addData.clicked.connect(self.chooseDataFiles)
         self.ui.btn_removeData.clicked.connect(self.removeData)
         self.ui.btn_dictionarySave.clicked.connect(self.createDictionary)
@@ -107,7 +103,6 @@ class mainWindow(QtGui.QMainWindow):
 
     def initializeFlags(self):
         self.flags = {}
-        self.flags['groupBoxDataResized'] = 0
         self.flags['MPisRunning']         = 0
         self.flags['visualizerOpened']    = 0
 
@@ -125,8 +120,8 @@ class mainWindow(QtGui.QMainWindow):
             self.warrningTextColor    = QtCore.Qt.red
             self.standardTextColor    = QtCore.Qt.black
 
-            self.ledFields = [self.ui.led_samplingFrequency , self.ui.led_nfft , self.ui.led_maxS , self.ui.led_minS , self.ui.led_iterationsLimit, self.ui.led_energyLimit , self.ui.led_dictonaryDensity]
-            self.buttons   = [self.ui.btn_addData , self.ui.btn_calculate , self.ui.btn_settingsData , self.ui.btn_saveSelectedBooks , self.ui.btn_openVisualisationTool , self.ui.btn_dictionarySave , self.ui.btn_configSave , self.ui.btn_removeData]
+            self.ledFields = [self.ui.led_samplingFrequency , self.ui.led_nfft , self.ui.led_maxS , self.ui.led_minS , self.ui.led_iterationsLimit, self.ui.led_energyLimit , self.ui.led_dictonaryDensity , self.ui.led_channels2calc , self.ui.led_trials2calc]
+            self.buttons   = [self.ui.btn_addData , self.ui.btn_calculate , self.ui.btn_saveSelectedBooks , self.ui.btn_openVisualisationTool , self.ui.btn_dictionarySave , self.ui.btn_configSave , self.ui.btn_removeData]
 
             self.warnings = {}
             self.warnings['wrongType']      = 'Wrong file type, in '
@@ -145,34 +140,9 @@ class mainWindow(QtGui.QMainWindow):
             self.books            = {}
             self.dictionaryConfig = {}
 
-            self.sizes = {}
-            self.sizes['groupBoxDataInfo']   = [0  , self.ui.groupBoxDataInfo.width()]
-            self.sizes['groupBoxAlgorithm']  = [0  , self.ui.groupBoxAlgorithm.width()]
-            self.sizes['groupBoxDictionary'] = [0  , self.ui.groupBoxDictionary.width()]
-            self.sizes['groupBoxSaving']     = [0  , self.ui.groupBoxSaving.width()]
-            self.sizes['groupBoxData']       = [self.ui.groupBoxData.width()  , self.ui.groupBoxData.width()]
-            self.sizes['groupBoxBooks']      = [self.ui.groupBoxBooks.width() , self.ui.groupBoxBooks.width()]
-            self.sizes['windowWidth']        = [int(self.width()/2.)          , self.width()]
-            self.sizes['windowHeight']       = [self.height()                 , self.height()]
-
-            # print self.sizes
-
     def setWidgetsInitialState(self):
         self.ui.groupBoxErrors.setHidden(True)
-
-        self.ui.groupBoxData.setMaximumWidth(self.sizes['groupBoxData'][1])
-        self.ui.groupBoxData.setMinimumWidth(self.sizes['groupBoxData'][0])
-        self.ui.groupBoxBooks.setMaximumWidth(self.sizes['groupBoxBooks'][1])
-        self.ui.groupBoxBooks.setMinimumWidth(self.sizes['groupBoxBooks'][0])
-
-        self.ui.groupBoxDataInfo.setMaximumWidth(self.sizes['groupBoxDataInfo'][0])
-        self.ui.groupBoxAlgorithm.setMaximumWidth(self.sizes['groupBoxAlgorithm'][0])
-        self.ui.groupBoxDictionary.setMaximumWidth(self.sizes['groupBoxDictionary'][0])
-        self.ui.groupBoxSaving.setMaximumWidth(self.sizes['groupBoxSaving'][0])
-        self.setMaximumWidth(self.sizes['windowWidth'][0])
-        self.setMinimumWidth(self.sizes['windowWidth'][0])
-        self.resize(self.sizes['windowWidth'][0] , self.sizes['windowHeight'][0])
-        # self.updateGeometry()
+        self.ui.groupBoxErrors2.setHidden(True)
 
         algorithmTypes = {'smp':0 , 'mmp':1}
         keys = algorithmTypes.keys()
@@ -189,6 +159,13 @@ class mainWindow(QtGui.QMainWindow):
         self.ui.cmb_maxS.setCurrentIndex(1)
 
         self.changeButtonsAvailability()
+
+        for led in self.ledFields:
+            led.setEnabled(False)
+        self.ui.cmb_maxS.setEnabled(False)
+        self.ui.cmb_minS.setEnabled(False)
+        self.ui.cmb_algorithmType.setEnabled(False)
+
 
         self.timer = QtCore.QTimer()
         self.timer.setSingleShot(True)
@@ -468,7 +445,7 @@ class mainWindow(QtGui.QMainWindow):
 
             if str(self.ui.cmb_minS.currentText()) == '[samples]':
                 minS = int(self.ui.led_minS.text()) / float(self.ui.led_samplingFrequency.text())
-            elif str(self.ui.cmb_maxS.currentText()) == '[sec]':
+            elif str(self.ui.cmb_minS.currentText()) == '[sec]':
                 minS = float(self.ui.led_minS.text())
             else:
                 return
@@ -505,7 +482,7 @@ class mainWindow(QtGui.QMainWindow):
             if str(self.ui.cmb_maxS.currentText()) == '[samples]':
                 maxS = int(self.ui.led_maxS.text())
             elif str(self.ui.cmb_maxS.currentText()) == '[sec]':
-                maxS = int(self.ui.led_maxS.text()) * float(self.ui.led_samplingFrequency.text())
+                maxS = float(self.ui.led_maxS.text()) * float(self.ui.led_samplingFrequency.text())
             else:
                 return
 
@@ -617,6 +594,7 @@ class mainWindow(QtGui.QMainWindow):
         if warningCollector != '':
             self.warrning('on' , warningCollector)
 
+        self.enableAllWidgets(True)
         self.changeButtonsAvailability()
 
     def dropDataFiles(self , listOfFiles):
@@ -648,6 +626,7 @@ class mainWindow(QtGui.QMainWindow):
         if warningCollector != '':
             self.warrning('on' , warningCollector)
 
+        self.enableAllWidgets(True)
         self.changeButtonsAvailability()
 
     def removeData(self):
@@ -674,12 +653,15 @@ class mainWindow(QtGui.QMainWindow):
             pass
 
         if self.ui.lst_data.count() < 1:
-            if self.flags['groupBoxDataResized'] == 1:
-                self.resizeWindow()
             self.filePath = ''
+            self.ui.lbl_nameOfDataFile.setText("Name of data file")
+            self.enableAllWidgets(False)
+            self.ui.btn_addData.setEnabled(True)
         else:
             self.filePath = str(self.ui.lst_data.currentItem().text())
+            self.ui.lbl_nameOfDataFile.setText(self.filePath)
             self.refreshSamplingFrequency()
+
 
         self.changeButtonsAvailability()
 
@@ -694,12 +676,15 @@ class mainWindow(QtGui.QMainWindow):
             self.setDataInfoControlls(self.dataMatrixes[self.filePath][1])
             self.setAlgorithmControlls(self.dataMatrixes[self.filePath][2])
 
+            self.ui.lbl_nameOfDataFile.setText(self.filePath)
+
             self.refreshSamplingFrequency()
         except AttributeError:
             # means that list is empty, or nothing is selected
             self.setDataInfoControlls()
             self.setAlgorithmControlls()
             self.filePath = ''
+            self.ui.lbl_nameOfDataFile.setText('Name of data file')
         
     def changeButtonsAvailability(self):
         flags = []
@@ -710,7 +695,6 @@ class mainWindow(QtGui.QMainWindow):
             flags.append(color.getRgb()[0])
 
         if len(self.dataMatrixes) > 0:
-            self.ui.btn_settingsData.setEnabled(True)
             self.ui.btn_removeData.setEnabled(True)
             self.ui.btn_configSave.setEnabled(True)
 
@@ -739,7 +723,6 @@ class mainWindow(QtGui.QMainWindow):
                 self.ui.btn_openVisualisationTool.setEnabled(False)
         else:
             self.ui.btn_calculate.setEnabled(False)
-            self.ui.btn_settingsData.setEnabled(False)
             self.ui.btn_saveSelectedBooks.setEnabled(False)
             self.ui.btn_openVisualisationTool.setEnabled(False)
             self.ui.btn_dictionarySave.setEnabled(False)
@@ -770,20 +753,27 @@ class mainWindow(QtGui.QMainWindow):
             self.ui.lbl_errors.setText('')
             palette.setColor(QtGui.QPalette.Foreground, self.warrningTextColor)
             self.ui.lbl_errors.setPalette(palette)
+            self.ui.lbl_errors2.setPalette(palette)
             self.ui.groupBoxErrors.hide()
+            self.ui.groupBoxErrors2.hide()
         else:
             palette.setColor(QtGui.QPalette.Foreground, self.informationTextColor)
             self.ui.lbl_errors.setPalette(palette)
+            self.ui.lbl_errors2.setPalette(palette)
             if flag == 'new':
                 self.ui.lbl_errors.setText(text)
+                self.ui.lbl_errors2.setText(text)
                 self.ui.groupBoxErrors.show()
+                self.ui.groupBoxErrors2.show()
             elif flag == 'add':
                 newtext = self.ui.lbl_errors.text() + ' ' + text
                 self.ui.lbl_errors.setText(newtext)
+                self.ui.lbl_errors2.setText(newtext)
             elif flag == 'remove_last':
                 t1 = self.ui.lbl_errors.text().find(' ')
                 newtext = self.ui.lbl_errors.text()[0:t1]
                 self.ui.lbl_errors.setText(newtext)
+                self.ui.lbl_errors2.setText(newtext)
         QtGui.QApplication.instance().processEvents()   # Important!
 
     def warrning(self , flag='off' , errorMsg='' , time=0):
@@ -795,14 +785,19 @@ class mainWindow(QtGui.QMainWindow):
                 self.timer.stop()
             palette = QtGui.QPalette()
             self.ui.lbl_errors.setText(errorMsg)
+            self.ui.lbl_errors2.setText(errorMsg)
             palette.setColor(QtGui.QPalette.Foreground, self.warrningTextColor)
             self.ui.lbl_errors.setPalette(palette)
+            self.ui.lbl_errors2.setPalette(palette)
             self.ui.groupBoxErrors.show()
+            self.ui.groupBoxErrors2.show()
             self.timer.start(time)
         elif flag == 'off':
             self.timer.stop()
             self.ui.lbl_errors.setText('')
+            self.ui.lbl_errors2.setText('')
             self.ui.groupBoxErrors.hide()
+            self.ui.groupBoxErrors2.hide()
         QtGui.QApplication.instance().processEvents()   # Important!
 
 ### PROCESSING EVENTS:
@@ -1012,88 +1007,3 @@ class mainWindow(QtGui.QMainWindow):
 
     def timerEvent(self):
         self.warrning('off')
-
-
-# ANIMATIONS AND WINDOW RESIZING
-################################
-    def resizeWindow(self):
-
-        animationDuration = 750     # in [ms]
-
-    	self.animation = QtCore.QParallelAnimationGroup(self)
-    	# self.animation.finished.connect(self.setProperWindowSize)
-
-        self.animationWindow = QtCore.QPropertyAnimation(self, "size")
-        self.animationWindow.setEasingCurve(QtCore.QEasingCurve.OutExpo)
-        self.animationWindow.setDuration(animationDuration)
-
-        #self.animationGroupBoxData = QtCore.QPropertyAnimation(self.ui.groupBoxData, "maximumWidth")
-        #self.animationGroupBoxData.setEasingCurve(QtCore.QEasingCurve.OutExpo)
-        #self.animationGroupBoxData.setDuration(animationDuration)
-
-        #self.animationGroupBoxBooks = QtCore.QPropertyAnimation(self.ui.groupBoxBooks, "maximumWidth")
-        #self.animationGroupBoxBooks.setEasingCurve(QtCore.QEasingCurve.OutExpo)
-        #self.animationGroupBoxBooks.setDuration(animationDuration)
-
-        self.animationGroupBoxDataInfo = QtCore.QPropertyAnimation(self.ui.groupBoxDataInfo, "maximumWidth")
-        self.animationGroupBoxDataInfo.setEasingCurve(QtCore.QEasingCurve.OutExpo)
-        self.animationGroupBoxDataInfo.setDuration(animationDuration)
-
-        self.animationGroupBoxAlgorithm = QtCore.QPropertyAnimation(self.ui.groupBoxAlgorithm, "maximumWidth")
-        self.animationGroupBoxAlgorithm.setEasingCurve(QtCore.QEasingCurve.OutExpo)
-        self.animationGroupBoxAlgorithm.setDuration(animationDuration)
-
-        self.animationGroupBoxDictionary = QtCore.QPropertyAnimation(self.ui.groupBoxDictionary, "maximumWidth")
-        self.animationGroupBoxDictionary.setEasingCurve(QtCore.QEasingCurve.OutExpo)
-        self.animationGroupBoxDictionary.setDuration(animationDuration)
-
-        self.animationGroupBoxSaving = QtCore.QPropertyAnimation(self.ui.groupBoxSaving, "maximumWidth")
-        self.animationGroupBoxSaving.setEasingCurve(QtCore.QEasingCurve.OutExpo)
-        self.animationGroupBoxSaving.setDuration(animationDuration)
-
-        #self.animationGroupBoxErrors = QtCore.QPropertyAnimation(self.ui.groupBoxErrors, "maximumWidth")
-        #self.animationGroupBoxErrors.setEasingCurve(QtCore.QEasingCurve.OutExpo)
-        #self.animationGroupBoxErrors.setDuration(animationDuration)
-
-        if self.flags['groupBoxDataResized'] == 0:
-            self.setMaximumWidth(self.sizes['windowWidth'][1])
-
-            self.animationWindow.setEndValue(QtCore.QSize(self.sizes['windowWidth'][1] , self.sizes['windowHeight'][1]))
-            #self.animationGroupBoxBooks.setEndValue(self.sizes['groupBoxBooks'][1])
-            self.animationGroupBoxDataInfo.setEndValue(self.sizes['groupBoxDataInfo'][1])
-            self.animationGroupBoxAlgorithm.setEndValue(self.sizes['groupBoxAlgorithm'][1])
-            #self.animationGroupBoxData.setEndValue(self.sizes['groupBoxData'][1])
-            #self.animationGroupBoxErrors.setEndValue(QtCore.QSize(980,160))
-            self.animationGroupBoxDictionary.setEndValue(self.sizes['groupBoxDictionary'][1])
-            self.animationGroupBoxSaving.setEndValue(self.sizes['groupBoxSaving'][1])
-            
-            self.flags['groupBoxDataResized'] = 1
-        else:
-            self.setMaximumWidth(self.sizes['windowWidth'][0])
-
-            self.animationWindow.setEndValue(QtCore.QSize(self.sizes['windowWidth'][0] , self.sizes['windowHeight'][0]))
-            #self.animationGroupBoxBooks.setEndValue(self.sizes['groupBoxBooks'][0])
-            self.animationGroupBoxDataInfo.setEndValue(self.sizes['groupBoxDataInfo'][0])
-            self.animationGroupBoxAlgorithm.setEndValue(self.sizes['groupBoxAlgorithm'][0])
-            #self.animationGroupBoxData.setEndValue(self.sizes['groupBoxData'][0])
-            #self.animationGroupBoxErrors.setEndValue(QtCore.QSize(580,160))
-            self.animationGroupBoxDictionary.setEndValue(self.sizes['groupBoxDictionary'][0])
-            self.animationGroupBoxSaving.setEndValue(self.sizes['groupBoxSaving'][0])
-            
-            self.flags['groupBoxDataResized'] = 0
-
-        self.animation.addAnimation(self.animationWindow)
-        # self.animation.addAnimation(self.animationGroupBoxBooks)
-        self.animation.addAnimation(self.animationGroupBoxDataInfo)
-        self.animation.addAnimation(self.animationGroupBoxAlgorithm)
-        self.animation.addAnimation(self.animationGroupBoxDictionary)
-        self.animation.addAnimation(self.animationGroupBoxSaving)
-        # self.animation.addAnimation(self.animationGroupBoxErrors)
-
-        self.animation.start()
-
-    def setProperWindowSize(self):
-    	if self.flags['groupBoxDataResized'] == 0:
-    		self.setMaximumSize(QtCore.QSize(self.ui.basicWindowSize[0], self.ui.basicWindowSize[1]))
-    	else:
-    		self.setMinimumSize(QtCore.QSize(1000, self.ui.basicWindowSize[1]))
