@@ -39,7 +39,7 @@ from functools import partial
 from platform  import system
 from os.path   import expanduser
 import numpy    as np
-# import pandas as pd
+import pandas as pd
 import pickle
 
 
@@ -528,8 +528,11 @@ class visWindow(QtGui.QMainWindow):
 					continue
 
 				if filePath[-2:] == '.p':
-					with open(filePath,'rb') as f:
-						result = pickle.load(f)
+					try:
+						with open(filePath,'rb') as f:
+							result = pickle.load(f)
+					except TypeError:
+						result = pd.read_pickle(filePath)
 					
 					self.books[str(filePath)] = result
 
@@ -606,8 +609,11 @@ class visWindow(QtGui.QMainWindow):
 					continue
 
 				if filePath[-2:] == '.p':
-					with open(filePath,'rb') as f:
-						result = pickle.load(f)
+					try:
+						with open(filePath,'rb') as f:
+							result = pickle.load(f)
+					except TypeError:
+						result = pd.read_pickle(filePath)
 					
 					self.books[str(filePath)] = result
 

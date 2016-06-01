@@ -140,7 +140,6 @@ def getAtomReconstruction(atom , time):
 	timeShifted    = time - atom['time_0']
 	reconstruction = np.zeros(time.shape , dtype='complex')
 	reconstruction = atom['modulus']['complex'] * envelope * np.exp(1j * atom['omega'] * timeShifted)
-	# print atom['time_0']
 	return reconstruction.real
 
 def getAtomEnvelope(atom , time):
