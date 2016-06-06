@@ -91,7 +91,9 @@ class visWindow(QtGui.QMainWindow):
 		self.atomTypes = {}
 		self.atomTypes['11'] = 'Gabor function'
 		self.atomTypes['21'] = 'Asymetric function'
+		self.atomTypes['31'] = 'Tukey-based function'
 		self.atomTypes['32'] = 'Tukey-based function'
+		self.atomTypes['33'] = 'Tukey-based function'
 
 		self.flags = {}
 		self.flags['atom']    = 1
