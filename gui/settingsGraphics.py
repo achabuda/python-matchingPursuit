@@ -78,8 +78,10 @@ class mainWindowUI(object):
         self.tabSpace.setMovable(0)
         self.tabSpace.setIconSize(QtCore.QSize(16,16))
 
-        self.tab_dataAndBooks = QtGui.QWidget()
-        self.tab_settings     = QtGui.QWidget()
+        self.tab_books      = QtGui.QWidget()
+        self.tab_dataInfo   = QtGui.QWidget()
+        self.tab_settings   = QtGui.QWidget()
+        self.tab_saving     = QtGui.QWidget()
 
         icon1 = QtGui.QIcon()
         iconPath = _fromUtf8("./pictures/icon_folder.png")
@@ -89,12 +91,9 @@ class mainWindowUI(object):
         iconPath = _fromUtf8("./pictures/icon_settings.png")
         icon2.addPixmap(QtGui.QPixmap(iconPath), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         
-        self.tabSpace.addTab(self.tab_dataAndBooks , icon1 , "Data")
-        self.tabSpace.addTab(self.tab_settings     , icon2 , "Settings")
-
-        self.lay_main = QtGui.QVBoxLayout()
-        self.lay_main.addWidget(self.tabSpace)
-        self.centralwidget.setLayout(self.lay_main)
+        self.tabSpace.addTab(self.tab_books    , icon1 , "Books")
+        self.tabSpace.addTab(self.tab_dataInfo , icon2 , "Parameters")
+        self.tabSpace.addTab(self.tab_settings , icon2 , "Settings")
 
 # GROUPBOXES:
         self.groupBoxData = QtGui.QGroupBox()
@@ -118,46 +117,23 @@ class mainWindowUI(object):
         self.groupBoxErrors = QtGui.QGroupBox()
         self.groupBoxErrors.setObjectName(_fromUtf8("groupBoxErrors"))
 
-        self.groupBoxErrors2 = QtGui.QGroupBox()
-        self.groupBoxErrors2.setObjectName(_fromUtf8("groupBoxErrors2"))
-
 # MAIN LAYOUTS:
-        self.lay_dataAndBooks = QtGui.QGridLayout()
-        self.lay_dataAndBooks.addWidget(self.groupBoxData   , 0 , 0)
-        self.lay_dataAndBooks.addWidget(self.groupBoxBooks  , 0 , 1)
-        self.lay_dataAndBooks.addWidget(self.groupBoxErrors , 1 , 0 , 1 , 0)
-
-        self.lay_dataAndBooks.setRowStretch(0,5)
-        self.lay_dataAndBooks.setRowStretch(1,1)
-        self.tab_dataAndBooks.setLayout(self.lay_dataAndBooks)
-
-        self.lbl_nameOfDataFile = QtGui.QLabel()
-        self.lbl_nameOfDataFile.setAlignment(QtCore.Qt.AlignCenter)
-        self.lbl_nameOfDataFile.setStyleSheet('font-size: 11pt; font-weight: bold;')
-        self.lbl_nameOfDataFile.setObjectName(_fromUtf8("lbl_nameOfDataFile"))
+        # books
+        self.lay_books = QtGui.QHBoxLayout()
+        self.lay_books.addWidget(self.groupBoxBooks)
+        self.tab_books.setLayout(self.lay_books)
         
+        # settings
         self.lay_settings  = QtGui.QVBoxLayout()
-        lay_settingsSub    = QtGui.QHBoxLayout()
-        lay_settingsSubSub = QtGui.QHBoxLayout()
-        
-        lay_settingsSub.addWidget(self.groupBoxDataInfo)
-        lay_settingsSub.addWidget(self.groupBoxDictionary)
-
-        lay_settingsSubSub.addWidget(self.groupBoxSaving)
-        lay_settingsSubSub.addWidget(self.groupBoxAlgorithm)
-        
-        self.lay_settings.addWidget(self.lbl_nameOfDataFile)
-        self.lay_settings.addLayout(lay_settingsSub)
-        self.lay_settings.addLayout(lay_settingsSubSub)
-        self.lay_settings.addWidget(self.groupBoxErrors2)
-        
-        self.lay_settings.setStretch(0 , 1)
-        self.lay_settings.setStretch(1 , 2)
-        self.lay_settings.setStretch(2 , 2)
-        self.lay_settings.setStretch(3 , 1)
-
-        
+        self.lay_settings.addWidget(self.groupBoxDictionary)
+        self.lay_settings.addWidget(self.groupBoxAlgorithm)
         self.tab_settings.setLayout(self.lay_settings)
+
+        # dataInfo
+        self.lay_dataInfo = QtGui.QVBoxLayout()
+        self.lay_dataInfo.addWidget(self.groupBoxDataInfo)
+        self.lay_dataInfo.addWidget(self.groupBoxSaving)
+        self.tab_dataInfo.setLayout(self.lay_dataInfo)
 
 # GROUPBOX - DATA
         dataGrid = QtGui.QGridLayout()
@@ -179,7 +155,16 @@ class mainWindowUI(object):
         self.btn_removeData.setIcon(icon1)
         self.btn_removeData.setIconSize(QtCore.QSize(24, 24))
         self.btn_removeData.setObjectName(_fromUtf8("btn_removeData"))
-        dataGrid.addWidget(self.btn_removeData,0,2)
+        dataGrid.addWidget(self.btn_removeData,0,1)
+
+        self.btn_calculate = QtGui.QPushButton(self.groupBoxData)
+        icon1 = QtGui.QIcon()
+        icon1path = _fromUtf8("./pictures/icon_run.png")
+        icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.btn_calculate.setIcon(icon1)
+        self.btn_calculate.setIconSize(QtCore.QSize(24, 24))
+        self.btn_calculate.setObjectName(_fromUtf8("btn_calculate"))
+        dataGrid.addWidget(self.btn_calculate,0,2)
 
         self.lst_data = DragDropListWidget_PYQT(QtGui.QMainWindow)
         dataGrid.addWidget(self.lst_data,1,0,2,0)
@@ -416,14 +401,14 @@ class mainWindowUI(object):
         booksGrid = QtGui.QGridLayout()
         self.groupBoxBooks.setLayout(booksGrid)
 
-        self.btn_calculate = QtGui.QPushButton(self.groupBoxBooks)
-        icon1 = QtGui.QIcon()
-        icon1path = _fromUtf8("./pictures/icon_run.png")
-        icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.btn_calculate.setIcon(icon1)
-        self.btn_calculate.setIconSize(QtCore.QSize(24, 24))
-        self.btn_calculate.setObjectName(_fromUtf8("btn_calculate"))
-        booksGrid.addWidget(self.btn_calculate,0,0)
+        # self.btn_calculate = QtGui.QPushButton(self.groupBoxBooks)
+        # icon1 = QtGui.QIcon()
+        # icon1path = _fromUtf8("./pictures/icon_run.png")
+        # icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        # self.btn_calculate.setIcon(icon1)
+        # self.btn_calculate.setIconSize(QtCore.QSize(24, 24))
+        # self.btn_calculate.setObjectName(_fromUtf8("btn_calculate"))
+        # booksGrid.addWidget(self.btn_calculate,0,0)
 
         self.btn_saveSelectedBooks = QtGui.QPushButton(self.groupBoxBooks)
         icon1 = QtGui.QIcon()
@@ -432,7 +417,7 @@ class mainWindowUI(object):
         self.btn_saveSelectedBooks.setIcon(icon1)
         self.btn_saveSelectedBooks.setIconSize(QtCore.QSize(24, 24))
         self.btn_saveSelectedBooks.setObjectName(_fromUtf8("btn_saveSelectedBooks"))
-        booksGrid.addWidget(self.btn_saveSelectedBooks,0,1)
+        booksGrid.addWidget(self.btn_saveSelectedBooks,0,0)
 
         self.btn_openVisualisationTool = QtGui.QPushButton(self.groupBoxBooks)
         icon1 = QtGui.QIcon()
@@ -441,11 +426,11 @@ class mainWindowUI(object):
         self.btn_openVisualisationTool.setIcon(icon1)
         self.btn_openVisualisationTool.setIconSize(QtCore.QSize(24, 24))
         self.btn_openVisualisationTool.setObjectName(_fromUtf8("btn_openVisualisationTool"))
-        booksGrid.addWidget(self.btn_openVisualisationTool,0,2)
+        booksGrid.addWidget(self.btn_openVisualisationTool,0,1)
 
         self.lst_books = QtGui.QListWidget(self.groupBoxBooks)
         self.lst_books.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
-        booksGrid.addWidget(self.lst_books,1,0,2,0)
+        booksGrid.addWidget(self.lst_books,1,0,1,0)
 
 # GROUPBOX - ERRORS
         lay_errors = QtGui.QVBoxLayout()
@@ -463,27 +448,19 @@ class mainWindowUI(object):
         lay_errors.addWidget(self.lbl_errors)
         lay_errors.addStretch(1)
 
-# GROUPBOX - ERRORS - SETTINGS TAB:
-        # this groupbox is an exact copy of groupBoxData but will be added on the settings tab
-        # can't add same widget to two different layout.
-        lay_errors = QtGui.QVBoxLayout()
-        self.groupBoxErrors2.setLayout(lay_errors)
-
-        self.lbl_errors2 = QtGui.QLabel(self.groupBoxErrors)
-        self.lbl_errors2.setAlignment(QtCore.Qt.AlignCenter)
-        font = QtGui.QFont()
-        font.setItalic(True)
-        self.lbl_errors2.setFont(font)
-        palette = QtGui.QPalette()
-        palette.setColor(QtGui.QPalette.Foreground,QtCore.Qt.red)
-        self.lbl_errors2.setPalette(palette)
-        self.lbl_errors2.setObjectName(_fromUtf8("lbl_errors"))
-        lay_errors.addWidget(self.lbl_errors2)
-        lay_errors.addStretch(1)
-
-
 
 # SET ALL THINGS UP:
+        self.lay_main = QtGui.QVBoxLayout()
+
+        self.lay_panels = QtGui.QHBoxLayout()
+        self.lay_panels.addWidget(self.groupBoxData)
+        self.lay_panels.addWidget(self.tabSpace)
+
+        self.lay_main.addLayout(self.lay_panels)
+        self.lay_main.addWidget(self.groupBoxErrors)
+
+        self.centralwidget.setLayout(self.lay_main)
+
         mainWindow.setCentralWidget(self.centralwidget)
         self.retranslateUi(mainWindow)
         QtCore.QMetaObject.connectSlotsByName(mainWindow)
@@ -499,9 +476,7 @@ class mainWindowUI(object):
         self.groupBoxSaving.setTitle(_translate("mainWindow", "Save", None))
         self.groupBoxBooks.setTitle(_translate("mainWindow", "Results", None))
         self.groupBoxErrors.setTitle(_translate("mainWindow", "", None))
-        self.groupBoxErrors2.setTitle(_translate("mainWindow", "", None))
 
-        self.lbl_nameOfDataFile.setText(_translate("mainWindow", "Name of data file", None))
         self.lbl_samplingFrequency.setText(_translate("mainWindow", "Sampling:", None))
         self.lbl_samplingFrequencyUnit.setText(_translate("mainWindow", "[Hz]", None))
         self.lbl_samples.setText(_translate("mainWindow", "# of samples:", None))
@@ -521,7 +496,6 @@ class mainWindowUI(object):
         self.lbl_useAsym.setText(_translate("mainWindow", "Include asymetrics:", None))
         self.lbl_useRect.setText(_translate("mainWindow", "Include rectangularities:", None))
         self.lbl_errors.setText(_translate("mainWindow", "Some error", None))
-        self.lbl_errors2.setText(_translate("mainWindow", "Some error", None))
 
         self.btn_addData.setText(_translate("mainWindow", "Add", None))
         self.btn_removeData.setText(_translate("mainWindow", "Remove", None))

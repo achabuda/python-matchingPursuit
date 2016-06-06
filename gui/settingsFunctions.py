@@ -142,7 +142,6 @@ class mainWindow(QtGui.QMainWindow):
 
     def setWidgetsInitialState(self):
         self.ui.groupBoxErrors.setHidden(True)
-        self.ui.groupBoxErrors2.setHidden(True)
 
         algorithmTypes = {'smp':0 , 'mmp':1}
         keys = algorithmTypes.keys()
@@ -654,12 +653,10 @@ class mainWindow(QtGui.QMainWindow):
 
         if self.ui.lst_data.count() < 1:
             self.filePath = ''
-            self.ui.lbl_nameOfDataFile.setText("Name of data file")
             self.enableAllWidgets(False)
             self.ui.btn_addData.setEnabled(True)
         else:
             self.filePath = str(self.ui.lst_data.currentItem().text())
-            self.ui.lbl_nameOfDataFile.setText(self.filePath)
             self.refreshSamplingFrequency()
 
 
@@ -676,15 +673,12 @@ class mainWindow(QtGui.QMainWindow):
             self.setDataInfoControlls(self.dataMatrixes[self.filePath][1])
             self.setAlgorithmControlls(self.dataMatrixes[self.filePath][2])
 
-            self.ui.lbl_nameOfDataFile.setText(self.filePath)
-
             self.refreshSamplingFrequency()
         except AttributeError:
             # means that list is empty, or nothing is selected
             self.setDataInfoControlls()
             self.setAlgorithmControlls()
             self.filePath = ''
-            self.ui.lbl_nameOfDataFile.setText('Name of data file')
         
     def changeButtonsAvailability(self):
         flags = []
@@ -753,27 +747,20 @@ class mainWindow(QtGui.QMainWindow):
             self.ui.lbl_errors.setText('')
             palette.setColor(QtGui.QPalette.Foreground, self.warrningTextColor)
             self.ui.lbl_errors.setPalette(palette)
-            self.ui.lbl_errors2.setPalette(palette)
             self.ui.groupBoxErrors.hide()
-            self.ui.groupBoxErrors2.hide()
         else:
             palette.setColor(QtGui.QPalette.Foreground, self.informationTextColor)
             self.ui.lbl_errors.setPalette(palette)
-            self.ui.lbl_errors2.setPalette(palette)
             if flag == 'new':
                 self.ui.lbl_errors.setText(text)
-                self.ui.lbl_errors2.setText(text)
                 self.ui.groupBoxErrors.show()
-                self.ui.groupBoxErrors2.show()
             elif flag == 'add':
                 newtext = self.ui.lbl_errors.text() + ' ' + text
                 self.ui.lbl_errors.setText(newtext)
-                self.ui.lbl_errors2.setText(newtext)
             elif flag == 'remove_last':
                 t1 = self.ui.lbl_errors.text().find(' ')
                 newtext = self.ui.lbl_errors.text()[0:t1]
                 self.ui.lbl_errors.setText(newtext)
-                self.ui.lbl_errors2.setText(newtext)
         QtGui.QApplication.instance().processEvents()   # Important!
 
     def warrning(self , flag='off' , errorMsg='' , time=0):
@@ -785,19 +772,14 @@ class mainWindow(QtGui.QMainWindow):
                 self.timer.stop()
             palette = QtGui.QPalette()
             self.ui.lbl_errors.setText(errorMsg)
-            self.ui.lbl_errors2.setText(errorMsg)
             palette.setColor(QtGui.QPalette.Foreground, self.warrningTextColor)
             self.ui.lbl_errors.setPalette(palette)
-            self.ui.lbl_errors2.setPalette(palette)
             self.ui.groupBoxErrors.show()
-            self.ui.groupBoxErrors2.show()
             self.timer.start(time)
         elif flag == 'off':
             self.timer.stop()
             self.ui.lbl_errors.setText('')
-            self.ui.lbl_errors2.setText('')
             self.ui.groupBoxErrors.hide()
-            self.ui.groupBoxErrors2.hide()
         QtGui.QApplication.instance().processEvents()   # Important!
 
 ### PROCESSING EVENTS:
