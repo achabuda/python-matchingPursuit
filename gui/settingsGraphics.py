@@ -54,15 +54,10 @@ class mainWindowUI(object):
         mainWindow.setObjectName(_fromUtf8("mainWindow"))
         mainWindow.setEnabled(True)
         mainWindow.move(100,100)
-        # icon = QtGui.QIcon()
-        # 
-        # if system() == 'Windows':
-        #     icon1path = _fromUtf8("./Pictures/settings.png")
-        # else:
-        #     icon1path = _fromUtf8("./Pictures/settings.svg")
-        # 
-        # icon.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        # mainWindow.setWindowIcon(icon)
+        icon = QtGui.QIcon()
+        icon1path = _fromUtf8("./Pictures/icon_application.png")
+        icon.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        mainWindow.setWindowIcon(icon)
         
         # self.screenSize = QtGui.QDesktopWidget().screenGeometry()
         # print screenSize.width(), screenSize.height()
@@ -400,15 +395,6 @@ class mainWindowUI(object):
 # GROUPBOX - BOOKS
         booksGrid = QtGui.QGridLayout()
         self.groupBoxBooks.setLayout(booksGrid)
-
-        # self.btn_calculate = QtGui.QPushButton(self.groupBoxBooks)
-        # icon1 = QtGui.QIcon()
-        # icon1path = _fromUtf8("./pictures/icon_run.png")
-        # icon1.addPixmap(QtGui.QPixmap(icon1path), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        # self.btn_calculate.setIcon(icon1)
-        # self.btn_calculate.setIconSize(QtCore.QSize(24, 24))
-        # self.btn_calculate.setObjectName(_fromUtf8("btn_calculate"))
-        # booksGrid.addWidget(self.btn_calculate,0,0)
 
         self.btn_saveSelectedBooks = QtGui.QPushButton(self.groupBoxBooks)
         icon1 = QtGui.QIcon()
